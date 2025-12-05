@@ -1,0 +1,736 @@
+import { useState, useEffect, useRef } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useCart } from '../context/CartContext';
+import { searchProducts } from '../services/api';
+
+const Navbar = () => {
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [searchResults, setSearchResults] = useState([]);
+  const [activeCategory, setActiveCategory] = useState(null);
+  const searchWrapRefMobile = useRef(null);
+  const searchWrapRefDesktop = useRef(null);
+  const categoryRef = useRef(null);
+  const navigate = useNavigate();
+  const { cartCount } = useCart();
+  const [wishlistCount, setWishlistCount] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  useEffect(() => {
+    const readWishlistCount = () => {
+      try {
+        const raw = localStorage.getItem('wishlist');
+        const list = raw ? JSON.parse(raw) : [];
+        setWishlistCount(Array.isArray(list) ? list.length : 0);
+      } catch {
+        setWishlistCount(0);
+      }
+    };
+    readWishlistCount();
+    const onStorage = (e) => {
+      if (!e || e.key === 'wishlist') readWishlistCount();
+    };
+    const onCustom = () => readWishlistCount();
+    window.addEventListener('storage', onStorage);
+    window.addEventListener('wishlist:updated', onCustom);
+    return () => {
+      window.removeEventListener('storage', onStorage);
+      window.removeEventListener('wishlist:updated', onCustom);
+    };
+  }, []);
+
+  // Check authentication status - Using in-memory state instead of localStorage
+  useEffect(() => {
+    // You can integrate this with your authentication context/provider
+    // For now, derive auth from localStorage token to keep Navbar in sync with Router guards
+    const checkAuth = () => {
+      try {
+        const token = localStorage.getItem('auth_token');
+        setIsAuthenticated(Boolean(token));
+      } catch {
+        setIsAuthenticated(false);
+      }
+    };
+
+    checkAuth();
+    
+    // Listen for storage events (from other tabs/windows)
+    const onStorage = (e) => {
+      if (!e || e.key === 'auth_token') {
+        checkAuth();
+      }
+    };
+    
+    // Listen for custom auth state change events (from same window)
+    const onAuthStateChanged = () => {
+      checkAuth();
+    };
+    
+    window.addEventListener('storage', onStorage);
+    window.addEventListener('authStateChanged', onAuthStateChanged);
+    
+    return () => {
+      window.removeEventListener('storage', onStorage);
+      window.removeEventListener('authStateChanged', onAuthStateChanged);
+    };
+  }, []);
+
+  const handleLogout = () => {
+    // Handle logout logic here
+    // Example: authContext.logout();
+    try {
+      localStorage.removeItem('auth_token');
+    } catch {}
+    setIsAuthenticated(false);
+    navigate('/signin');
+  };
+
+  const handleLogin = () => {
+    navigate('/signin');
+  };
+
+  const handleSearch = () => {
+    const q = searchQuery.trim();
+    if (!q) return;
+    setSearchOpen(false);
+    navigate(`/search?q=${encodeURIComponent(q)}`);
+  };
+
+  const handleSearchKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleSearch();
+    }
+    if (e.key === 'Escape') {
+      setSearchOpen(false);
+    }
+  };
+
+  // Debounced fetch for inline search results
+  useEffect(() => {
+    const q = searchQuery.trim();
+    if (q.length < 2) {
+      setSearchResults([]);
+      setSearchLoading(false);
+      setSearchOpen(false);
+      return;
+    }
+    setSearchLoading(true);
+    setSearchOpen(true);
+    const t = setTimeout(async () => {
+      try {
+        const data = await searchProducts(q);
+        const items = data?.results || [];
+        setSearchResults(items);
+      } catch (err) {
+        setSearchResults([]);
+      } finally {
+        setSearchLoading(false);
+      }
+    }, 250);
+    return () => clearTimeout(t);
+  }, [searchQuery]);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    const onClick = (e) => {
+      const inMobile = searchWrapRefMobile.current && searchWrapRefMobile.current.contains(e.target);
+      const inDesktop = searchWrapRefDesktop.current && searchWrapRefDesktop.current.contains(e.target);
+      if (!inMobile && !inDesktop) setSearchOpen(false);
+    };
+    document.addEventListener('mousedown', onClick);
+    return () => document.removeEventListener('mousedown', onClick);
+  }, []);
+
+  // Categories with subcategories
+  const categories = [
+    {
+      name: "MEN'S SHOES",
+      path: '/category/shoes/mens-shoes',
+      subcategories: [
+        { name: 'Sports Shoes', path: '/category/shoes/mens-shoes/sports-shoes' },
+        { name: 'Casual Shoes', path: '/category/shoes/mens-shoes/casual-shoes' },
+        { name: 'Formal Shoes', path: '/category/shoes/mens-shoes/formal-shoes' },
+        { name: 'Sneakers', path: '/category/shoes/mens-shoes/sneakers' },
+        { name: 'Boots', path: '/category/shoes/mens-shoes/boots' },
+        { name: 'Running Shoes', path: '/category/shoes/mens-shoes/running-shoes' },
+      ]
+    },
+    {
+      name: "CHILD SHOES",
+      path: '/category/shoes/child-shoes',
+      subcategories: [
+        { name: 'School Shoes', path: '/category/shoes/child-shoes/school-shoes' },
+        { name: 'Sports Shoes', path: '/category/shoes/child-shoes/sports-shoes' },
+        { name: 'Casual Shoes', path: '/category/shoes/child-shoes/casual-shoes' },
+        { name: 'Sandals', path: '/category/shoes/child-shoes/sandals' },
+        { name: 'Sneakers', path: '/category/shoes/child-shoes/sneakers' },
+      ]
+    },
+    {
+      name: "WOMEN'S SHOES",
+      path: '/category/shoes/womens-shoes',
+      subcategories: [
+        { name: 'Heels', path: '/category/shoes/womens-shoes/heels' },
+        { name: 'Flats', path: '/category/shoes/womens-shoes/flats' },
+        { name: 'Sneakers', path: '/category/shoes/womens-shoes/sneakers' },
+        { name: 'Sports Shoes', path: '/category/shoes/womens-shoes/sports-shoes' },
+        { name: 'Casual Shoes', path: '/category/shoes/womens-shoes/casual-shoes' },
+        { name: 'Sandals', path: '/category/shoes/womens-shoes/sandals' },
+      ]
+    },
+    {
+      name: "GIRLS SHOES",
+      path: '/category/shoes/girls-shoes',
+      subcategories: [
+        { name: 'School Shoes', path: '/category/shoes/girls-shoes/school-shoes' },
+        { name: 'Sports Shoes', path: '/category/shoes/girls-shoes/sports-shoes' },
+        { name: 'Casual Shoes', path: '/category/shoes/girls-shoes/casual-shoes' },
+        { name: 'Sandals', path: '/category/shoes/girls-shoes/sandals' },
+        { name: 'Sneakers', path: '/category/shoes/girls-shoes/sneakers' },
+      ]
+    },
+    {
+      name: "GIRL WATCHES",
+      path: '/category/watches/girl-watches',
+      subcategories: [
+        { name: 'Analog Watches', path: '/category/watches/girl-watches/analog-watches' },
+        { name: 'Digital Watches', path: '/category/watches/girl-watches/digital-watches' },
+        { name: 'Smart Watches', path: '/category/watches/girl-watches/smart-watches' },
+        { name: 'Fitness Trackers', path: '/category/watches/girl-watches/fitness-trackers' },
+        { name: 'Classic Watches', path: '/category/watches/girl-watches/classic-watches' },
+      ]
+    },
+    {
+      name: "MEN WATCHES",
+      path: '/category/watches/men-watches',
+      subcategories: [
+        { name: 'Analog Watches', path: '/category/watches/men-watches/analog-watches' },
+        { name: 'Digital Watches', path: '/category/watches/men-watches/digital-watches' },
+        { name: 'Smart Watches', path: '/category/watches/men-watches/smart-watches' },
+        { name: 'Sports Watches', path: '/category/watches/men-watches/sports-watches' },
+        { name: 'Luxury Watches', path: '/category/watches/men-watches/luxury-watches' },
+        { name: 'Chronograph Watches', path: '/category/watches/men-watches/chronograph-watches' },
+      ]
+    },
+  ];
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      // Don't close if clicking on a link
+      if (event.target.tagName === 'A' || event.target.closest('a')) {
+        return;
+      }
+      if (categoryRef.current && !categoryRef.current.contains(event.target)) {
+        setActiveCategory(null);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  return (
+    <nav className="relative z-[70] bg-white">
+      {/* Top Bar - Dark Grey with Social Icons and Account Links */}
+      <div className="bg-gray-800 text-white py-1.5 sm:py-2">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
+          <div className="flex items-center justify-between">
+            {/* Social Media Icons - Left */}
+            <div className="flex items-center space-x-1 sm:space-x-1.5 md:space-x-2">
+              <a 
+                href="https://facebook.com" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-white hover:text-gray-300 transition-colors p-1"
+                aria-label="Facebook"
+              >
+                <svg className="w-3 h-3 sm:w-3.5 sm:h-3.5 md:w-4 md:h-4" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+                </svg>
+              </a>
+              <a 
+                href="https://instagram.com" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-white hover:text-gray-300 transition-colors p-1"
+                aria-label="Instagram"
+              >
+                <svg className="w-3 h-3 sm:w-3.5 sm:h-3.5 md:w-4 md:h-4" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
+                </svg>
+              </a>
+              <a 
+                href="https://twitter.com" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-white hover:text-gray-300 transition-colors p-1"
+                aria-label="Twitter"
+              >
+                <svg className="w-3 h-3 sm:w-3.5 sm:h-3.5 md:w-4 md:h-4" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z" />
+                </svg>
+              </a>
+              <a 
+                href="mailto:info@tickntrack.com" 
+                className="text-white hover:text-gray-300 transition-colors p-1"
+                aria-label="Email"
+              >
+                <svg className="w-3 h-3 sm:w-3.5 sm:h-3.5 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+              </a>
+              <a 
+                href="https://pinterest.com" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-white hover:text-gray-300 transition-colors p-1"
+                aria-label="Pinterest"
+              >
+                <svg className="w-3 h-3 sm:w-3.5 sm:h-3.5 md:w-4 md:h-4" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 0c-6.627 0-12 5.372-12 12 0 5.084 3.163 9.426 7.627 11.174-.105-.949-.2-2.405.042-3.441.218-.937 1.407-5.965 1.407-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738.098.119.112.224.083.345l-.333 1.36c-.053.22-.174.267-.402.161-1.499-.698-2.436-2.889-2.436-4.649 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-1.216 0-2.359-.631-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146 1.124.347 2.317.535 3.554.535 6.627 0 12-5.373 12-12 0-6.628-5.373-12-12-12z" />
+                </svg>
+              </a>
+            </div>
+
+            {/* Account Links - Right */}
+            <div className="flex items-center space-x-2 sm:space-x-3 md:space-x-4 text-xs sm:text-sm">
+              {isAuthenticated ? (
+                <Link to="/profile" className="text-white hover:text-gray-300 transition-colors whitespace-nowrap">
+                  My Account
+                </Link>
+              ) : (
+                <button onClick={handleLogin} className="text-white hover:text-gray-300 transition-colors whitespace-nowrap">
+                  My Account
+                </button>
+              )}
+              <Link to={isAuthenticated ? "/profile" : "/signin"} className="text-white hover:text-gray-300 transition-colors whitespace-nowrap">
+                Track Order
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Bottom Bar - White with Logo, Navigation, and Icons */}
+      <div className="bg-white border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16 md:h-20">
+            {/* Logo/Brand - Left */}
+            <Link to="/" className="flex-shrink-0">
+              <div className="text-2xl md:text-3xl font-bold text-gray-900" style={{ fontFamily: 'cursive, serif' }}>
+                TickNTrack
+              </div>
+            </Link>
+
+            {/* Navigation Menu - Center (Desktop) with Categories */}
+            <div className="hidden md:flex items-center justify-center flex-1 space-x-3 lg:space-x-5" ref={categoryRef}>
+              {categories.map((category) => (
+                <div key={category.name} className="relative group">
+                  <div
+                    className={`flex items-center text-gray-700 hover:text-gray-900 font-medium text-sm uppercase transition-all duration-200 cursor-pointer whitespace-nowrap px-2 py-1 rounded-md hover:bg-gray-50 ${
+                      activeCategory === category.name ? 'text-gray-900 bg-gray-50' : ''
+                    }`}
+                    onClick={() => {
+                      // Toggle dropdown when clicking on category name
+                      setActiveCategory(activeCategory === category.name ? null : category.name);
+                    }}
+                  >
+                    <span className="whitespace-nowrap">{category.name}</span>
+                    <svg
+                      className={`w-4 h-4 ml-1.5 flex-shrink-0 transition-transform duration-300 ${
+                        activeCategory === category.name ? 'rotate-180' : ''
+                      }`}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </div>
+
+                  {/* Enhanced Dropdown */}
+                  {activeCategory === category.name && category.subcategories && (
+                    <div className="absolute left-1/2 transform -translate-x-1/2 mt-3 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                      <div className="bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden w-64 min-w-[200px]">
+                        {/* Header with gradient */}
+                        <div className="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200">
+                          <button
+                            type="button"
+                            className="w-full text-left block px-5 py-3.5 text-sm font-semibold text-gray-900 hover:text-gray-900 transition-colors duration-200 flex items-center gap-2 group"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              setActiveCategory(null);
+                              navigate(category.path);
+                            }}
+                          >
+                            <svg className="w-4 h-4 text-gray-400 group-hover:text-gray-900 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                            </svg>
+                            <span>All {category.name}</span>
+                            <svg className="w-3.5 h-3.5 ml-auto text-gray-400 group-hover:text-gray-900 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
+                          </button>
+                        </div>
+                        {/* Subcategories with better styling */}
+                        <div className="max-h-[60vh] overflow-y-auto custom-scrollbar">
+                          {category.subcategories.map((subcategory, idx) => (
+                            <button
+                              key={subcategory.name}
+                              type="button"
+                              className="w-full text-left block px-5 py-3 text-sm text-gray-700 hover:text-gray-900 hover:bg-gradient-to-r hover:from-gray-50 hover:to-gray-100 transition-all duration-200 border-l-3 border-transparent hover:border-gray-900 group"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                setActiveCategory(null);
+                                navigate(subcategory.path);
+                              }}
+                            >
+                              <div className="flex items-center gap-3">
+                                <div className="w-1.5 h-1.5 rounded-full bg-gray-300 group-hover:bg-gray-900 transition-colors"></div>
+                                <span className="font-medium">{subcategory.name}</span>
+                                <svg className="w-3.5 h-3.5 ml-auto text-gray-300 group-hover:text-gray-900 opacity-0 group-hover:opacity-100 transition-all duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                </svg>
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {/* Icons - Right (Search, Wishlist, Cart) */}
+            <div className="flex items-center space-x-4">
+              {/* Search Icon */}
+              <div className="relative" ref={searchWrapRefDesktop}>
+                <button
+                  onClick={() => setSearchOpen(!searchOpen)}
+                  className="p-2 text-gray-700 hover:text-gray-900 transition-all duration-200 hover:scale-110"
+                  aria-label="Search"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                  </svg>
+                </button>
+                {/* Search Dropdown */}
+                {searchOpen && (
+                  <div className="absolute right-0 top-full mt-2 w-80 bg-white border border-gray-200 rounded-lg shadow-xl z-[80]">
+                    <div className="p-3">
+                      <input
+                        type="text"
+                        placeholder="Search for shoes, watches..."
+                        value={searchQuery}
+                        onChange={(e) => { const v = e.target.value; setSearchQuery(v); }}
+                        onKeyPress={handleSearchKeyPress}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-400"
+                        autoFocus
+                      />
+                    </div>
+                    {searchLoading && (
+                      <div className="px-4 py-3 text-sm text-gray-500">Searching…</div>
+                    )}
+                    {!searchLoading && searchQuery.trim() && searchResults.length === 0 && (
+                      <div className="px-4 py-3 text-sm text-gray-500">No products found</div>
+                    )}
+                    {!searchLoading && searchResults.length > 0 && (
+                      <ul className="max-h-80 overflow-auto divide-y divide-gray-100">
+                        {searchResults.slice(0, 8).map((p) => (
+                          <li key={p._id || p.id || p.slug}>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setSearchOpen(false);
+                                navigate(`/product/${p._id || p.id || ''}`);
+                              }}
+                              className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 text-left"
+                            >
+                              <img
+                                src={p.images?.image1 || p.image || 'https://via.placeholder.com/60x80?text=No+Image'}
+                                alt={p.title || p.name || 'Product'}
+                                className="w-12 h-16 object-cover rounded-md border border-gray-100"
+                                onError={(e) => { e.target.onerror = null; e.target.src = 'https://via.placeholder.com/60x80?text=No+Image'; }}
+                              />
+                              <div className="min-w-0 flex-1">
+                                <p className="text-sm font-medium text-gray-900 truncate">{p.title || p.name || 'Product'}</p>
+                                {p.price && (
+                                  <p className="text-xs text-gray-600">₹{Number(p.price).toLocaleString()}</p>
+                                )}
+                              </div>
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* Wishlist Icon */}
+              <Link to="/wishlist" className="p-2 text-gray-700 hover:text-red-500 relative transition-all duration-200 hover:scale-110 group">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.312-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+                </svg>
+                {wishlistCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-semibold shadow-md">
+                    {wishlistCount > 9 ? '9+' : wishlistCount}
+                  </span>
+                )}
+              </Link>
+
+              {/* Cart Icon */}
+              <Link to="/cart" className="p-2 text-gray-700 hover:text-gray-900 relative transition-all duration-200 hover:scale-110">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.25 10.5a.75.75 0 01-.75.75H5.25a.75.75 0 010-1.5h2.25a.75.75 0 01.75.75zm6.75 0a.75.75 0 01-.75.75h-2.25a.75.75 0 010-1.5h2.25a.75.75 0 01.75.75z" />
+                </svg>
+                {cartCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-gray-900 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-semibold shadow-md">
+                    {cartCount > 9 ? '9+' : cartCount}
+                  </span>
+                )}
+              </Link>
+            </div>
+
+            {/* Mobile menu button */}
+            <div className="flex items-center md:hidden">
+              <button
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                className="inline-flex items-center justify-center p-2 rounded-md text-gray-700 hover:text-gray-900 focus:outline-none"
+                aria-expanded="false"
+              >
+                <span className="sr-only">Open main menu</span>
+                {isMobileMenuOpen ? (
+                  <svg className="block h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                ) : (
+                  <svg className="block h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                  </svg>
+                )}
+              </button>
+            </div>
+          </div>
+
+          {/* Mobile Search Bar */}
+          <div className="md:hidden px-4 pb-3">
+            <div className="relative" ref={searchWrapRefMobile}>
+              <input
+                type="text"
+                placeholder="Search..."
+                value={searchQuery}
+                onChange={(e) => { const v = e.target.value; setSearchQuery(v); setSearchOpen(v.trim().length >= 2); }}
+                onKeyPress={handleSearchKeyPress}
+                onFocus={() => { if (searchQuery.trim().length >= 2) setSearchOpen(true); }}
+                className="w-full px-3 py-2 pl-9 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-400"
+              />
+              <button
+                onClick={handleSearch}
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                type="button"
+                aria-label="Search"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                </svg>
+              </button>
+              {searchOpen && (
+                <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-xl z-[80] overflow-hidden">
+                  {searchLoading && (
+                    <div className="px-4 py-3 text-sm text-gray-500">Searching…</div>
+                  )}
+                  {!searchLoading && searchQuery.trim() && searchResults.length === 0 && (
+                    <div className="px-4 py-3 text-sm text-gray-500">No products found</div>
+                  )}
+                  {!searchLoading && searchResults.length > 0 && (
+                    <ul className="max-h-80 overflow-auto divide-y divide-gray-100">
+                      {searchResults.slice(0, 8).map((p) => (
+                        <li key={p._id || p.id || p.slug}>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSearchOpen(false);
+                              navigate(`/product/${p._id || p.id || ''}`);
+                            }}
+                            className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 text-left"
+                          >
+                            <img
+                              src={p.images?.image1 || p.image || 'https://via.placeholder.com/60x80?text=No+Image'}
+                              alt={p.title || p.name || 'Product'}
+                              className="w-12 h-16 object-cover rounded-md border border-gray-100"
+                              onError={(e) => { e.target.onerror = null; e.target.src = 'https://via.placeholder.com/60x80?text=No+Image'; }}
+                            />
+                            <div className="min-w-0 flex-1">
+                              <p className="text-sm font-medium text-gray-900 truncate">{p.title || p.name || 'Product'}</p>
+                              {p.price && (
+                                <p className="text-xs text-gray-600">₹{Number(p.price).toLocaleString()}</p>
+                              )}
+                            </div>
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Mobile Menu */}
+        {isMobileMenuOpen && (
+          <div id="mobile-menu" className="md:hidden py-6 border-t border-gray-200 bg-white shadow-lg">
+            {/* Mobile Navigation Links with Categories */}
+            <nav className="flex flex-col space-y-1 px-4">
+              {categories.map((category) => (
+                <div key={category.name}>
+                  <button
+                    onClick={() => {
+                      if (activeCategory === category.name) {
+                        setActiveCategory(null);
+                      } else {
+                        setActiveCategory(category.name);
+                      }
+                    }}
+                    className="w-full flex items-center justify-between text-gray-700 hover:text-gray-900 hover:bg-gray-50 font-medium py-3.5 px-4 rounded-xl transition-all duration-200 text-sm uppercase whitespace-nowrap shadow-sm border border-transparent hover:border-gray-200"
+                  >
+                    <span className="whitespace-nowrap">{category.name}</span>
+                    <svg
+                      className={`w-5 h-5 flex-shrink-0 transition-transform duration-300 ml-2 ${
+                        activeCategory === category.name ? 'rotate-180' : ''
+                      }`}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                  {activeCategory === category.name && category.subcategories && (
+                    <div className="pl-4 space-y-1.5 mt-2 animate-in">
+                      <button
+                        type="button"
+                        className="w-full text-left block text-gray-900 hover:text-gray-900 bg-white hover:bg-gradient-to-r hover:from-gray-50 hover:to-gray-100 font-semibold py-3 px-4 rounded-lg transition-all duration-200 text-xs shadow-sm border border-gray-200 flex items-center gap-2 group"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setActiveCategory(null);
+                          setIsMobileMenuOpen(false);
+                          navigate(category.path);
+                        }}
+                      >
+                        <svg className="w-3.5 h-3.5 text-gray-400 group-hover:text-gray-900 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                        <span>All {category.name}</span>
+                      </button>
+                      {category.subcategories.map((subcategory) => (
+                        <button
+                          key={subcategory.name}
+                          type="button"
+                          className="w-full text-left block text-gray-700 hover:text-gray-900 bg-white hover:bg-gradient-to-r hover:from-gray-50 hover:to-gray-100 font-medium py-2.5 px-4 rounded-lg transition-all duration-200 text-xs border border-transparent hover:border-gray-200 flex items-center gap-2 group"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            setActiveCategory(null);
+                            setIsMobileMenuOpen(false);
+                            navigate(subcategory.path);
+                          }}
+                        >
+                          <div className="w-1.5 h-1.5 rounded-full bg-gray-300 group-hover:bg-gray-600 transition-colors"></div>
+                          <span>{subcategory.name}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </nav>
+
+            {/* Auth Section in Mobile Menu */}
+            <div className="mt-6 pt-6 px-4 border-t border-gray-200">
+              {isAuthenticated ? (
+                <button
+                  onClick={() => {
+                    handleLogout();
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="w-full flex items-center justify-center space-x-2 py-3 px-4 bg-gray-800 text-white rounded-lg font-medium hover:bg-gray-700 transition-colors duration-200"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                  </svg>
+                  <span>Logout</span>
+                </button>
+              ) : (
+                <button
+                  onClick={() => {
+                    handleLogin();
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="w-full flex items-center justify-center space-x-2 py-3 px-4 bg-gray-800 text-white rounded-lg font-medium hover:bg-gray-700 transition-colors duration-200"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                  </svg>
+                  <span>Sign In</span>
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Custom Styles for Dropdown */}
+      <style>{`
+        @keyframes fade-in {
+          from {
+            opacity: 0;
+            transform: translateY(-10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        .animate-in {
+          animation: fade-in 0.2s ease-out;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: #f1f1f1;
+          border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: #cbd5e1;
+          border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: #94a3b8;
+        }
+        .border-l-3 {
+          border-left-width: 3px;
+        }
+      `}</style>
+    </nav>
+  );
+};
+
+export default Navbar;
