@@ -32,6 +32,20 @@ export async function createProduct(req, res) {
         SareeMaterial: product_info.SareeMaterial || '',
         SareeColor: product_info.SareeColor || '',
         IncludedComponents: product_info.IncludedComponents || '',
+        // Shoe-related fields
+        availableSizes: Array.isArray(product_info.availableSizes) ? product_info.availableSizes : 
+                       (product_info.availableSizes ? [product_info.availableSizes] : []),
+        shoeSize: product_info.shoeSize || product_info.availableSizes?.[0] || '',
+        shoeMaterial: product_info.shoeMaterial || '',
+        shoeColor: product_info.shoeColor || '',
+        shoeType: product_info.shoeType || '',
+        // Watch-related fields
+        watchBrand: product_info.watchBrand || '',
+        movementType: product_info.movementType || '',
+        caseMaterial: product_info.caseMaterial || '',
+        bandMaterial: product_info.bandMaterial || '',
+        waterResistance: product_info.waterResistance || '',
+        watchType: product_info.watchType || '',
       },
       images: {
         image1: images.image1,

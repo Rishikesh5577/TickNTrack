@@ -29,7 +29,7 @@ const Layout = () => {
       <div aria-hidden="true" style={{ height: headerHeight }} className="bg-white border-b border-gray-300" />
 
       {/* Main Content Area with responsive padding */}
-      <main className="flex-grow">
+      <main className="flex-grow" style={{ position: 'relative' }}>
         <Outlet />
       </main>
 

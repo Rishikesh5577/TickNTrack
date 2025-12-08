@@ -17,7 +17,8 @@ const productSchema = new mongoose.Schema(
       brand: { type: String },
       manufacturer: { type: String },
       // For Shoes
-      shoeSize: { type: String }, // e.g., "7", "8", "9", "10" or "EU 42", "US 9"
+      availableSizes: { type: [String], default: [] }, // e.g., ["7", "8", "9", "10"] or ["EU 42", "US 9"]
+      shoeSize: { type: String }, // Legacy field - kept for backward compatibility
       shoeMaterial: { type: String }, // e.g., "Leather", "Canvas", "Mesh"
       shoeColor: { type: String },
       shoeType: { type: String }, // e.g., "Sneakers", "Formal", "Sports", "Casual", "Boots"

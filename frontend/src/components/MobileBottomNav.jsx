@@ -86,23 +86,26 @@ const MobileBottomNav = () => {
   const location = useLocation();
   
   useEffect(() => {
-    const readWishlistCount = () => {
+    const loadWishlistCount = async () => {
       try {
-        const raw = localStorage.getItem('wishlist');
-        const list = raw ? JSON.parse(raw) : [];
-        setWishlistCount(Array.isArray(list) ? list.length : 0);
+        const { getWishlistCount } = await import('../services/api');
+        const data = await getWishlistCount();
+        setWishlistCount(data.count || 0);
       } catch {
         setWishlistCount(0);
       }
     };
-    readWishlistCount();
-    const onStorage = (e) => { if (!e || e.key === 'wishlist') readWishlistCount(); };
-    const onCustom = () => readWishlistCount();
-    window.addEventListener('storage', onStorage);
-    window.addEventListener('wishlist:updated', onCustom);
+    
+    loadWishlistCount();
+    
+    // Listen for wishlist updates (from custom event)
+    const onWishlistUpdated = () => {
+      loadWishlistCount();
+    };
+    
+    window.addEventListener('wishlist:updated', onWishlistUpdated);
     return () => {
-      window.removeEventListener('storage', onStorage);
-      window.removeEventListener('wishlist:updated', onCustom);
+      window.removeEventListener('wishlist:updated', onWishlistUpdated);
     };
   }, []);
 

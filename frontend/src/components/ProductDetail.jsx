@@ -2,22 +2,8 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { FaShoppingCart, FaRupeeSign, FaArrowLeft, FaStar, FaRegStar, FaBolt, FaSpinner, FaTimes, FaExpand, FaHeart, FaRegHeart, FaShareAlt } from "react-icons/fa";
 import { useCart } from "../context/CartContext";
-import { fetchSareeById } from "../services/api";
-
-const readWishlist = () => {
-  try {
-    const raw = localStorage.getItem('wishlist');
-    return raw ? JSON.parse(raw) : [];
-  } catch {
-    return [];
-  }
-};
-
-const writeWishlist = (items) => {
-  try {
-    localStorage.setItem('wishlist', JSON.stringify(items));
-  } catch {}
-};
+import { fetchSareeById, getWishlist, addToWishlist, removeFromWishlist } from "../services/api";
+import { placeholders, getProductImage } from "../utils/imagePlaceholder";
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -27,6 +13,7 @@ const ProductDetail = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [quantity, setQuantity] = useState(1);
+  const [selectedSize, setSelectedSize] = useState(null);
   const [isAdding, setIsAdding] = useState(false);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const location = useLocation();
@@ -52,17 +39,43 @@ const ProductDetail = () => {
 
   // Initialize wishlist state when product loads
   useEffect(() => {
-    if (!saree) return;
-    const list = readWishlist();
-    const pid = saree._id || id;
-    setWishlisted(list.some(p => (p._id || p.id) === pid));
+    const checkWishlistStatus = async () => {
+      if (!saree) return;
+      const pid = saree._id || id;
+      try {
+        const data = await getWishlist();
+        const productIds = (data.items || []).map(item => item.product?._id || item.product).filter(Boolean);
+        setWishlisted(productIds.includes(pid));
+      } catch (err) {
+        // If not authenticated or error, treat as not wishlisted
+        setWishlisted(false);
+      }
+    };
+    checkWishlistStatus();
   }, [saree, id]);
 
   const handleAddToCart = async () => {
     if (!saree) return;
+    
+    // Check if product requires size selection
+    const availableSizes = saree.product_info?.availableSizes || 
+      (saree.product_info?.shoeSize ? [saree.product_info.shoeSize] : []);
+    const isShoe = saree.category && (
+      saree.category.toLowerCase().includes('shoe') || 
+      saree.category.toLowerCase().includes('sneaker') ||
+      saree.category.toLowerCase().includes('boot') ||
+      saree.category.toLowerCase().includes('sandal')
+    );
+    
+    // Require size selection if it's a shoe or has available sizes
+    if ((isShoe || availableSizes.length > 0) && availableSizes.length > 0 && !selectedSize) {
+      alert('Please select a size before adding to cart');
+      return;
+    }
+    
     setIsAdding(true);
     try {
-      await addToCart(id, quantity);
+      await addToCart(id, quantity, selectedSize);
       alert(`${saree.title} ${quantity > 1 ? `(${quantity} items) ` : ''}added to cart!`);
     } catch (error) {
       console.error('Error adding to cart:', error);
@@ -100,19 +113,19 @@ const ProductDetail = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
-        <FaSpinner className="animate-spin text-4xl text-indigo-600" />
+      <div className="flex justify-center items-center min-h-screen bg-gradient-to-b from-teal-50 to-white">
+        <FaSpinner className="animate-spin text-4xl text-teal-600" />
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="text-center py-12">
+      <div className="text-center py-12 bg-gradient-to-b from-teal-50 to-white min-h-screen">
         <p className="text-red-500">{error}</p>
         <button
           onClick={() => navigate(-1)}
-          className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition-colors"
+          className="mt-4 px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors shadow-md"
         >
           Go Back
         </button>
@@ -122,13 +135,13 @@ const ProductDetail = () => {
 
   if (!saree) {
     return (
-      <div className="text-center py-12">
+      <div className="text-center py-12 bg-gradient-to-b from-teal-50 to-white min-h-screen">
         <p className="text-gray-600">Product not found</p>
         <button
           onClick={() => navigate('/shop')}
-          className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition-colors"
+          className="mt-4 px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors shadow-md"
         >
-          Browse Sarees
+          Browse Products
         </button>
       </div>
     );
@@ -137,7 +150,7 @@ const ProductDetail = () => {
   const sellingPrice = Math.round(saree.mrp - (saree.mrp * (saree.discountPercent || 0) / 100));
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20 sm:pb-4 relative">
+    <div className="min-h-screen bg-gradient-to-b from-teal-50 via-white to-gray-50 pb-20 sm:pb-4 relative">
       {/* Image Modal */}
       {isImageModalOpen && (
         <div 
@@ -155,33 +168,33 @@ const ProductDetail = () => {
               <FaTimes className="w-8 h-8" />
             </button>
             <img
-              src={saree.images?.image1 || 'https://via.placeholder.com/600x800?text=Image+Not+Available'}
+              src={getProductImage(saree, 'image1')}
               alt={saree.title}
               className="max-w-full max-h-[80vh] object-contain"
               onClick={(e) => e.stopPropagation()}
               onError={(e) => {
                 e.target.onerror = null;
-                e.target.src = 'https://via.placeholder.com/600x800?text=Image+Not+Available';
+                e.target.src = placeholders.productDetail;
               }}
             />
           </div>
         </div>
       )}
 
-      <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 p-4">
+      <div className="bg-white rounded-2xl shadow-xl border border-teal-100 overflow-hidden">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 p-6">
           
           {/* Image Section */}
-          <div className="w-full overflow-hidden rounded-xl bg-gray-50 group relative">
+          <div className="w-full overflow-hidden rounded-xl bg-gradient-to-br from-teal-50 to-gray-50 group relative border border-teal-100">
             <div className="relative pt-[100%] md:pt-[90%] overflow-hidden">
               <img
-                src={saree.images?.image1 || 'https://via.placeholder.com/600x800?text=Image+Not+Available'}
+                src={getProductImage(saree, 'image1')}
                 alt={saree.title}
                 className="absolute top-0 left-0 w-full h-full object-contain cursor-zoom-in"
                 onClick={() => setIsImageModalOpen(true)}
                 onError={(e) => {
                   e.target.onerror = null;
-                  e.target.src = 'https://via.placeholder.com/600x800?text=Image+Not+Available';
+                  e.target.src = placeholders.productDetail;
                 }}
               />
               <div className="absolute top-3 right-3 z-10 flex gap-2">
@@ -189,33 +202,34 @@ const ProductDetail = () => {
                   type="button"
                   aria-label="Add to wishlist"
                   className={(wishlisted
-                    ? 'bg-rose-600 text-white hover:bg-rose-700 border border-rose-600'
-                    : 'bg-white text-black hover:bg-gray-50 border border-black') + ' rounded-full p-2 shadow cursor-pointer'}
-                  onClick={(e) => {
+                    ? 'bg-teal-600 text-white hover:bg-teal-700 border border-teal-600'
+                    : 'bg-white text-teal-700 hover:bg-teal-50 border border-teal-300') + ' rounded-full p-2 shadow-md cursor-pointer transition-all'}
+                  onClick={async (e) => {
                     e.stopPropagation();
                     if (!saree) return;
                     const pid = saree._id || id;
-                    const list = readWishlist();
-                    const exists = list.some(p => (p._id || p.id) === pid);
-                    if (exists) {
-                      const next = list.filter(p => (p._id || p.id) !== pid);
-                      writeWishlist(next);
-                      setWishlisted(false);
-                      try { window.dispatchEvent(new Event('wishlist:updated')); } catch {}
-                    } else {
-                      const item = {
-                        _id: pid,
-                        title: saree.title,
-                        images: saree.images,
-                        price: Math.round(saree.mrp - (saree.mrp * (saree.discountPercent || 0) / 100)),
-                        mrp: saree.mrp,
-                        discountPercent: saree.discountPercent || 0,
-                      };
-                      const next = [item, ...list.filter((p) => (p._id || p.id) !== pid)];
-                      writeWishlist(next);
-                      setWishlisted(true);
-                      try { window.dispatchEvent(new Event('wishlist:updated')); } catch {}
-                      alert(`${saree.title} added to wishlist`);
+                    
+                    try {
+                      if (wishlisted) {
+                        // Remove from wishlist
+                        await removeFromWishlist(pid);
+                        setWishlisted(false);
+                        try { window.dispatchEvent(new Event('wishlist:updated')); } catch {}
+                      } else {
+                        // Add to wishlist
+                        await addToWishlist(pid);
+                        setWishlisted(true);
+                        try { window.dispatchEvent(new Event('wishlist:updated')); } catch {}
+                        alert(`${saree.title} added to wishlist`);
+                      }
+                    } catch (err) {
+                      console.error('Error toggling wishlist:', err);
+                      if (err.message && err.message.includes('login')) {
+                        alert('Please login to add items to wishlist');
+                        navigate('/signin');
+                      } else {
+                        alert('Failed to update wishlist. Please try again.');
+                      }
                     }
                   }}
                   title={wishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
@@ -225,7 +239,7 @@ const ProductDetail = () => {
                 <button
                   type="button"
                   aria-label="Share"
-                  className="bg-white/90 hover:bg-white text-gray-700 hover:text-gray-900 rounded-full p-2 shadow cursor-pointer"
+                  className="bg-white/90 hover:bg-white text-teal-700 hover:text-teal-900 rounded-full p-2 shadow-md cursor-pointer transition-all"
                   onClick={(e) => { e.stopPropagation(); handleShare(); }}
                   title="Share"
                 >
@@ -233,69 +247,136 @@ const ProductDetail = () => {
                 </button>
               </div>
               <div 
-                className="absolute bottom-4 right-4 bg-white bg-opacity-80 p-2 rounded-full cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                className="absolute bottom-4 right-4 bg-teal-600 bg-opacity-90 text-white p-2 rounded-full cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity duration-200 shadow-lg"
                 onClick={(e) => {
                   e.stopPropagation();
                   setIsImageModalOpen(true);
                 }}
                 title="Click to enlarge"
               >
-                <FaExpand className="text-gray-700" />
+                <FaExpand className="text-white" />
               </div>
             </div>
           </div>
 
           {/* Product Details */}
-          <div className="py-2 px-2">
-            <h1 className="text-2xl font-bold text-gray-800 mb-2">{saree.title}</h1>
+          <div className="py-4 px-4">
+            <h1 className="text-3xl font-bold text-gray-900 mb-3 tracking-tight">{saree.title}</h1>
             
             <div className="flex items-center mb-4">
-              <div className="flex text-yellow-400 mr-2">
+              <div className="flex text-teal-500 mr-2">
                 {[1, 2, 3, 4, 5].map((star) => (
                   star <= 4 ? <FaStar key={star} /> : <FaRegStar key={star} />
                 ))}
               </div>
-              <span className="text-gray-500 text-sm">(24 Reviews)</span>
+              <span className="text-gray-600 text-sm font-medium">(24 Reviews)</span>
             </div>
 
-            <div className="flex items-center mb-4">
+            <div className="flex items-center mb-6">
               <div className="flex items-center">
-                <FaRupeeSign className="text-gray-700" />
-                <span className="text-2xl font-bold text-gray-900 ml-1">
+                <FaRupeeSign className="text-teal-600" />
+                <span className="text-3xl font-bold text-teal-700 ml-1">
                   {sellingPrice.toLocaleString()}
                 </span>
               </div>
-              <span className="text-gray-400 text-base line-through ml-4">
+              <span className="text-gray-400 text-lg line-through ml-4">
                 ₹{saree.mrp.toLocaleString()}
               </span>
               {saree.discountPercent > 0 && (
-                <span className="bg-pink-100 text-pink-700 text-sm font-medium px-2.5 py-0.5 rounded ml-4">
+                <span className="bg-teal-100 text-teal-700 text-sm font-bold px-3 py-1 rounded-lg ml-4 shadow-sm">
                   {saree.discountPercent}% OFF
                 </span>
               )}
             </div>
 
             <div className="mb-6">
-              <h3 className="text-base font-semibold text-gray-800 mb-2">Description</h3>
-              <p className="text-gray-600 leading-relaxed mb-6">
+              <h3 className="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
+                <span className="w-1 h-6 bg-gradient-to-b from-teal-600 to-cyan-500 rounded-full"></span>
+                Description
+              </h3>
+              <p className="text-gray-700 leading-relaxed mb-6 bg-teal-50 p-4 rounded-lg border border-teal-100">
                 {saree.description}
               </p>
 
+              {/* Size Selector for Shoes */}
+              {(() => {
+                const categoryLower = (saree.category || '').toLowerCase();
+                const isShoe = categoryLower.includes('shoe') || 
+                              categoryLower.includes('sneaker') ||
+                              categoryLower.includes('boot') ||
+                              categoryLower.includes('sandal') ||
+                              categoryLower.includes('heel') ||
+                              categoryLower.includes('flat');
+                
+                // Get available sizes from product_info
+                let availableSizes = saree.product_info?.availableSizes || [];
+                
+                // If it's a shoe but no sizes defined, provide default sizes
+                if (isShoe && availableSizes.length === 0) {
+                  // Default sizes for shoes (Indian sizes)
+                  availableSizes = ['5', '6', '7', '8', '9', '10', '11'];
+                } else if (saree.product_info?.shoeSize && availableSizes.length === 0) {
+                  // Legacy support: if only shoeSize exists, use it
+                  availableSizes = [saree.product_info.shoeSize];
+                }
+                
+                // Show size selector if it's a shoe OR if product has availableSizes
+                if (isShoe && availableSizes.length > 0) {
+                  return (
+                    <div className="mb-6">
+                      <h3 className="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
+                        <span className="w-1 h-6 bg-gradient-to-b from-teal-600 to-cyan-500 rounded-full"></span>
+                        Select Size
+                      </h3>
+                      <div className="flex flex-wrap gap-3">
+                        {availableSizes.map((size) => (
+                          <button
+                            key={size}
+                            onClick={() => setSelectedSize(size)}
+                            className={`px-6 py-3 rounded-lg font-semibold transition-all transform hover:scale-105 active:scale-95 min-w-[60px] ${
+                              selectedSize === size
+                                ? 'bg-teal-600 text-white shadow-lg border-2 border-teal-700 scale-105'
+                                : 'bg-white text-teal-700 border-2 border-teal-300 hover:bg-teal-50 hover:border-teal-500'
+                            }`}
+                          >
+                            {size}
+                          </button>
+                        ))}
+                      </div>
+                      {!selectedSize && (
+                        <p className="text-red-500 text-sm mt-3 font-medium flex items-center gap-2">
+                          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                          </svg>
+                          Please select a size before adding to cart
+                        </p>
+                      )}
+                      {selectedSize && (
+                        <p className="text-teal-600 text-sm mt-2 font-medium">
+                          ✓ Selected Size: <span className="font-bold">{selectedSize}</span>
+                        </p>
+                      )}
+                    </div>
+                  );
+                }
+                return null;
+              })()}
+
               {/* Quantity Selector and Action Buttons */}
               <div className="flex items-center mb-6">
-                <span className="text-gray-700 font-medium mr-4">Quantity:</span>
-                <div className="flex items-center border border-gray-300 rounded-md overflow-hidden">
+                <span className="text-gray-800 font-semibold mr-4">Quantity:</span>
+                <div className="flex items-center border-2 border-teal-300 rounded-lg overflow-hidden shadow-sm">
                   <button 
                     onClick={decrementQuantity}
-                    className="px-3 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 cursor-pointer"
+                    className="px-4 py-2 bg-teal-50 hover:bg-teal-100 text-teal-700 font-bold cursor-pointer transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     disabled={quantity <= 1}
                   >
                     -
                   </button>
-                  <span className="px-4 py-1 border-x border-gray-300">{quantity}</span>
+                  <span className="px-6 py-2 border-x-2 border-teal-300 bg-white text-gray-900 font-semibold">{quantity}</span>
                   <button 
                     onClick={incrementQuantity}
-                    className="px-3 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 cursor-pointer"
+                    className="px-4 py-2 bg-teal-50 hover:bg-teal-100 text-teal-700 font-bold cursor-pointer transition-colors"
                   >
                     +
                   </button>
@@ -303,76 +384,93 @@ const ProductDetail = () => {
               </div>
 
               {/* Sticky Buttons Container - Hidden on larger screens */}
-              <div className="fixed bottom-0 left-0 right-0 bg-white shadow-lg p-2 z-50 sm:hidden">
-                <div className="flex gap-2 max-w-md mx-auto">
+              <div className="fixed bottom-0 left-0 right-0 bg-white shadow-2xl border-t border-teal-100 p-3 z-50 sm:hidden">
+                <div className="flex gap-3 max-w-md mx-auto">
                   <button 
-                    className="flex-1 bg-white text-[#800020] py-2.5 rounded-lg flex items-center justify-center space-x-1.5 hover:bg-[#660019] hover:text-white transition-colors disabled:opacity-70 cursor-pointer shadow-sm border border-[#800020] text-sm"
+                    className="flex-1 bg-white text-teal-600 py-3 rounded-xl flex items-center justify-center space-x-2 hover:bg-teal-600 hover:text-white transition-all disabled:opacity-70 cursor-pointer shadow-md border-2 border-teal-600 font-semibold text-sm transform hover:scale-105 active:scale-95"
                     onClick={handleAddToCart}
                     disabled={isAdding}
                   >
                     <FaShoppingCart className="h-4 w-4" />
-                    <span className="font-medium">{isAdding ? 'Adding...' : 'Add to Cart'}</span>
+                    <span>{isAdding ? 'Adding...' : 'Add to Cart'}</span>
                   </button>
                   <button 
-                    className="flex-1 bg-[#800020] text-white py-2.5 rounded-lg flex items-center justify-center space-x-1.5 hover:bg-[#660019] transition-colors cursor-pointer shadow-sm border border-[#800020] text-sm"
+                    className="flex-1 bg-gradient-to-r from-teal-600 to-cyan-600 text-white py-3 rounded-xl flex items-center justify-center space-x-2 hover:from-teal-700 hover:to-cyan-700 transition-all cursor-pointer shadow-lg font-semibold text-sm transform hover:scale-105 active:scale-95"
                     onClick={handleBuyNow}
                   >
                     <FaBolt className="h-4 w-4" />
-                    <span className="font-medium">Buy Now</span>
+                    <span>Buy Now</span>
                   </button>
                 </div>
               </div>
 
               {/* Regular Buttons - Hidden on mobile */}
-              <div className="hidden sm:flex flex-col sm:flex-row gap-3 mb-6">
+              <div className="hidden sm:flex flex-col sm:flex-row gap-4 mb-6">
                 <button 
-                  className="flex-1 bg-white text-[#800020] py-2.5 px-5 rounded-lg flex items-center justify-center space-x-2 hover:bg-[#660019] hover:text-white transition-colors disabled:opacity-70 cursor-pointer shadow-sm border border-[#800020]"
+                  className="flex-1 bg-white text-teal-600 py-3 px-6 rounded-xl flex items-center justify-center space-x-2 hover:bg-teal-600 hover:text-white transition-all disabled:opacity-70 cursor-pointer shadow-md border-2 border-teal-600 font-semibold transform hover:scale-105 active:scale-95"
                   onClick={handleAddToCart}
                   disabled={isAdding}
                 >
                   <FaShoppingCart className="h-5 w-5" />
-                  <span className="font-medium">{isAdding ? 'Adding...' : 'Add to Cart'}</span>
+                  <span>{isAdding ? 'Adding...' : 'Add to Cart'}</span>
                 </button>
                 <button 
-                  className="flex-1 bg-[#800020] text-white py-2.5 px-5 rounded-lg flex items-center justify-center space-x-2 hover:bg-[#660019] transition-colors cursor-pointer shadow-sm border border-[#800020]"
+                  className="flex-1 bg-gradient-to-r from-teal-600 to-cyan-600 text-white py-3 px-6 rounded-xl flex items-center justify-center space-x-2 hover:from-teal-700 hover:to-cyan-700 transition-all cursor-pointer shadow-lg font-semibold transform hover:scale-105 active:scale-95"
                   onClick={handleBuyNow}
                 >
                   <FaBolt className="h-5 w-5" />
-                  <span className="font-medium">Buy Now</span>
+                  <span>Buy Now</span>
                 </button>
               </div>
               
-              <div className="space-y-4">
-                <h4 className="text-lg font-semibold text-gray-800 border-b pb-2">Product Information</h4>
-                <div className="space-y-3 text-gray-700">
-                  <div className="flex">
-                    <span className="w-36 font-medium text-gray-600">Brand:</span>
-                    <span>{saree.product_info?.brand || 'N/A'}</span>
+              <div className="space-y-4 bg-gradient-to-br from-teal-50 to-cyan-50 p-6 rounded-xl border border-teal-100">
+                <h4 className="text-xl font-bold text-gray-900 border-b-2 border-teal-300 pb-3 flex items-center gap-2">
+                  <span className="w-1 h-6 bg-gradient-to-b from-teal-600 to-cyan-500 rounded-full"></span>
+                  Product Information
+                </h4>
+                <div className="space-y-4 text-gray-800">
+                  <div className="flex items-center py-2 border-b border-teal-100">
+                    <span className="w-40 font-semibold text-teal-700">Brand:</span>
+                    <span className="font-medium">{saree.product_info?.brand || 'N/A'}</span>
                   </div>
-                  <div className="flex">
-                    <span className="w-36 font-medium text-gray-600">Manufacturer:</span>
-                    <span>{saree.product_info?.manufacturer || 'N/A'}</span>
+                  <div className="flex items-center py-2 border-b border-teal-100">
+                    <span className="w-40 font-semibold text-teal-700">Manufacturer:</span>
+                    <span className="font-medium">{saree.product_info?.manufacturer || 'N/A'}</span>
                   </div>
-                  <div className="flex">
-                    <span className="w-36 font-medium text-gray-600">Category:</span>
-                    <span>{saree.category}</span>
+                  <div className="flex items-center py-2 border-b border-teal-100">
+                    <span className="w-40 font-semibold text-teal-700">Category:</span>
+                    <span className="font-medium bg-teal-100 text-teal-800 px-3 py-1 rounded-lg inline-block">{saree.category}</span>
                   </div>
-                  <div className="flex">
-                    <span className="w-36 font-medium text-gray-600">Material:</span>
-                    <span>{saree.product_info?.SareeMaterial || 'N/A'}</span>
+                  <div className="flex items-center py-2 border-b border-teal-100">
+                    <span className="w-40 font-semibold text-teal-700">Material:</span>
+                    <span className="font-medium">{saree.product_info?.SareeMaterial || saree.product_info?.shoeMaterial || 'N/A'}</span>
                   </div>
-                  <div className="flex">
-                    <span className="w-36 font-medium text-gray-600">Color:</span>
-                    <span>{saree.product_info?.SareeColor || 'N/A'}</span>
+                  <div className="flex items-center py-2 border-b border-teal-100">
+                    <span className="w-40 font-semibold text-teal-700">Color:</span>
+                    <span className="font-medium">{saree.product_info?.SareeColor || saree.product_info?.shoeColor || 'N/A'}</span>
                   </div>
-                  <div className="flex">
-                    <span className="w-36 font-medium text-gray-600">Length:</span>
-                    <span>{saree.product_info?.SareeLength || 'N/A'}</span>
-                  </div>
+                  {saree.product_info?.SareeLength && (
+                    <div className="flex items-center py-2 border-b border-teal-100">
+                      <span className="w-40 font-semibold text-teal-700">Length:</span>
+                      <span className="font-medium">{saree.product_info.SareeLength}</span>
+                    </div>
+                  )}
+                  {saree.product_info?.availableSizes && saree.product_info.availableSizes.length > 0 && (
+                    <div className="flex items-center py-2 border-b border-teal-100">
+                      <span className="w-40 font-semibold text-teal-700">Available Sizes:</span>
+                      <span className="font-medium">{saree.product_info.availableSizes.join(', ')}</span>
+                    </div>
+                  )}
+                  {saree.product_info?.shoeType && (
+                    <div className="flex items-center py-2 border-b border-teal-100">
+                      <span className="w-40 font-semibold text-teal-700">Type:</span>
+                      <span className="font-medium">{saree.product_info.shoeType}</span>
+                    </div>
+                  )}
                   {saree.product_info?.IncludedComponents && (
-                    <div className="flex">
-                      <span className="w-36 font-medium text-gray-600">Included:</span>
-                      <span>{saree.product_info.IncludedComponents}</span>
+                    <div className="flex items-center py-2">
+                      <span className="w-40 font-semibold text-teal-700">Included:</span>
+                      <span className="font-medium">{saree.product_info.IncludedComponents}</span>
                     </div>
                   )}
                 </div>
@@ -380,14 +478,14 @@ const ProductDetail = () => {
             </div>
 
 
-            <div className="mt-8 pt-6 border-t border-gray-200">
-              <div className="flex items-center">
-                <div className="bg-green-100 p-2 rounded-full mr-3">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            <div className="mt-8 pt-6 border-t-2 border-teal-200">
+              <div className="flex items-center bg-gradient-to-r from-teal-50 to-cyan-50 p-4 rounded-xl border border-teal-200">
+                <div className="bg-teal-600 p-3 rounded-full mr-4 shadow-md">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
                   </svg>
                 </div>
-                <span className="text-gray-700">Free shipping on orders over ₹1,000</span>
+                <span className="text-gray-800 font-semibold">Free shipping on orders over ₹1,000</span>
               </div>
             </div>
           </div>

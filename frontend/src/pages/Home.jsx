@@ -2,60 +2,32 @@ import React from 'react';
 import Collections from '../components/Collections';
 import MobileBottomNav from '../components/MobileBottomNav';
 import HeroSlider from '../components/HeroSlider';
+import TickNTrackSections from '../components/TickNTrackSections';
 
 const Home = () => {
   return (
-    <div className="min-h-screen pt-0 pb-16 md:pb-0">
+    <div className="min-h-screen pt-0 pb-16 md:pb-0 mt-0">
       {/* Hero Slider */}
       <HeroSlider
         slides={[
           {
-            desktop: 'https://res.cloudinary.com/duc9svg7w/image/upload/v1761978463/Effortlessly_smoothen_every_fabric_20251101_014257_0000_pmkwyh.png',
+            desktop: 'https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765019607/Desktop_-_1_8_rkwkq3.svg',
             alt: 'TickNTrack - Premium Shoes & Watches Collection',
           },
           {
-            desktop: 'https://res.cloudinary.com/duc9svg7w/image/upload/v1762255943/Green_and_Gold_Traditional_Fashion_Sale_Presentation_20251101_013751_0000_jy3n3g.png',
+            desktop: 'https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765023578/Desktop_-_1_9_gvj1rs.svg',
             alt: 'Festive Offer - TickNTrack',
           },
         ]}
-        mobileSrc="https://res.cloudinary.com/duc9svg7w/image/upload/v1762318223/Beige_And_Brown_Luxury_Shopping_Guide_Instagram_Post_20251104_225913_0000_tbyvtj.png"
+        mobileSrc="https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765129835/a705c12f-57b9-4b1f-95ef-219c47ab2653_vrzdjh.png"
       />
 
-      {/* Featured Collections */}
-      <Collections />
+      {/* TickNTrack Sections */}
+      <TickNTrackSections />
 
-      {/* Why Choose Us */}
-<section className="py-20 px-4 bg-white">
-  <div className="max-w-7xl mx-auto">
-    <h2 className="text-5xl font-light tracking-wide text-center mb-4 text-gray-800">
-      WHY CHOOSE TICKNTRACK
-    </h2>
-    <p className="text-xl text-gray-600 text-center mb-16 font-light">
-      Discover our exclusive collection of premium shoes and watches
-    </p>
-    <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-      {[
-        { icon: '✨', title: 'Premium Quality', desc: 'Handpicked finest shoes and watches from top brands' },
-        { icon: '🚚', title: 'Free Shipping', desc: 'On orders above ₹999 across India' },
-        { icon: '🔄', title: 'Easy Returns', desc: '7-day hassle-free return policy' },
-        { icon: '💎', title: '100% Authentic', desc: 'Certified genuine products from authorized dealers' },
-      ].map((feature, index) => (
-        <div
-          key={index}
-          className="relative group"
-        >
-          <div className="absolute inset-0 bg-gradient-to-br from-pink-600 to-amber-600 rounded-2xl opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
-          <div className="relative text-center p-8 bg-white rounded-2xl border-2 border-gray-100 hover:border-pink-300 transition-all duration-300 transform hover:-translate-y-2 hover:shadow-xl">
-            <div className="text-6xl mb-6 transform group-hover:scale-110 transition-transform duration-300">{feature.icon}</div>
-            <h3 className="text-2xl font-light text-gray-800 mb-3 tracking-wide">{feature.title}</h3>
-            <p className="text-gray-600 leading-relaxed font-light">{feature.desc}</p>
-          </div>
-        </div>
-      ))}
-    </div>
-  </div>
-</section>
-      
+      {/* Featured Collections */}
+
+       
       {/* Mobile Bottom Navigation */}
       <MobileBottomNav />
     </div>

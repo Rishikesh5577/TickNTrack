@@ -119,7 +119,7 @@ export default function AddressForm() {
         description: 'Order Payment',
         order_id: order.id,
         prefill: { name: formData.name || '', contact: formData.mobile || '' },
-        theme: { color: '#800020' },
+        theme: { color: '#14b8a6' },
         handler: async function (response) {
           try {
             const r = await verifyPayment(response);
@@ -337,14 +337,14 @@ export default function AddressForm() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4">
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white p-4">
       <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
           {showForm ? (
-            <form onSubmit={handleSaveAddress} className="bg-white shadow-sm rounded">
-            <div className="bg-blue-600 text-white p-4 flex items-center gap-3">
-              <span>1</span>
-              <span className="font-medium">DELIVERY ADDRESS</span>
+            <form onSubmit={handleSaveAddress} className="bg-white shadow-lg rounded-2xl border border-teal-100 overflow-hidden">
+            <div className="bg-gradient-to-r from-teal-600 to-cyan-600 text-white p-4 flex items-center gap-3">
+              <span className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center font-bold">1</span>
+              <span className="font-semibold text-lg">DELIVERY ADDRESS</span>
             </div>
 
             <div className="p-6">
@@ -361,7 +361,7 @@ export default function AddressForm() {
                   {formData.landmark && <div className="text-sm text-gray-700">Landmark: {formData.landmark}</div>}
                   {formData.alternatePhone && <div className="text-sm text-gray-700">Alt: {formData.alternatePhone}</div>}
                   <div className="mt-4 flex gap-3">
-                    <button type="button" onClick={() => setEditMode(true)} className="px-4 py-2 border rounded text-blue-600 border-blue-600 hover:bg-blue-50 cursor-pointer">Edit Address</button>
+                    <button type="button" onClick={() => setEditMode(true)} className="px-4 py-2 border-2 rounded-lg text-teal-600 border-teal-600 hover:bg-teal-50 cursor-pointer font-semibold transition-all shadow-sm hover:shadow-md">Edit Address</button>
                     <button 
                       type="button" 
                       onClick={async () => {
@@ -390,7 +390,7 @@ export default function AddressForm() {
                           }
                         }
                       }}
-                      className="px-4 py-2 border rounded text-red-600 border-red-600 hover:bg-red-50 cursor-pointer"
+                      className="px-4 py-2 border-2 rounded-lg text-red-600 border-red-600 hover:bg-red-50 cursor-pointer font-semibold transition-all shadow-sm hover:shadow-md"
                     >
                       Delete Address
                     </button>
@@ -401,7 +401,7 @@ export default function AddressForm() {
               <button
                 type="button"
                 onClick={handleUseCurrentLocation}
-                className="mb-6 bg-blue-600 text-white px-4 py-2 rounded flex items-center gap-2 hover:bg-blue-700 transition cursor-pointer"
+                className="mb-6 bg-gradient-to-r from-teal-600 to-cyan-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:from-teal-700 hover:to-cyan-700 transition-all font-medium shadow-md hover:shadow-lg cursor-pointer"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
@@ -419,7 +419,7 @@ export default function AddressForm() {
                     onChange={handleInputChange}
                     placeholder="Enter your full name"
                     required
-                    className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:border-blue-500"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-600 focus:border-teal-600 transition-all"
                   />
                 </div>
                 <div>
@@ -432,7 +432,7 @@ export default function AddressForm() {
                     maxLength={10}
                     placeholder="Enter 10-digit mobile number"
                     required
-                    className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:border-blue-500"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-600 focus:border-teal-600 transition-all"
                   />
                 </div>
               </div>
@@ -448,7 +448,7 @@ export default function AddressForm() {
                     maxLength={6}
                     placeholder="Enter 6-digit pincode"
                     required
-                    className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:border-blue-500"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-600 focus:border-teal-600 transition-all"
                   />
                 </div>
                 <div>
@@ -460,7 +460,7 @@ export default function AddressForm() {
                     onChange={handleInputChange}
                     placeholder="Enter your locality"
                     required
-                    className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:border-blue-500"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-600 focus:border-teal-600 transition-all"
                   />
                 </div>
               </div>
@@ -474,7 +474,7 @@ export default function AddressForm() {
                   rows={3}
                   placeholder="Enter your complete address"
                   required
-                  className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:border-blue-500"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-600 focus:border-teal-600 transition-all"
                 />
               </div>
 
@@ -488,25 +488,25 @@ export default function AddressForm() {
                     onChange={handleInputChange}
                     placeholder="Enter your city"
                     required
-                    className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:border-blue-500"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-600 focus:border-teal-600 transition-all"
                   />
                 </div>
                 <div className="relative" ref={stateDropdownRef}>
                   <label className="block text-xs text-gray-600 mb-1">State</label>
                   <div 
-                    className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:border-blue-500 bg-white cursor-pointer"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-600 focus:border-teal-600 bg-white cursor-pointer transition-all"
                     onClick={() => setShowStateDropdown(!showStateDropdown)}
                   >
                     {formData.state || 'Select State'}
                   </div>
                   
                   {showStateDropdown && (
-                    <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded shadow-lg max-h-60 overflow-y-auto">
-                      <div className="p-2 border-b">
+                    <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-xl max-h-60 overflow-y-auto">
+                      <div className="p-2 border-b border-gray-200">
                         <input
                           type="text"
                           placeholder="Search state..."
-                          className="w-full p-2 border rounded focus:outline-none focus:border-blue-500"
+                          className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-600 focus:border-teal-600 transition-all"
                           value={searchTerm}
                           onChange={(e) => setSearchTerm(e.target.value)}
                           onClick={(e) => e.stopPropagation()}
@@ -517,8 +517,8 @@ export default function AddressForm() {
                           filteredStates.map((state) => (
                             <div
                               key={state}
-                              className={`px-4 py-2 hover:bg-gray-100 cursor-pointer ${
-                                formData.state === state ? 'bg-blue-50 text-blue-700' : ''
+                              className={`px-4 py-2 hover:bg-teal-50 cursor-pointer transition-colors ${
+                                formData.state === state ? 'bg-teal-100 text-teal-700 font-medium' : 'text-gray-700'
                               }`}
                               onClick={() => {
                                 setFormData({ ...formData, state });
@@ -547,7 +547,7 @@ export default function AddressForm() {
                     value={formData.landmark}
                     onChange={handleInputChange}
                     placeholder="E.g., Near Central Mall"
-                    className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:border-blue-500"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-600 focus:border-teal-600 transition-all"
                   />
                 </div>
                 <div>
@@ -559,7 +559,7 @@ export default function AddressForm() {
                     onChange={handleInputChange}
                     maxLength={10}
                     placeholder="Alternate phone (Optional)"
-                    className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:border-blue-500"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-600 focus:border-teal-600 transition-all"
                   />
                 </div>
               </div>
@@ -594,33 +594,36 @@ export default function AddressForm() {
                 <button
                   type="submit"
                   disabled={saving}
-                  className={`bg-[#800020] hover:bg-[#660019] text-white px-8 py-3 rounded font-medium transition-colors cursor-pointer w-full sm:w-auto text-center ${saving ? 'opacity-70' : ''}`}
+                  className={`bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white px-8 py-3 rounded-xl font-semibold transition-all shadow-lg hover:shadow-xl cursor-pointer w-full sm:w-auto text-center transform hover:scale-105 active:scale-95 ${saving ? 'opacity-70 cursor-not-allowed' : ''}`}
                 >
-                  SAVE AND DELIVER HERE
+                  {saving ? 'Saving...' : 'SAVE AND DELIVER HERE'}
                 </button>
                 <button
                   onClick={handleCancel}
-                  className="text-blue-600 hover:text-blue-700 px-6 py-3 rounded font-medium transition cursor-pointer w-full sm:w-auto text-center border border-blue-600 hover:bg-blue-50"
+                  className="text-teal-600 hover:text-teal-700 px-6 py-3 rounded-xl font-semibold transition-all cursor-pointer w-full sm:w-auto text-center border-2 border-teal-600 hover:bg-teal-50 shadow-md hover:shadow-lg"
                 >
                   CANCEL
                 </button>
               </div>
 
               {showSuccess && (
-                <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
+                <div className="bg-teal-50 border-2 border-teal-300 text-teal-700 px-4 py-3 rounded-lg flex items-center gap-2 font-medium mt-4">
+                  <svg className="w-5 h-5 text-teal-600" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
                   Address saved successfully!
                 </div>
               )}
             </div>
             </form>
           ) : (
-            <div className="bg-white shadow-sm rounded">
-              <div className="bg-blue-600 text-white p-4 flex items-center gap-3">
-                <span>1</span>
-                <span className="font-medium">DELIVERY ADDRESS</span>
+            <div className="bg-white shadow-lg rounded-2xl border border-teal-100 overflow-hidden">
+              <div className="bg-gradient-to-r from-teal-600 to-cyan-600 text-white p-4 flex items-center gap-3">
+                <span className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center font-bold">1</span>
+                <span className="font-semibold text-lg">DELIVERY ADDRESS</span>
               </div>
               <div className="p-6">
-                <div className="mb-4 p-4 border border-green-200 bg-green-50 rounded">
+                <div className="mb-4 p-4 border-2 border-teal-200 bg-teal-50 rounded-xl">
                   <div className="flex justify-between items-start">
                     <div>
                       <h3 className="font-medium">{formData.name}</h3>
@@ -641,14 +644,14 @@ export default function AddressForm() {
                         <button
                           type="button"
                           onClick={handleEditAddress}
-                          className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                          className="text-teal-600 hover:text-teal-800 text-sm font-semibold px-3 py-1.5 rounded-lg hover:bg-teal-100 transition-colors"
                         >
                           EDIT
                         </button>
                         <button
                           type="button"
                           onClick={handleDeleteAddress}
-                          className="text-red-600 hover:text-red-800 text-sm font-medium"
+                          className="text-red-600 hover:text-red-800 text-sm font-semibold px-3 py-1.5 rounded-lg hover:bg-red-50 transition-colors"
                         >
                           DELETE
                         </button>
@@ -665,35 +668,42 @@ export default function AddressForm() {
         </div>
 
         <div className="lg:col-span-1">
-          <div className="bg-white shadow-sm rounded p-4 sticky top-4">
-            <h3 className="text-gray-500 text-sm font-medium mb-4">PRICE DETAILS</h3>
+          <div className="bg-white shadow-lg rounded-2xl border border-teal-100 p-6 sticky top-4">
+            <h3 className="text-gray-900 text-lg font-bold mb-6 flex items-center gap-2">
+              <span className="w-1 h-6 bg-gradient-to-b from-teal-600 to-cyan-500 rounded-full"></span>
+              PRICE DETAILS
+            </h3>
 
-            <div className="space-y-3 mb-4 pb-4 border-b">
-              <div className="flex justify-between text-sm">
+            <div className="space-y-3 mb-4 pb-4 border-b border-gray-200">
+              <div className="flex justify-between text-sm text-gray-700">
                 <span>Price ({priceDetails.items} {priceDetails.items === 1 ? 'item' : 'items'})</span>
-                <span>₹{priceDetails.subtotal.toLocaleString()}</span>
+                <span className="font-semibold">₹{priceDetails.subtotal.toLocaleString()}</span>
               </div>
-              <div className="flex justify-between text-sm">
+              <div className="flex justify-between text-sm text-gray-700">
                 <span>Shipping</span>
-                <span className={priceDetails.shippingCharge > 0 ? 'text-gray-600' : 'text-green-600'}>
-                  {priceDetails.shippingCharge > 0 ? `₹${priceDetails.shippingCharge.toLocaleString()}` : 'Free'}
+                <span className={`font-semibold ${priceDetails.shippingCharge > 0 ? 'text-gray-900' : 'text-teal-600'}`}>
+                  {priceDetails.shippingCharge > 0 ? `₹${priceDetails.shippingCharge.toLocaleString()}` : 'Free ✓'}
                 </span>
               </div>
-              <div className="flex justify-between text-sm">
+              <div className="flex justify-between text-sm text-gray-700">
                 <span>Tax (5%)</span>
-                <span>₹{priceDetails.tax.toLocaleString()}</span>
+                <span className="font-semibold">₹{priceDetails.tax.toLocaleString()}</span>
               </div>
             </div>
 
-            <div className="flex justify-between font-medium text-base mb-4 pb-4 border-b">
-              <span>Total Payable</span>
-              <span>₹{priceDetails.total.toLocaleString()}</span>
+            <div className="flex justify-between font-bold text-lg mb-4 pb-4 border-b-2 border-teal-200">
+              <span className="text-gray-900">Total Payable</span>
+              <span className="text-teal-700">₹{priceDetails.total.toLocaleString()}</span>
             </div>
 
             <button 
               onClick={handlePayment}
               disabled={!hasSavedAddress}
-              className={`w-full mt-4 py-3 px-4 rounded-md transition-colors font-medium cursor-pointer ${hasSavedAddress ? 'bg-[#800020] text-white hover:bg-[#660019]' : 'bg-gray-300 text-gray-600 cursor-not-allowed'}`}
+              className={`w-full mt-4 py-4 px-4 rounded-xl transition-all font-bold cursor-pointer shadow-lg ${
+                hasSavedAddress 
+                  ? 'bg-gradient-to-r from-teal-600 to-cyan-600 text-white hover:from-teal-700 hover:to-cyan-700 hover:shadow-xl transform hover:scale-105 active:scale-95' 
+                  : 'bg-gray-300 text-gray-600 cursor-not-allowed'
+              }`}
             >
               PROCEED TO PAYMENT
             </button>

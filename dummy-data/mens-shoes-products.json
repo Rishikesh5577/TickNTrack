@@ -1,0 +1,399 @@
+[
+  {
+    "title": "Nike Air Max 270 Running Shoes",
+    "mrp": 8999,
+    "discountPercent": 15,
+    "description": "Comfortable and stylish running shoes with Air Max cushioning technology. Perfect for daily runs and light sports activities. Features breathable mesh upper and responsive cushioning.",
+    "category": "Men Sports Shoes",
+    "product_info": {
+      "brand": "Nike",
+      "manufacturer": "Nike Inc.",
+      "availableSizes": ["7", "8", "9", "10", "11", "12"],
+      "shoeSize": "9",
+      "shoeMaterial": "Mesh",
+      "shoeColor": "Black/White",
+      "shoeType": "Sports",
+      "IncludedComponents": "Shoes, Original Box, Warranty Card"
+    },
+    "images": {
+      "image1": "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800",
+      "image2": "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=800",
+      "image3": "https://images.unsplash.com/photo-1460353581641-37baddab0fa2?w=800"
+    }
+  },
+  {
+    "title": "Adidas Ultraboost 22 Sneakers",
+    "mrp": 12999,
+    "discountPercent": 20,
+    "description": "Premium running shoes with Boost technology for maximum energy return. Lightweight design with Primeknit upper for a sock-like fit.",
+    "category": "Men Sports Shoes",
+    "product_info": {
+      "brand": "Adidas",
+      "manufacturer": "Adidas AG",
+      "availableSizes": ["7", "8", "9", "10", "11"],
+      "shoeSize": "9",
+      "shoeMaterial": "Primeknit",
+      "shoeColor": "White/Navy",
+      "shoeType": "Sports",
+      "IncludedComponents": "Shoes, Original Box, Warranty Card"
+    },
+    "images": {
+      "image1": "https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?w=800",
+      "image2": "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=800",
+      "image3": "https://images.unsplash.com/photo-1460353581641-37baddab0fa2?w=800"
+    }
+  },
+  {
+    "title": "Puma Speedcat Sports Shoes",
+    "mrp": 5999,
+    "discountPercent": 10,
+    "description": "Lightweight sports shoes perfect for gym workouts and running. Features cushioned midsole and durable rubber outsole.",
+    "category": "Men Sports Shoes",
+    "product_info": {
+      "brand": "Puma",
+      "manufacturer": "Puma SE",
+      "availableSizes": ["8", "9", "10", "11", "12"],
+      "shoeSize": "10",
+      "shoeMaterial": "Synthetic",
+      "shoeColor": "Red/Black",
+      "shoeType": "Sports",
+      "IncludedComponents": "Shoes, Original Box"
+    },
+    "images": {
+      "image1": "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=800",
+      "image2": "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=800",
+      "image3": "https://images.unsplash.com/photo-1460353581641-37baddab0fa2?w=800"
+    }
+  },
+  {
+    "title": "Woodland Brown Casual Walking Shoes",
+    "mrp": 3499,
+    "discountPercent": 25,
+    "description": "Comfortable casual shoes for everyday wear. Perfect for walking, office, and casual outings. Made with premium leather.",
+    "category": "Men Casual Shoes",
+    "product_info": {
+      "brand": "Woodland",
+      "manufacturer": "Woodland Worldwide",
+      "availableSizes": ["7", "8", "9", "10", "11"],
+      "shoeSize": "9",
+      "shoeMaterial": "Leather",
+      "shoeColor": "Brown",
+      "shoeType": "Casual",
+      "IncludedComponents": "Shoes, Original Box, Shoe Care Kit"
+    },
+    "images": {
+      "image1": "https://images.unsplash.com/photo-1539185441755-769473a23570?w=800",
+      "image2": "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=800",
+      "image3": "https://images.unsplash.com/photo-1460353581641-37baddab0fa2?w=800"
+    }
+  },
+  {
+    "title": "Red Tape Black Casual Sneakers",
+    "mrp": 2499,
+    "discountPercent": 30,
+    "description": "Stylish and comfortable casual sneakers. Perfect for daily wear, shopping, and casual meetings. Breathable design.",
+    "category": "Men Casual Shoes",
+    "product_info": {
+      "brand": "Red Tape",
+      "manufacturer": "Red Tape Footwear",
+      "availableSizes": ["8", "9", "10", "11", "12"],
+      "shoeSize": "10",
+      "shoeMaterial": "Canvas",
+      "shoeColor": "Black",
+      "shoeType": "Casual",
+      "IncludedComponents": "Shoes, Original Box"
+    },
+    "images": {
+      "image1": "https://images.unsplash.com/photo-1608231387042-66d1773070a5?w=800",
+      "image2": "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=800",
+      "image3": "https://images.unsplash.com/photo-1460353581641-37baddab0fa2?w=800"
+    }
+  },
+  {
+    "title": "Bata White Casual Canvas Shoes",
+    "mrp": 1299,
+    "discountPercent": 20,
+    "description": "Classic white canvas shoes for casual wear. Comfortable and affordable, perfect for college and casual outings.",
+    "category": "Men Casual Shoes",
+    "product_info": {
+      "brand": "Bata",
+      "manufacturer": "Bata India",
+      "availableSizes": ["7", "8", "9", "10", "11"],
+      "shoeSize": "9",
+      "shoeMaterial": "Canvas",
+      "shoeColor": "White",
+      "shoeType": "Casual",
+      "IncludedComponents": "Shoes, Original Box"
+    },
+    "images": {
+      "image1": "https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?w=800",
+      "image2": "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=800",
+      "image3": "https://images.unsplash.com/photo-1460353581641-37baddab0fa2?w=800"
+    }
+  },
+  {
+    "title": "Hush Puppies Black Leather Formal Shoes",
+    "mrp": 4999,
+    "discountPercent": 15,
+    "description": "Premium black leather formal shoes for office and formal occasions. Classic design with comfortable fit. Handcrafted finish.",
+    "category": "Men Formal Shoes",
+    "product_info": {
+      "brand": "Hush Puppies",
+      "manufacturer": "Wolverine World Wide",
+      "availableSizes": ["8", "9", "10", "11"],
+      "shoeSize": "9",
+      "shoeMaterial": "Leather",
+      "shoeColor": "Black",
+      "shoeType": "Formal",
+      "IncludedComponents": "Shoes, Original Box, Shoe Trees, Polish Kit"
+    },
+    "images": {
+      "image1": "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=800",
+      "image2": "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=800",
+      "image3": "https://images.unsplash.com/photo-1460353581641-37baddab0fa2?w=800"
+    }
+  },
+  {
+    "title": "Liberty Brown Formal Oxford Shoes",
+    "mrp": 3999,
+    "discountPercent": 20,
+    "description": "Elegant brown Oxford shoes for formal wear. Perfect for office, meetings, and special occasions. Premium leather construction.",
+    "category": "Men Formal Shoes",
+    "product_info": {
+      "brand": "Liberty",
+      "manufacturer": "Liberty Shoes",
+      "availableSizes": ["8", "9", "10", "11", "12"],
+      "shoeSize": "10",
+      "shoeMaterial": "Leather",
+      "shoeColor": "Brown",
+      "shoeType": "Formal",
+      "IncludedComponents": "Shoes, Original Box, Shoe Care Kit"
+    },
+    "images": {
+      "image1": "https://images.unsplash.com/photo-1539185441755-769473a23570?w=800",
+      "image2": "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=800",
+      "image3": "https://images.unsplash.com/photo-1460353581641-37baddab0fa2?w=800"
+    }
+  },
+  {
+    "title": "Clarks Tan Formal Brogue Shoes",
+    "mrp": 7999,
+    "discountPercent": 10,
+    "description": "Premium tan brogue shoes with classic design. Handcrafted leather uppers with cushioned insoles for all-day comfort.",
+    "category": "Men Formal Shoes",
+    "product_info": {
+      "brand": "Clarks",
+      "manufacturer": "Clarks Originals",
+      "availableSizes": ["8", "9", "10", "11"],
+      "shoeSize": "9",
+      "shoeMaterial": "Leather",
+      "shoeColor": "Tan",
+      "shoeType": "Formal",
+      "IncludedComponents": "Shoes, Original Box, Shoe Trees, Warranty Card"
+    },
+    "images": {
+      "image1": "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=800",
+      "image2": "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=800",
+      "image3": "https://images.unsplash.com/photo-1460353581641-37baddab0fa2?w=800"
+    }
+  },
+  {
+    "title": "Vans Classic Black & White Sneakers",
+    "mrp": 4999,
+    "discountPercent": 25,
+    "description": "Iconic skate-inspired sneakers with waffle outsole. Classic design perfect for casual wear and skateboarding.",
+    "category": "Men Sneakers",
+    "product_info": {
+      "brand": "Vans",
+      "manufacturer": "Vans Inc.",
+      "availableSizes": ["7", "8", "9", "10", "11", "12"],
+      "shoeSize": "9",
+      "shoeMaterial": "Canvas",
+      "shoeColor": "Black/White",
+      "shoeType": "Sneakers",
+      "IncludedComponents": "Shoes, Original Box"
+    },
+    "images": {
+      "image1": "https://images.unsplash.com/photo-1608231387042-66d1773070a5?w=800",
+      "image2": "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=800",
+      "image3": "https://images.unsplash.com/photo-1460353581641-37baddab0fa2?w=800"
+    }
+  },
+  {
+    "title": "Converse Chuck Taylor All Star Sneakers",
+    "mrp": 4499,
+    "discountPercent": 20,
+    "description": "Classic canvas high-top sneakers. Timeless design that never goes out of style. Perfect for casual and street style.",
+    "category": "Men Sneakers",
+    "product_info": {
+      "brand": "Converse",
+      "manufacturer": "Converse Inc.",
+      "availableSizes": ["8", "9", "10", "11"],
+      "shoeSize": "10",
+      "shoeMaterial": "Canvas",
+      "shoeColor": "White",
+      "shoeType": "Sneakers",
+      "IncludedComponents": "Shoes, Original Box"
+    },
+    "images": {
+      "image1": "https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?w=800",
+      "image2": "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=800",
+      "image3": "https://images.unsplash.com/photo-1460353581641-37baddab0fa2?w=800"
+    }
+  },
+  {
+    "title": "Reebok Classic Leather Sneakers",
+    "mrp": 3999,
+    "discountPercent": 30,
+    "description": "Retro-style sneakers with leather upper. Classic design with modern comfort technology. Versatile for any casual occasion.",
+    "category": "Men Sneakers",
+    "product_info": {
+      "brand": "Reebok",
+      "manufacturer": "Reebok International",
+      "availableSizes": ["7", "8", "9", "10", "11", "12"],
+      "shoeSize": "9",
+      "shoeMaterial": "Leather",
+      "shoeColor": "Navy/White",
+      "shoeType": "Sneakers",
+      "IncludedComponents": "Shoes, Original Box"
+    },
+    "images": {
+      "image1": "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=800",
+      "image2": "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=800",
+      "image3": "https://images.unsplash.com/photo-1460353581641-37baddab0fa2?w=800"
+    }
+  },
+  {
+    "title": "Timberland Brown Waterproof Boots",
+    "mrp": 11999,
+    "discountPercent": 15,
+    "description": "Premium waterproof leather boots. Perfect for outdoor activities, hiking, and harsh weather conditions. Durable and comfortable.",
+    "category": "Men Boots",
+    "product_info": {
+      "brand": "Timberland",
+      "manufacturer": "Timberland LLC",
+      "availableSizes": ["8", "9", "10", "11", "12"],
+      "shoeSize": "10",
+      "shoeMaterial": "Leather",
+      "shoeColor": "Brown",
+      "shoeType": "Boots",
+      "IncludedComponents": "Shoes, Original Box, Warranty Card"
+    },
+    "images": {
+      "image1": "https://images.unsplash.com/photo-1544966503-7cc5ac882d5e?w=800",
+      "image2": "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=800",
+      "image3": "https://images.unsplash.com/photo-1460353581641-37baddab0fa2?w=800"
+    }
+  },
+  {
+    "title": "Woodland Black Ankle Boots",
+    "mrp": 4999,
+    "discountPercent": 20,
+    "description": "Stylish black ankle boots for casual and semi-formal wear. Comfortable fit with cushioned insoles. Great for city walks.",
+    "category": "Men Boots",
+    "product_info": {
+      "brand": "Woodland",
+      "manufacturer": "Woodland Worldwide",
+      "availableSizes": ["8", "9", "10", "11"],
+      "shoeSize": "9",
+      "shoeMaterial": "Leather",
+      "shoeColor": "Black",
+      "shoeType": "Boots",
+      "IncludedComponents": "Shoes, Original Box"
+    },
+    "images": {
+      "image1": "https://images.unsplash.com/photo-1539185441755-769473a23570?w=800",
+      "image2": "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=800",
+      "image3": "https://images.unsplash.com/photo-1460353581641-37baddab0fa2?w=800"
+    }
+  },
+  {
+    "title": "Red Chief Tan Work Boots",
+    "mrp": 2999,
+    "discountPercent": 25,
+    "description": "Durable work boots perfect for construction and outdoor jobs. Steel toe protection with anti-slip sole.",
+    "category": "Men Boots",
+    "product_info": {
+      "brand": "Red Chief",
+      "manufacturer": "Red Chief Footwear",
+      "availableSizes": ["8", "9", "10", "11", "12"],
+      "shoeSize": "10",
+      "shoeMaterial": "Leather",
+      "shoeColor": "Tan",
+      "shoeType": "Boots",
+      "IncludedComponents": "Shoes, Original Box"
+    },
+    "images": {
+      "image1": "https://images.unsplash.com/photo-1544966503-7cc5ac882d5e?w=800",
+      "image2": "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=800",
+      "image3": "https://images.unsplash.com/photo-1460353581641-37baddab0fa2?w=800"
+    }
+  },
+  {
+    "title": "ASICS Gel-Nimbus Running Shoes",
+    "mrp": 9999,
+    "discountPercent": 18,
+    "description": "Premium running shoes with GEL cushioning technology. Designed for long-distance running with maximum comfort and shock absorption.",
+    "category": "Men Running Shoes",
+    "product_info": {
+      "brand": "ASICS",
+      "manufacturer": "ASICS Corporation",
+      "availableSizes": ["7", "8", "9", "10", "11", "12"],
+      "shoeSize": "9",
+      "shoeMaterial": "Mesh",
+      "shoeColor": "Blue/White",
+      "shoeType": "Running",
+      "IncludedComponents": "Shoes, Original Box, Warranty Card"
+    },
+    "images": {
+      "image1": "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800",
+      "image2": "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=800",
+      "image3": "https://images.unsplash.com/photo-1460353581641-37baddab0fa2?w=800"
+    }
+  },
+  {
+    "title": "Brooks Ghost 15 Running Shoes",
+    "mrp": 8999,
+    "discountPercent": 15,
+    "description": "Neutral running shoes with DNA Loft cushioning. Smooth ride for daily training and long runs. Lightweight and responsive.",
+    "category": "Men Running Shoes",
+    "product_info": {
+      "brand": "Brooks",
+      "manufacturer": "Brooks Sports",
+      "availableSizes": ["8", "9", "10", "11"],
+      "shoeSize": "10",
+      "shoeMaterial": "Mesh",
+      "shoeColor": "Grey/Green",
+      "shoeType": "Running",
+      "IncludedComponents": "Shoes, Original Box, Warranty Card"
+    },
+    "images": {
+      "image1": "https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?w=800",
+      "image2": "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=800",
+      "image3": "https://images.unsplash.com/photo-1460353581641-37baddab0fa2?w=800"
+    }
+  },
+  {
+    "title": "New Balance Fresh Foam Running Shoes",
+    "mrp": 7499,
+    "discountPercent": 20,
+    "description": "Comfortable running shoes with Fresh Foam midsole. Perfect for road running and daily jogging. Breathable upper design.",
+    "category": "Men Running Shoes",
+    "product_info": {
+      "brand": "New Balance",
+      "manufacturer": "New Balance Athletics",
+      "availableSizes": ["7", "8", "9", "10", "11", "12"],
+      "shoeSize": "9",
+      "shoeMaterial": "Mesh",
+      "shoeColor": "Black/Red",
+      "shoeType": "Running",
+      "IncludedComponents": "Shoes, Original Box"
+    },
+    "images": {
+      "image1": "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=800",
+      "image2": "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=800",
+      "image3": "https://images.unsplash.com/photo-1460353581641-37baddab0fa2?w=800"
+    }
+  }
+]
+

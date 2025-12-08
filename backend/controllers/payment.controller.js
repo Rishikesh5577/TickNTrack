@@ -75,7 +75,12 @@ export const verifyPayment = async (req, res) => {
         const discountPercent = Number(p?.discountPercent) || 0;
         base = Math.round(mrp - (mrp * discountPercent) / 100) || 0;
       }
-      return { product: p._id, quantity: i.quantity, price: base };
+      return { 
+        product: p._id, 
+        quantity: i.quantity, 
+        price: base,
+        size: i.size || undefined // Include size if available
+      };
     });
     const amount = items.reduce((sum, it) => sum + (it.price * it.quantity), 0);
 

@@ -1,8 +1,8 @@
 // src/utils/api.js
 
-// Prefer VITE_BACKEND_URL. If not set, fall back to window.location.origin in browser.
+// Prefer VITE_BACKEND_URL. If not set, fall back to localhost:5000 for development.
 // Make sure VITE_BACKEND_URL is defined for production builds (Vite requires VITE_ prefix).
-const API_BASE_URL = import.meta.env.VITE_BACKEND_URL ?? (typeof window !== 'undefined' ? window.location.origin : '');
+const API_BASE_URL = import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:5000';
 console.log('API_BASE_URL', API_BASE_URL);
 
 function buildUrl(path) {
@@ -142,8 +142,12 @@ export const api = {
 
   // Cart endpoints
   getCart: () => request('/api/cart', { method: 'GET' }),
-  addToCart: ({ productId, quantity = 1 }) => request('/api/cart/add', { method: 'POST', body: JSON.stringify({ productId, quantity }) }),
-  removeFromCart: (productId) => request(`/api/cart/remove/${productId}`, { method: 'DELETE' }),
+  addToCart: ({ productId, quantity = 1, size = null }) => request('/api/cart/add', { method: 'POST', body: JSON.stringify({ productId, quantity, size }) }),
+  removeFromCart: (productId, size = null) => {
+    const url = size ? `/api/cart/remove/${productId}?size=${encodeURIComponent(size)}` : `/api/cart/remove/${productId}`;
+    return request(url, { method: 'DELETE' });
+  },
+  updateCartQuantity: ({ productId, quantity, size = null }) => request('/api/cart/update', { method: 'PUT', body: JSON.stringify({ productId, quantity, size }) }),
 
   // Admin endpoints
   admin: {

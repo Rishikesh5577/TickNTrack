@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { FaRupeeSign, FaSpinner, FaFilter, FaTimes, FaChevronDown, FaChevronUp } from 'react-icons/fa';
 import { fetchSarees } from '../services/api';
+import { placeholders, getProductImage } from '../utils/imagePlaceholder';
 
 // Add CSS to hide scrollbar and loading animation
 const styles = `
@@ -20,11 +21,50 @@ const styles = `
       transform: translateX(300%);
     }
   }
+  @keyframes slide-in-from-right {
+    from {
+      transform: translateX(100%);
+    }
+    to {
+      transform: translateX(0);
+    }
+  }
+  .animate-in {
+    animation: slide-in-from-right 0.3s ease-out;
+  }
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #14b8a6;
+    border-radius: 10px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #0d9488;
+  }
+  /* Ensure sticky positioning works */
+  .filter-sticky-container {
+    position: relative;
+    overflow: visible !important;
+  }
+  .filter-sticky-sidebar {
+    position: -webkit-sticky !important;
+    position: sticky !important;
+  }
 `;
 
 const ProductList = ({ defaultCategory } = {}) => {
   const { categoryName, subCategoryName, mainCategory } = useParams();
   const navigate = useNavigate();
+  const navbarRef = useRef(null);
+  const filterSidebarRef = useRef(null);
+  const filterContainerRef = useRef(null);
+  const [navbarHeight, setNavbarHeight] = useState(80);
+  const [isFilterSticky, setIsFilterSticky] = useState(false);
   
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
@@ -38,52 +78,276 @@ const ProductList = ({ defaultCategory } = {}) => {
   const [customPriceTo, setCustomPriceTo] = useState('');
   const [selectedFabrics, setSelectedFabrics] = useState([]);
   
+  // Product-specific filter states
+  const [selectedBrands, setSelectedBrands] = useState([]);
+  const [selectedShoeMaterials, setSelectedShoeMaterials] = useState([]);
+  const [selectedShoeTypes, setSelectedShoeTypes] = useState([]);
+  const [selectedSizes, setSelectedSizes] = useState([]);
+  const [selectedWatchMovements, setSelectedWatchMovements] = useState([]);
+  const [selectedWatchCaseMaterials, setSelectedWatchCaseMaterials] = useState([]);
+  const [selectedWatchBandMaterials, setSelectedWatchBandMaterials] = useState([]);
+  const [selectedWaterResistance, setSelectedWaterResistance] = useState([]);
+  
   // Accordion states for desktop filters
   const [openSections, setOpenSections] = useState({
     price: true,
-    material: true
+    material: true,
+    brand: true,
+    type: true,
+    size: true,
+    movement: true,
+    caseMaterial: true,
+    bandMaterial: true,
+    waterResistance: true
   });
+  
+  // Normalize category name helper
+  const normalize = (s) => {
+    if (!s) return '';
+    const t = s.replace(/-/g, ' ').toLowerCase();
+    return t.replace(/\b\w/g, (c) => c.toUpperCase());
+  };
+
+  // Handle 3-segment paths: /category/shoes/mens-shoes/sports-shoes
+  // Calculate effectiveCategory and effectiveSubCategory
+  const effectiveCategory = React.useMemo(() => {
+    if (mainCategory && categoryName && subCategoryName) {
+      // 3-segment path: /category/shoes/mens-shoes/sports-shoes
+      return normalize(categoryName); // "Mens Shoes"
+    } else if (categoryName && subCategoryName) {
+      // 2-segment path: /category/shoes/mens-shoes
+      return normalize(categoryName); // "Shoes"
+    } else if (categoryName) {
+      // 1-segment path: /category/shoes
+      return normalize(categoryName); // "Shoes"
+    }
+    return '';
+  }, [mainCategory, categoryName, subCategoryName]);
+
+  const effectiveSubCategory = React.useMemo(() => {
+    if (mainCategory && categoryName && subCategoryName) {
+      // 3-segment path: /category/shoes/mens-shoes/sports-shoes
+      return normalize(subCategoryName); // "Sports Shoes"
+    } else if (categoryName && subCategoryName) {
+      // 2-segment path: /category/shoes/mens-shoes
+      return normalize(subCategoryName); // "Mens Shoes"
+    }
+    return '';
+  }, [mainCategory, categoryName, subCategoryName]);
+  
+  // Detect product type from category
+  const isShoesCategory = React.useMemo(() => {
+    const cat = (effectiveCategory || effectiveSubCategory || '').toLowerCase();
+    return cat.includes('shoe') || cat.includes('sneaker') || cat.includes('boot') || cat.includes('sandal');
+  }, [effectiveCategory, effectiveSubCategory]);
+  
+  const isWatchCategory = React.useMemo(() => {
+    const cat = (effectiveCategory || effectiveSubCategory || '').toLowerCase();
+    return cat.includes('watch');
+  }, [effectiveCategory, effectiveSubCategory]);
+
+  // Calculate navbar height for sticky positioning
+  useEffect(() => {
+    const calculateNavbarHeight = () => {
+      // First try to get from CSS variable set by Layout component
+      const root = document.documentElement;
+      const cssVar = getComputedStyle(root).getPropertyValue('--app-header-height').trim();
+      if (cssVar && cssVar !== '0px') {
+        const height = parseFloat(cssVar);
+        if (!isNaN(height) && height > 0) {
+          setNavbarHeight(height);
+          return;
+        }
+      }
+      
+      // Fallback: calculate from navbar element
+      const navbar = document.querySelector('nav');
+      if (navbar) {
+        const height = navbar.offsetHeight || navbar.getBoundingClientRect().height;
+        if (height > 0) {
+          setNavbarHeight(height);
+          return;
+        }
+      }
+      
+      // Calculate from fixed header wrapper
+      const headerWrapper = document.querySelector('[ref*="headerWrapRef"], .fixed.top-0');
+      if (headerWrapper) {
+        const height = headerWrapper.offsetHeight || headerWrapper.getBoundingClientRect().height;
+        if (height > 0) {
+          setNavbarHeight(height);
+          return;
+        }
+      }
+      
+      // Final fallback: approximate navbar height
+      const fallbackHeight = window.innerWidth >= 768 ? 80 : 72;
+      setNavbarHeight(fallbackHeight);
+    };
+    
+    // Calculate on mount and after delays to ensure navbar is rendered
+    calculateNavbarHeight();
+    const timeoutId = setTimeout(calculateNavbarHeight, 100);
+    const timeoutId2 = setTimeout(calculateNavbarHeight, 300);
+    const timeoutId3 = setTimeout(calculateNavbarHeight, 600);
+    
+    window.addEventListener('resize', calculateNavbarHeight);
+    window.addEventListener('load', calculateNavbarHeight);
+    
+    // Also listen for when navbar might change
+    const observer = new MutationObserver(calculateNavbarHeight);
+    const navbar = document.querySelector('nav');
+    if (navbar) {
+      observer.observe(navbar, { childList: true, subtree: true, attributes: true, attributeFilter: ['class', 'style'] });
+    }
+    
+    return () => {
+      clearTimeout(timeoutId);
+      clearTimeout(timeoutId2);
+      clearTimeout(timeoutId3);
+      window.removeEventListener('resize', calculateNavbarHeight);
+      window.removeEventListener('load', calculateNavbarHeight);
+      observer.disconnect();
+    };
+  }, []);
+
+  // Handle scroll to ensure filter stays below navbar
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!filterContainerRef.current) return;
+      
+      const container = filterContainerRef.current;
+      const rect = container.getBoundingClientRect();
+      const shouldBeSticky = rect.top <= navbarHeight;
+      
+      setIsFilterSticky(shouldBeSticky);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll(); // Initial check
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, [navbarHeight]);
   
   // Available fabric options
   const allPossibleFabrics = ['Silk', 'Cotton', 'Georgette', 'Chiffon', 'Linen', 'Satin', 'Velvet', 'Organza', 'Banarasi', 'Kanjivaram', 'Katan', 'Tussar', 'Maheshwari', 'Chanderi', 'Kota', 'Gota Patti', 'Zari', 'Zardosi', 'Resham', 'Kalamkari', 'Bandhani', 'Leheriya', 'Patola', 'Paithani', 'Baluchari', 'Dhakai', 'Jamdani', 'Khesh', 'Muga', 'Eri', 'Mysore', 'Uppada', 'Gadwal', 'Venkatagiri', 'Narayanpet', 'Bomkai', 'Sambalpuri', 'Khandua', 'Kotpad', 'Bhagalpur', 'Tussar', 'Muga', 'Eri', 'Mysore Silk', 'Kanchipuram', 'Kanjivaram', 'Banarasi Silk', 'Chanderi', 'Maheshwari', 'Kota Doria', 'Gota Work', 'Zari Work', 'Zardosi Work', 'Resham Work', 'Kalamkari', 'Bandhani', 'Leheriya', 'Patola', 'Paithani', 'Baluchari', 'Dhakai', 'Jamdani', 'Khesh', 'Muga', 'Eri', 'Mysore', 'Uppada', 'Gadwal', 'Venkatagiri', 'Narayanpet', 'Bomkai', 'Sambalpuri', 'Khandua', 'Kotpad', 'Bhagalpur', 'Tussar', 'Muga', 'Eri', 'Mysore Silk', 'Kanchipuram', 'Kanjivaram', 'Banarasi Silk', 'Chanderi', 'Maheshwari', 'Kota Doria', 'Gota Work', 'Zari Work', 'Zardosi Work', 'Resham Work', 'Kalamkari', 'Bandhani', 'Leheriya', 'Patola', 'Paithani', 'Baluchari', 'Dhakai', 'Jamdani', 'Khesh', 'Muga', 'Eri', 'Mysore', 'Uppada', 'Gadwal', 'Venkatagiri', 'Narayanpet', 'Bomkai', 'Sambalpuri', 'Khandua', 'Kotpad', 'Bhagalpur', 'Tussar', 'Muga', 'Eri', 'Mysore Silk', 'Kanchipuram', 'Kanjivaram', 'Banarasi Silk', 'Chanderi', 'Maheshwari', 'Kota Doria', 'Gota Work', 'Zari Work', 'Zardosi Work', 'Resham Work', 'Kalamkari', 'Bandhani', 'Leheriya', 'Patola', 'Paithani', 'Baluchari', 'Dhakai', 'Jamdani', 'Khesh', 'Muga', 'Eri', 'Mysore', 'Uppada', 'Gadwal', 'Venkatagiri', 'Narayanpet', 'Bomkai', 'Sambalpuri', 'Khandua', 'Kotpad', 'Bhagalpur', 'Tussar', 'Muga', 'Eri', 'Mysore Silk', 'Kanchipuram', 'Kanjivaram', 'Banarasi Silk', 'Chanderi', 'Maheshwari', 'Kota Doria', 'Gota Work', 'Zari Work', 'Zardosi Work', 'Resham Work'];
   
-  // Extract unique fabrics from products
-  const availableFabrics = React.useMemo(() => {
-    const fabricSet = new Set();
-    
+  // Extract unique values from products based on type
+  const availableBrands = React.useMemo(() => {
+    const brandSet = new Set();
     products.forEach(product => {
-      // Check multiple possible fields that might contain fabric info
-      const possibleFabricFields = [
-        product.fabric,
-        product.material,
-        product.product_info?.fabric,
-        product.product_info?.material,
-        product.details?.fabric,
-        product.details?.material,
-        product.description,
-        product.title
-      ];
-      
-      // Check each field for fabric matches
-      possibleFabricFields.forEach(field => {
-        if (field) {
-          const fieldStr = String(field).toLowerCase();
-          allPossibleFabrics.forEach(fabric => {
-            if (fieldStr.includes(fabric.toLowerCase())) {
-              fabricSet.add(fabric);
-            }
-          });
-        }
-      });
+      const brand = product.product_info?.brand || product.brand;
+      if (brand && typeof brand === 'string') brandSet.add(brand.trim());
     });
-    
-    // Add some common fabrics if none found
-    if (fabricSet.size === 0) {
-      return ['Silk', 'Cotton', 'Georgette', 'Chiffon', 'Linen', 'Satin', 'Velvet', 'Organza'];
-    }
-    
-    return Array.from(fabricSet).sort();
+    return Array.from(brandSet).sort();
   }, [products]);
+  
+  const availableShoeMaterials = React.useMemo(() => {
+    const materialSet = new Set();
+    products.forEach(product => {
+      const material = product.product_info?.shoeMaterial || product.product_info?.SareeMaterial;
+      if (material && typeof material === 'string') {
+        material.split(',').forEach(m => {
+          const trimmed = m.trim();
+          if (trimmed) materialSet.add(trimmed);
+        });
+      }
+    });
+    return Array.from(materialSet).sort();
+  }, [products]);
+  
+  const availableShoeTypes = React.useMemo(() => {
+    const typeSet = new Set();
+    products.forEach(product => {
+      const type = product.product_info?.shoeType;
+      if (type && typeof type === 'string') typeSet.add(type.trim());
+    });
+    return Array.from(typeSet).sort();
+  }, [products]);
+  
+  const availableSizes = React.useMemo(() => {
+    const sizeSet = new Set();
+    products.forEach(product => {
+      const sizes = product.product_info?.availableSizes || [];
+      if (Array.isArray(sizes)) {
+        sizes.forEach(size => {
+          if (size) sizeSet.add(String(size).trim());
+        });
+      }
+    });
+    return Array.from(sizeSet).sort((a, b) => {
+      const numA = parseFloat(a);
+      const numB = parseFloat(b);
+      if (!isNaN(numA) && !isNaN(numB)) return numA - numB;
+      return a.localeCompare(b);
+    });
+  }, [products]);
+  
+  const availableWatchMovements = React.useMemo(() => {
+    const movementSet = new Set();
+    products.forEach(product => {
+      const movement = product.product_info?.movementType;
+      if (movement && typeof movement === 'string') movementSet.add(movement.trim());
+    });
+    return Array.from(movementSet).sort();
+  }, [products]);
+  
+  const availableWatchCaseMaterials = React.useMemo(() => {
+    const materialSet = new Set();
+    products.forEach(product => {
+      const material = product.product_info?.caseMaterial;
+      if (material && typeof material === 'string') {
+        material.split(',').forEach(m => {
+          const trimmed = m.trim();
+          if (trimmed) materialSet.add(trimmed);
+        });
+      }
+    });
+    return Array.from(materialSet).sort();
+  }, [products]);
+  
+  const availableWatchBandMaterials = React.useMemo(() => {
+    const materialSet = new Set();
+    products.forEach(product => {
+      const material = product.product_info?.bandMaterial;
+      if (material && typeof material === 'string') {
+        material.split(',').forEach(m => {
+          const trimmed = m.trim();
+          if (trimmed) materialSet.add(trimmed);
+        });
+      }
+    });
+    return Array.from(materialSet).sort();
+  }, [products]);
+  
+  const availableWaterResistance = React.useMemo(() => {
+    const wrSet = new Set();
+    products.forEach(product => {
+      const wr = product.product_info?.waterResistance;
+      if (wr && typeof wr === 'string') wrSet.add(wr.trim());
+    });
+    return Array.from(wrSet).sort();
+  }, [products]);
+  
+  // Available fabric options (for non-shoe/watch products)
+  const availableFabrics = React.useMemo(() => {
+    if (isShoesCategory || isWatchCategory) return [];
+    const fabricSet = new Set();
+    products.forEach(product => {
+      const material = product.product_info?.SareeMaterial || product.product_info?.fabric;
+      if (material && typeof material === 'string') {
+        material.split(',').forEach(m => {
+          const trimmed = m.trim();
+          if (trimmed && allPossibleFabrics.some(f => trimmed.toLowerCase().includes(f.toLowerCase()))) {
+            fabricSet.add(trimmed);
+          }
+        });
+      }
+    });
+    return Array.from(fabricSet).sort();
+  }, [products, isShoesCategory, isWatchCategory]);
   
   const priceRanges = [
     { id: 1, label: '₹300 - ₹1,000', min: 300, max: 1000 },
@@ -97,32 +361,6 @@ const ProductList = ({ defaultCategory } = {}) => {
     { id: 9, label: '₹8,001 - ₹10,000', min: 8001, max: 10000 },
     { id: 10, label: 'Above ₹10,000', min: 10001, max: Infinity },
   ];
-  
-  const normalize = (s) => {
-    if (!s) return '';
-    const t = s.replace(/-/g, ' ').toLowerCase();
-    return t.replace(/\b\w/g, (c) => c.toUpperCase());
-  };
-
-  // Handle 3-segment paths: /category/shoes/mens-shoes/sports-shoes
-  // In this case: mainCategory="shoes", categoryName="mens-shoes", subCategoryName="sports-shoes"
-  // We want to use categoryName as the main category and subCategoryName as the subcategory
-  let effectiveCategory = '';
-  let effectiveSubCategory = '';
-  
-  if (mainCategory && categoryName && subCategoryName) {
-    // 3-segment path: /category/shoes/mens-shoes/sports-shoes
-    effectiveCategory = normalize(categoryName); // "Mens Shoes"
-    effectiveSubCategory = normalize(subCategoryName); // "Sports Shoes"
-  } else if (categoryName && subCategoryName) {
-    // 2-segment path: /category/shoes/mens-shoes
-    effectiveCategory = normalize(categoryName); // "Shoes"
-    effectiveSubCategory = normalize(subCategoryName); // "Mens Shoes"
-  } else if (categoryName) {
-    // 1-segment path: /category/shoes
-    effectiveCategory = normalize(categoryName); // "Shoes"
-    effectiveSubCategory = '';
-  }
   
   // Fetch products
   useEffect(() => {
@@ -155,7 +393,7 @@ const ProductList = ({ defaultCategory } = {}) => {
   useEffect(() => {
     let result = [...products];
     
-    // Filter by price range
+    // Filter by price range (always available)
     if (selectedPriceRange) {
       const range = priceRanges.find(r => r.id === selectedPriceRange);
       if (range) {
@@ -166,37 +404,118 @@ const ProductList = ({ defaultCategory } = {}) => {
       }
     }
     
-    // Filter by fabric
-    if (selectedFabrics.length > 0) {
+    // Filter by brand (common for shoes and watches)
+    if (selectedBrands.length > 0) {
       result = result.filter(p => {
-        // Check multiple possible fields that might contain fabric info
-        const possibleFabricFields = [
-          p.fabric,
-          p.material,
-          p.product_info?.fabric,
-          p.product_info?.material,
-          p.details?.fabric,
-          p.details?.material,
-          p.description,
-          p.title
-        ];
-        
-        // Convert all fabric fields to a single searchable string
-        const fabricSearchString = possibleFabricFields
-          .filter(Boolean)
-          .map(String)
-          .join(' ')
-          .toLowerCase();
-        
-        // Check if any selected fabric is in the search string
+        const brand = (p.product_info?.brand || p.brand || '').trim();
+        return selectedBrands.some(selectedBrand => 
+          brand.toLowerCase() === selectedBrand.toLowerCase()
+        );
+      });
+    }
+    
+    // Shoes-specific filters
+    if (isShoesCategory) {
+      // Filter by shoe material
+      if (selectedShoeMaterials.length > 0) {
+        result = result.filter(p => {
+          const material = (p.product_info?.shoeMaterial || '').toLowerCase();
+          return selectedShoeMaterials.some(selectedMaterial => 
+            material.includes(selectedMaterial.toLowerCase())
+          );
+        });
+      }
+      
+      // Filter by shoe type
+      if (selectedShoeTypes.length > 0) {
+        result = result.filter(p => {
+          const type = (p.product_info?.shoeType || '').trim();
+          return selectedShoeTypes.some(selectedType => 
+            type.toLowerCase() === selectedType.toLowerCase()
+          );
+        });
+      }
+      
+      // Filter by size
+      if (selectedSizes.length > 0) {
+        result = result.filter(p => {
+          const sizes = p.product_info?.availableSizes || [];
+          return selectedSizes.some(selectedSize => 
+            sizes.some(size => String(size).trim() === selectedSize.trim())
+          );
+        });
+      }
+    }
+    
+    // Watches-specific filters
+    if (isWatchCategory) {
+      // Filter by movement type
+      if (selectedWatchMovements.length > 0) {
+        result = result.filter(p => {
+          const movement = (p.product_info?.movementType || '').trim();
+          return selectedWatchMovements.some(selectedMovement => 
+            movement.toLowerCase() === selectedMovement.toLowerCase()
+          );
+        });
+      }
+      
+      // Filter by case material
+      if (selectedWatchCaseMaterials.length > 0) {
+        result = result.filter(p => {
+          const material = (p.product_info?.caseMaterial || '').toLowerCase();
+          return selectedWatchCaseMaterials.some(selectedMaterial => 
+            material.includes(selectedMaterial.toLowerCase())
+          );
+        });
+      }
+      
+      // Filter by band material
+      if (selectedWatchBandMaterials.length > 0) {
+        result = result.filter(p => {
+          const material = (p.product_info?.bandMaterial || '').toLowerCase();
+          return selectedWatchBandMaterials.some(selectedMaterial => 
+            material.includes(selectedMaterial.toLowerCase())
+          );
+        });
+      }
+      
+      // Filter by water resistance
+      if (selectedWaterResistance.length > 0) {
+        result = result.filter(p => {
+          const wr = (p.product_info?.waterResistance || '').trim();
+          return selectedWaterResistance.some(selectedWR => 
+            wr.toLowerCase() === selectedWR.toLowerCase()
+          );
+        });
+      }
+    }
+    
+    // Filter by fabric (for non-shoe/watch products)
+    if (!isShoesCategory && !isWatchCategory && selectedFabrics.length > 0) {
+      result = result.filter(p => {
+        const material = (p.product_info?.SareeMaterial || p.product_info?.fabric || '').toLowerCase();
         return selectedFabrics.some(fabric => 
-          fabricSearchString.includes(fabric.toLowerCase())
+          material.includes(fabric.toLowerCase())
         );
       });
     }
     
     setFilteredProducts(result);
-  }, [products, selectedPriceRange, selectedFabrics]);
+  }, [
+    products, 
+    selectedPriceRange, 
+    selectedFabrics, 
+    selectedBrands,
+    selectedShoeMaterials,
+    selectedShoeTypes,
+    selectedSizes,
+    selectedWatchMovements,
+    selectedWatchCaseMaterials,
+    selectedWatchBandMaterials,
+    selectedWaterResistance,
+    isShoesCategory,
+    isWatchCategory
+  ]);
   
   const toggleFabric = (fabric) => {
     setSelectedFabrics(prev => 
@@ -209,6 +528,14 @@ const ProductList = ({ defaultCategory } = {}) => {
   const resetFilters = () => {
     setSelectedPriceRange(null);
     setSelectedFabrics([]);
+    setSelectedBrands([]);
+    setSelectedShoeMaterials([]);
+    setSelectedShoeTypes([]);
+    setSelectedSizes([]);
+    setSelectedWatchMovements([]);
+    setSelectedWatchCaseMaterials([]);
+    setSelectedWatchBandMaterials([]);
+    setSelectedWaterResistance([]);
   };
 
   const toggleSection = (section) => {
@@ -233,17 +560,28 @@ const ProductList = ({ defaultCategory } = {}) => {
 
   const activeFilterCount = [
     selectedFabrics.length,
+    selectedBrands.length,
+    selectedShoeMaterials.length,
+    selectedShoeTypes.length,
+    selectedSizes.length,
+    selectedWatchMovements.length,
+    selectedWatchCaseMaterials.length,
+    selectedWatchBandMaterials.length,
+    selectedWaterResistance.length,
     selectedPriceRange ? 1 : 0
   ].reduce((a, b) => a + b, 0);
 
   const FilterContent = () => (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h3 className="text-lg font-semibold text-gray-900">Filters</h3>
+      <div className="flex justify-between items-center pb-4 border-b border-gray-200">
+        <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+          <FaFilter className="text-teal-600" />
+          Filters
+        </h3>
         {activeFilterCount > 0 && (
           <button 
             onClick={resetFilters}
-            className="text-sm text-pink-600 hover:text-pink-700 font-medium"
+            className="text-sm bg-gray-900 text-white px-4 py-1.5 rounded-lg hover:bg-teal-600 font-medium transition-colors shadow-sm"
           >
             Clear all
           </button>
@@ -254,25 +592,43 @@ const ProductList = ({ defaultCategory } = {}) => {
       <div className="border-b border-gray-200 pb-6">
         <button
           onClick={() => toggleSection('price')}
-          className="flex justify-between items-center w-full mb-4"
+          className="flex justify-between items-center w-full mb-4 group"
         >
-          <h4 className="text-sm font-medium text-gray-900">Price</h4>
-          {openSections.price ? <FaChevronUp className="text-gray-400" /> : <FaChevronDown className="text-gray-400" />}
+          <h4 className="text-base font-semibold text-gray-900 group-hover:text-teal-600 transition-colors">Price Range</h4>
+          <div className="flex items-center gap-2">
+            {selectedPriceRange && (
+              <span className="inline-flex items-center justify-center h-5 w-5 bg-teal-600 text-white text-xs font-bold rounded-full">
+                ✓
+              </span>
+            )}
+            {openSections.price ? (
+              <FaChevronUp className="text-teal-600 transition-transform" />
+            ) : (
+              <FaChevronDown className="text-gray-400 group-hover:text-teal-600 transition-colors" />
+            )}
+          </div>
         </button>
         
         {openSections.price && (
-          <div className="space-y-3">
+          <div className="space-y-2.5">
             {priceRanges.map(range => (
-              <div key={range.id} className="flex items-center">
+              <div key={range.id} className="flex items-center group">
                 <input
                   type="radio"
                   id={`price-${range.id}`}
                   name="priceRange"
                   checked={selectedPriceRange === range.id}
                   onChange={() => setSelectedPriceRange(range.id)}
-                  className="h-4 w-4 text-pink-600 focus:ring-pink-500 border-gray-300 cursor-pointer"
+                  className="h-4 w-4 text-teal-600 focus:ring-teal-600 border-gray-300 cursor-pointer"
                 />
-                <label htmlFor={`price-${range.id}`} className="ml-3 text-sm text-gray-700 cursor-pointer">
+                <label 
+                  htmlFor={`price-${range.id}`} 
+                  className={`ml-3 text-sm cursor-pointer flex-1 py-1.5 px-3 rounded-md transition-all ${
+                    selectedPriceRange === range.id 
+                      ? 'bg-teal-50 text-teal-700 font-medium' 
+                      : 'text-gray-700 hover:bg-gray-50'
+                  }`}
+                >
                   {range.label}
                 </label>
               </div>
@@ -281,46 +637,481 @@ const ProductList = ({ defaultCategory } = {}) => {
         )}
       </div>
       
-      {/* Material Filter */}
-      <div className="border-b border-gray-200 pb-6">
-        <button
-          onClick={() => toggleSection('material')}
-          className="flex justify-between items-center w-full mb-4"
-        >
-          <h4 className="text-sm font-medium text-gray-900">Fabric</h4>
-          <div className="flex items-center">
-            {selectedFabrics.length > 0 && (
-              <span className="mr-2 inline-flex items-center justify-center h-5 w-5 bg-pink-100 text-pink-800 text-xs font-semibold rounded-full">
-                {selectedFabrics.length}
-              </span>
-            )}
-            {openSections.material ? <FaChevronUp className="text-gray-400" /> : <FaChevronDown className="text-gray-400" />}
-          </div>
-        </button>
-        
-        {openSections.material && (
-          <div className="space-y-3 max-h-64 overflow-y-auto">
-            {availableFabrics && availableFabrics.length > 0 ? (
-              availableFabrics.map(material => (
-                <div key={material} className="flex items-center">
+      {/* Brand Filter (for Shoes and Watches) */}
+      {(isShoesCategory || isWatchCategory) && availableBrands.length > 0 && (
+        <div className="border-b border-gray-200 pb-6">
+          <button
+            onClick={() => toggleSection('brand')}
+            className="flex justify-between items-center w-full mb-4 group"
+          >
+            <h4 className="text-base font-semibold text-gray-900 group-hover:text-teal-600 transition-colors">Brand</h4>
+            <div className="flex items-center gap-2">
+              {selectedBrands.length > 0 && (
+                <span className="inline-flex items-center justify-center h-6 w-6 bg-teal-600 text-white text-xs font-bold rounded-full shadow-sm">
+                  {selectedBrands.length}
+                </span>
+              )}
+              {openSections.brand ? (
+                <FaChevronUp className="text-teal-600 transition-transform" />
+              ) : (
+                <FaChevronDown className="text-gray-400 group-hover:text-teal-600 transition-colors" />
+              )}
+            </div>
+          </button>
+          
+          {openSections.brand && (
+            <div className="space-y-2.5 max-h-64 overflow-y-auto custom-scrollbar pr-2">
+              {availableBrands.map(brand => (
+                <div key={brand} className="flex items-center group">
+                  <input
+                    type="checkbox"
+                    id={`brand-${brand}`}
+                    checked={selectedBrands.includes(brand)}
+                    onChange={() => setSelectedBrands(prev => 
+                      prev.includes(brand) ? prev.filter(b => b !== brand) : [...prev, brand]
+                    )}
+                    className="h-4 w-4 text-teal-600 focus:ring-teal-600 border-gray-300 rounded cursor-pointer"
+                  />
+                  <label 
+                    htmlFor={`brand-${brand}`} 
+                    className={`ml-3 text-sm cursor-pointer flex-1 py-1.5 px-3 rounded-md transition-all ${
+                      selectedBrands.includes(brand)
+                        ? 'bg-teal-50 text-teal-700 font-medium'
+                        : 'text-gray-700 hover:bg-gray-50'
+                    }`}
+                  >
+                    {brand}
+                  </label>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Shoe-specific Filters */}
+      {isShoesCategory && (
+        <>
+          {/* Shoe Material Filter */}
+          {availableShoeMaterials.length > 0 && (
+            <div className="border-b border-gray-200 pb-6">
+              <button
+                onClick={() => toggleSection('material')}
+                className="flex justify-between items-center w-full mb-4 group"
+              >
+                <h4 className="text-base font-semibold text-gray-900 group-hover:text-teal-600 transition-colors">Material</h4>
+                <div className="flex items-center gap-2">
+                  {selectedShoeMaterials.length > 0 && (
+                    <span className="inline-flex items-center justify-center h-6 w-6 bg-teal-600 text-white text-xs font-bold rounded-full shadow-sm">
+                      {selectedShoeMaterials.length}
+                    </span>
+                  )}
+                  {openSections.material ? (
+                    <FaChevronUp className="text-teal-600 transition-transform" />
+                  ) : (
+                    <FaChevronDown className="text-gray-400 group-hover:text-teal-600 transition-colors" />
+                  )}
+                </div>
+              </button>
+              
+              {openSections.material && (
+                <div className="space-y-2.5 max-h-64 overflow-y-auto custom-scrollbar pr-2">
+                  {availableShoeMaterials.map(material => (
+                    <div key={material} className="flex items-center group">
+                      <input
+                        type="checkbox"
+                        id={`shoe-material-${material}`}
+                        checked={selectedShoeMaterials.includes(material)}
+                        onChange={() => setSelectedShoeMaterials(prev => 
+                          prev.includes(material) ? prev.filter(m => m !== material) : [...prev, material]
+                        )}
+                        className="h-4 w-4 text-teal-600 focus:ring-teal-600 border-gray-300 rounded cursor-pointer"
+                      />
+                      <label 
+                        htmlFor={`shoe-material-${material}`} 
+                        className={`ml-3 text-sm cursor-pointer flex-1 py-1.5 px-3 rounded-md transition-all ${
+                          selectedShoeMaterials.includes(material)
+                            ? 'bg-teal-50 text-teal-700 font-medium'
+                            : 'text-gray-700 hover:bg-gray-50'
+                        }`}
+                      >
+                        {material}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Shoe Type Filter */}
+          {availableShoeTypes.length > 0 && (
+            <div className="border-b border-gray-200 pb-6">
+              <button
+                onClick={() => toggleSection('type')}
+                className="flex justify-between items-center w-full mb-4 group"
+              >
+                <h4 className="text-base font-semibold text-gray-900 group-hover:text-teal-600 transition-colors">Type</h4>
+                <div className="flex items-center gap-2">
+                  {selectedShoeTypes.length > 0 && (
+                    <span className="inline-flex items-center justify-center h-6 w-6 bg-teal-600 text-white text-xs font-bold rounded-full shadow-sm">
+                      {selectedShoeTypes.length}
+                    </span>
+                  )}
+                  {openSections.type ? (
+                    <FaChevronUp className="text-teal-600 transition-transform" />
+                  ) : (
+                    <FaChevronDown className="text-gray-400 group-hover:text-teal-600 transition-colors" />
+                  )}
+                </div>
+              </button>
+              
+              {openSections.type && (
+                <div className="space-y-2.5 max-h-64 overflow-y-auto custom-scrollbar pr-2">
+                  {availableShoeTypes.map(type => (
+                    <div key={type} className="flex items-center group">
+                      <input
+                        type="checkbox"
+                        id={`shoe-type-${type}`}
+                        checked={selectedShoeTypes.includes(type)}
+                        onChange={() => setSelectedShoeTypes(prev => 
+                          prev.includes(type) ? prev.filter(t => t !== type) : [...prev, type]
+                        )}
+                        className="h-4 w-4 text-teal-600 focus:ring-teal-600 border-gray-300 rounded cursor-pointer"
+                      />
+                      <label 
+                        htmlFor={`shoe-type-${type}`} 
+                        className={`ml-3 text-sm cursor-pointer flex-1 py-1.5 px-3 rounded-md transition-all ${
+                          selectedShoeTypes.includes(type)
+                            ? 'bg-teal-50 text-teal-700 font-medium'
+                            : 'text-gray-700 hover:bg-gray-50'
+                        }`}
+                      >
+                        {type}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Size Filter */}
+          {availableSizes.length > 0 && (
+            <div className="border-b border-gray-200 pb-6">
+              <button
+                onClick={() => toggleSection('size')}
+                className="flex justify-between items-center w-full mb-4 group"
+              >
+                <h4 className="text-base font-semibold text-gray-900 group-hover:text-teal-600 transition-colors">Size</h4>
+                <div className="flex items-center gap-2">
+                  {selectedSizes.length > 0 && (
+                    <span className="inline-flex items-center justify-center h-6 w-6 bg-teal-600 text-white text-xs font-bold rounded-full shadow-sm">
+                      {selectedSizes.length}
+                    </span>
+                  )}
+                  {openSections.size ? (
+                    <FaChevronUp className="text-teal-600 transition-transform" />
+                  ) : (
+                    <FaChevronDown className="text-gray-400 group-hover:text-teal-600 transition-colors" />
+                  )}
+                </div>
+              </button>
+              
+              {openSections.size && (
+                <div className="space-y-2.5 max-h-64 overflow-y-auto custom-scrollbar pr-2">
+                  {availableSizes.map(size => (
+                    <div key={size} className="flex items-center group">
+                      <input
+                        type="checkbox"
+                        id={`size-${size}`}
+                        checked={selectedSizes.includes(size)}
+                        onChange={() => setSelectedSizes(prev => 
+                          prev.includes(size) ? prev.filter(s => s !== size) : [...prev, size]
+                        )}
+                        className="h-4 w-4 text-teal-600 focus:ring-teal-600 border-gray-300 rounded cursor-pointer"
+                      />
+                      <label 
+                        htmlFor={`size-${size}`} 
+                        className={`ml-3 text-sm cursor-pointer flex-1 py-1.5 px-3 rounded-md transition-all ${
+                          selectedSizes.includes(size)
+                            ? 'bg-teal-50 text-teal-700 font-medium'
+                            : 'text-gray-700 hover:bg-gray-50'
+                        }`}
+                      >
+                        {size}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </>
+      )}
+
+      {/* Watch-specific Filters */}
+      {isWatchCategory && (
+        <>
+          {/* Movement Type Filter */}
+          {availableWatchMovements.length > 0 && (
+            <div className="border-b border-gray-200 pb-6">
+              <button
+                onClick={() => toggleSection('movement')}
+                className="flex justify-between items-center w-full mb-4 group"
+              >
+                <h4 className="text-base font-semibold text-gray-900 group-hover:text-teal-600 transition-colors">Movement Type</h4>
+                <div className="flex items-center gap-2">
+                  {selectedWatchMovements.length > 0 && (
+                    <span className="inline-flex items-center justify-center h-6 w-6 bg-teal-600 text-white text-xs font-bold rounded-full shadow-sm">
+                      {selectedWatchMovements.length}
+                    </span>
+                  )}
+                  {openSections.movement ? (
+                    <FaChevronUp className="text-teal-600 transition-transform" />
+                  ) : (
+                    <FaChevronDown className="text-gray-400 group-hover:text-teal-600 transition-colors" />
+                  )}
+                </div>
+              </button>
+              
+              {openSections.movement && (
+                <div className="space-y-2.5 max-h-64 overflow-y-auto custom-scrollbar pr-2">
+                  {availableWatchMovements.map(movement => (
+                    <div key={movement} className="flex items-center group">
+                      <input
+                        type="checkbox"
+                        id={`movement-${movement}`}
+                        checked={selectedWatchMovements.includes(movement)}
+                        onChange={() => setSelectedWatchMovements(prev => 
+                          prev.includes(movement) ? prev.filter(m => m !== movement) : [...prev, movement]
+                        )}
+                        className="h-4 w-4 text-teal-600 focus:ring-teal-600 border-gray-300 rounded cursor-pointer"
+                      />
+                      <label 
+                        htmlFor={`movement-${movement}`} 
+                        className={`ml-3 text-sm cursor-pointer flex-1 py-1.5 px-3 rounded-md transition-all ${
+                          selectedWatchMovements.includes(movement)
+                            ? 'bg-teal-50 text-teal-700 font-medium'
+                            : 'text-gray-700 hover:bg-gray-50'
+                        }`}
+                      >
+                        {movement}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Case Material Filter */}
+          {availableWatchCaseMaterials.length > 0 && (
+            <div className="border-b border-gray-200 pb-6">
+              <button
+                onClick={() => toggleSection('caseMaterial')}
+                className="flex justify-between items-center w-full mb-4 group"
+              >
+                <h4 className="text-base font-semibold text-gray-900 group-hover:text-teal-600 transition-colors">Case Material</h4>
+                <div className="flex items-center gap-2">
+                  {selectedWatchCaseMaterials.length > 0 && (
+                    <span className="inline-flex items-center justify-center h-6 w-6 bg-teal-600 text-white text-xs font-bold rounded-full shadow-sm">
+                      {selectedWatchCaseMaterials.length}
+                    </span>
+                  )}
+                  {openSections.caseMaterial ? (
+                    <FaChevronUp className="text-teal-600 transition-transform" />
+                  ) : (
+                    <FaChevronDown className="text-gray-400 group-hover:text-teal-600 transition-colors" />
+                  )}
+                </div>
+              </button>
+              
+              {openSections.caseMaterial && (
+                <div className="space-y-2.5 max-h-64 overflow-y-auto custom-scrollbar pr-2">
+                  {availableWatchCaseMaterials.map(material => (
+                    <div key={material} className="flex items-center group">
+                      <input
+                        type="checkbox"
+                        id={`case-material-${material}`}
+                        checked={selectedWatchCaseMaterials.includes(material)}
+                        onChange={() => setSelectedWatchCaseMaterials(prev => 
+                          prev.includes(material) ? prev.filter(m => m !== material) : [...prev, material]
+                        )}
+                        className="h-4 w-4 text-teal-600 focus:ring-teal-600 border-gray-300 rounded cursor-pointer"
+                      />
+                      <label 
+                        htmlFor={`case-material-${material}`} 
+                        className={`ml-3 text-sm cursor-pointer flex-1 py-1.5 px-3 rounded-md transition-all ${
+                          selectedWatchCaseMaterials.includes(material)
+                            ? 'bg-teal-50 text-teal-700 font-medium'
+                            : 'text-gray-700 hover:bg-gray-50'
+                        }`}
+                      >
+                        {material}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Band Material Filter */}
+          {availableWatchBandMaterials.length > 0 && (
+            <div className="border-b border-gray-200 pb-6">
+              <button
+                onClick={() => toggleSection('bandMaterial')}
+                className="flex justify-between items-center w-full mb-4 group"
+              >
+                <h4 className="text-base font-semibold text-gray-900 group-hover:text-teal-600 transition-colors">Band Material</h4>
+                <div className="flex items-center gap-2">
+                  {selectedWatchBandMaterials.length > 0 && (
+                    <span className="inline-flex items-center justify-center h-6 w-6 bg-teal-600 text-white text-xs font-bold rounded-full shadow-sm">
+                      {selectedWatchBandMaterials.length}
+                    </span>
+                  )}
+                  {openSections.bandMaterial ? (
+                    <FaChevronUp className="text-teal-600 transition-transform" />
+                  ) : (
+                    <FaChevronDown className="text-gray-400 group-hover:text-teal-600 transition-colors" />
+                  )}
+                </div>
+              </button>
+              
+              {openSections.bandMaterial && (
+                <div className="space-y-2.5 max-h-64 overflow-y-auto custom-scrollbar pr-2">
+                  {availableWatchBandMaterials.map(material => (
+                    <div key={material} className="flex items-center group">
+                      <input
+                        type="checkbox"
+                        id={`band-material-${material}`}
+                        checked={selectedWatchBandMaterials.includes(material)}
+                        onChange={() => setSelectedWatchBandMaterials(prev => 
+                          prev.includes(material) ? prev.filter(m => m !== material) : [...prev, material]
+                        )}
+                        className="h-4 w-4 text-teal-600 focus:ring-teal-600 border-gray-300 rounded cursor-pointer"
+                      />
+                      <label 
+                        htmlFor={`band-material-${material}`} 
+                        className={`ml-3 text-sm cursor-pointer flex-1 py-1.5 px-3 rounded-md transition-all ${
+                          selectedWatchBandMaterials.includes(material)
+                            ? 'bg-teal-50 text-teal-700 font-medium'
+                            : 'text-gray-700 hover:bg-gray-50'
+                        }`}
+                      >
+                        {material}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Water Resistance Filter */}
+          {availableWaterResistance.length > 0 && (
+            <div className="border-b border-gray-200 pb-6">
+              <button
+                onClick={() => toggleSection('waterResistance')}
+                className="flex justify-between items-center w-full mb-4 group"
+              >
+                <h4 className="text-base font-semibold text-gray-900 group-hover:text-teal-600 transition-colors">Water Resistance</h4>
+                <div className="flex items-center gap-2">
+                  {selectedWaterResistance.length > 0 && (
+                    <span className="inline-flex items-center justify-center h-6 w-6 bg-teal-600 text-white text-xs font-bold rounded-full shadow-sm">
+                      {selectedWaterResistance.length}
+                    </span>
+                  )}
+                  {openSections.waterResistance ? (
+                    <FaChevronUp className="text-teal-600 transition-transform" />
+                  ) : (
+                    <FaChevronDown className="text-gray-400 group-hover:text-teal-600 transition-colors" />
+                  )}
+                </div>
+              </button>
+              
+              {openSections.waterResistance && (
+                <div className="space-y-2.5 max-h-64 overflow-y-auto custom-scrollbar pr-2">
+                  {availableWaterResistance.map(wr => (
+                    <div key={wr} className="flex items-center group">
+                      <input
+                        type="checkbox"
+                        id={`water-resistance-${wr}`}
+                        checked={selectedWaterResistance.includes(wr)}
+                        onChange={() => setSelectedWaterResistance(prev => 
+                          prev.includes(wr) ? prev.filter(w => w !== wr) : [...prev, wr]
+                        )}
+                        className="h-4 w-4 text-teal-600 focus:ring-teal-600 border-gray-300 rounded cursor-pointer"
+                      />
+                      <label 
+                        htmlFor={`water-resistance-${wr}`} 
+                        className={`ml-3 text-sm cursor-pointer flex-1 py-1.5 px-3 rounded-md transition-all ${
+                          selectedWaterResistance.includes(wr)
+                            ? 'bg-teal-50 text-teal-700 font-medium'
+                            : 'text-gray-700 hover:bg-gray-50'
+                        }`}
+                      >
+                        {wr}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </>
+      )}
+
+      {/* Fabric Filter (for non-shoe/watch products) */}
+      {!isShoesCategory && !isWatchCategory && availableFabrics.length > 0 && (
+        <div className="border-b border-gray-200 pb-6">
+          <button
+            onClick={() => toggleSection('material')}
+            className="flex justify-between items-center w-full mb-4 group"
+          >
+            <h4 className="text-base font-semibold text-gray-900 group-hover:text-teal-600 transition-colors">Fabric</h4>
+            <div className="flex items-center gap-2">
+              {selectedFabrics.length > 0 && (
+                <span className="inline-flex items-center justify-center h-6 w-6 bg-teal-600 text-white text-xs font-bold rounded-full shadow-sm">
+                  {selectedFabrics.length}
+                </span>
+              )}
+              {openSections.material ? (
+                <FaChevronUp className="text-teal-600 transition-transform" />
+              ) : (
+                <FaChevronDown className="text-gray-400 group-hover:text-teal-600 transition-colors" />
+              )}
+            </div>
+          </button>
+          
+          {openSections.material && (
+            <div className="space-y-2.5 max-h-64 overflow-y-auto custom-scrollbar pr-2">
+              {availableFabrics.map(material => (
+                <div key={material} className="flex items-center group">
                   <input
                     type="checkbox"
                     id={`material-${material}`}
                     checked={selectedFabrics.includes(material)}
                     onChange={() => toggleFabric(material)}
-                    className="h-4 w-4 text-pink-600 focus:ring-pink-500 border-gray-300 rounded cursor-pointer"
+                    className="h-4 w-4 text-teal-600 focus:ring-teal-600 border-gray-300 rounded cursor-pointer"
                   />
-                  <label htmlFor={`material-${material}`} className="ml-3 text-sm text-gray-700 cursor-pointer">
+                  <label 
+                    htmlFor={`material-${material}`} 
+                    className={`ml-3 text-sm cursor-pointer flex-1 py-1.5 px-3 rounded-md transition-all ${
+                      selectedFabrics.includes(material)
+                        ? 'bg-teal-50 text-teal-700 font-medium'
+                        : 'text-gray-700 hover:bg-gray-50'
+                    }`}
+                  >
                     {material}
                   </label>
                 </div>
-              ))
-            ) : (
-              <p className="text-sm text-gray-500">No fabric options available</p>
-            )}
-          </div>
-        )}
-      </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
       
     </div>
   );
@@ -334,35 +1125,48 @@ const ProductList = ({ defaultCategory } = {}) => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white" style={{ position: 'relative', overflowX: 'hidden' }}>
       <style>{styles}</style>
       {loading && (
         <div className="fixed left-0 right-0 top-0 z-50">
-          <div className="h-1 bg-gradient-to-r from-indigo-500 via-pink-500 to-amber-500 relative overflow-hidden">
+          <div className="h-1 bg-teal-600 relative overflow-hidden">
             <div className="absolute top-0 left-0 h-full w-1/2 bg-gradient-to-r from-transparent via-white/50 to-transparent animate-[shimmer_1.5s_infinite]"></div>
           </div>
         </div>
       )}
 
-      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        {/* Header */}
-        <div className="mb-6 sticky top-0 bg-gray-50 pt-6 pb-2 z-10">
-          <div className="flex flex-col items-center">
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-800 tracking-wide text-center mb-3">
+      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-6">
+        {/* Modern Header */}
+        <div className="mb-2 sm:mb-4">
+          <div className="flex flex-col items-center text-center mb-2 sm:mb-3">
+            <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 tracking-tight mb-1 sm:mb-2">
               {effectiveSubCategory
                 ? effectiveSubCategory
                 : (effectiveCategory
                     ? effectiveCategory
                     : 'All Products')}
             </h1>
-            <div className="w-24 h-1 bg-gradient-to-r from-[#7A2A2A] via-[#A56E2C] to-[#C89D4B] rounded-full"></div>
+            <div className="w-24 sm:w-32 h-1 sm:h-1.5 bg-gradient-to-r from-teal-600 via-cyan-600 to-teal-500 rounded-full shadow-sm"></div>
+            <p className="text-gray-600 mt-1 sm:mt-2 text-xs sm:text-sm md:text-base hidden sm:block">
+              Discover our premium collection
+            </p>
           </div>
         </div>
 
-        <div className="flex gap-6 relative">
-          {/* Desktop Sidebar Filters */}
-          <aside className="hidden lg:block w-64 flex-shrink-0">
-            <div className="sticky top-32 bg-white rounded-lg shadow-sm border border-gray-200 p-6 h-[calc(100vh-200px)] overflow-y-auto scrollbar-hide">
+        <div ref={filterContainerRef} className="flex gap-6 lg:gap-8 relative filter-sticky-container" style={{ position: 'relative', overflow: 'visible' }}>
+          {/* Desktop Sidebar Filters - Sticky below navbar */}
+          <aside className="hidden lg:block w-72 flex-shrink-0" style={{ alignSelf: 'flex-start', position: 'relative' }}>
+            <div 
+              ref={filterSidebarRef}
+              className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 overflow-y-auto custom-scrollbar filter-sticky-sidebar"
+              style={{ 
+                position: 'sticky',
+                top: `${navbarHeight}px`,
+                maxHeight: `calc(100vh - ${navbarHeight}px)`,
+                zIndex: 40,
+                marginTop: 0
+              }}
+            >
               <FilterContent />
             </div>
           </aside>
@@ -370,15 +1174,15 @@ const ProductList = ({ defaultCategory } = {}) => {
           {/* Main Content */}
           <div className="flex-1 min-w-0">
             {/* Mobile Filter Button & Active Filters */}
-            <div className="lg:hidden mb-4 space-y-3">
+            <div className="lg:hidden mb-3 space-y-2">
               <button 
                 onClick={() => setShowMobileFilters(true)}
-                className="flex items-center justify-center gap-2 w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 shadow-sm"
+                className="flex items-center justify-center gap-2 w-full px-4 py-2.5 bg-white border-2 border-gray-200 rounded-lg text-gray-700 hover:border-teal-600 hover:bg-teal-50 shadow-sm hover:shadow-md transition-all text-sm"
               >
-                <FaFilter className="text-gray-500" />
+                <FaFilter className="text-teal-600 text-sm" />
                 <span className="font-medium">Filters</span>
                 {activeFilterCount > 0 && (
-                  <span className="ml-2 px-2.5 py-0.5 bg-pink-100 text-pink-800 text-xs font-semibold rounded-full">
+                  <span className="ml-1 px-2 py-0.5 bg-teal-600 text-white text-xs font-bold rounded-full shadow-sm">
                     {activeFilterCount}
                   </span>
                 )}
@@ -386,42 +1190,130 @@ const ProductList = ({ defaultCategory } = {}) => {
 
               {/* Active Filters Pills */}
               {activeFilterCount > 0 && (
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-1.5 max-h-20 overflow-y-auto">
                   {selectedPriceRange && (
-                    <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-pink-100 text-pink-800">
+                    <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-teal-50 text-teal-700 border border-teal-200">
                       {priceRanges.find(r => r.id === selectedPriceRange)?.label}
                       <button 
                         onClick={() => setSelectedPriceRange(null)}
-                        className="ml-2 hover:text-pink-900"
+                        className="ml-1.5 hover:scale-110 transition-transform"
                       >
-                        ×
+                        <FaTimes className="w-2.5 h-2.5" />
                       </button>
                     </span>
                   )}
                   
                   {(customPriceFrom || customPriceTo) && (
-                    <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-pink-100 text-pink-800">
-                      ₹{customPriceFrom || '0'} - ₹{customPriceTo || '∞'}
+                    <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-teal-50 text-teal-700 border border-teal-200">
+                      ₹{customPriceFrom || '0'}-₹{customPriceTo || '∞'}
                       <button 
                         onClick={() => {
                           setCustomPriceFrom('');
                           setCustomPriceTo('');
                         }}
-                        className="ml-2 hover:text-pink-900"
+                        className="ml-1.5 hover:scale-110 transition-transform"
                       >
-                        ×
+                        <FaTimes className="w-2.5 h-2.5" />
                       </button>
                     </span>
                   )}
                   
+                  {selectedBrands.map(brand => (
+                    <span key={brand} className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-teal-50 text-teal-700 border border-teal-200">
+                      {brand}
+                      <button 
+                        onClick={() => setSelectedBrands(prev => prev.filter(b => b !== brand))}
+                        className="ml-1.5 hover:scale-110 transition-transform"
+                      >
+                        <FaTimes className="w-2.5 h-2.5" />
+                      </button>
+                    </span>
+                  ))}
+                  {selectedShoeMaterials.map(material => (
+                    <span key={material} className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-teal-50 text-teal-700 border border-teal-200">
+                      {material}
+                      <button 
+                        onClick={() => setSelectedShoeMaterials(prev => prev.filter(m => m !== material))}
+                        className="ml-1.5 hover:scale-110 transition-transform"
+                      >
+                        <FaTimes className="w-2.5 h-2.5" />
+                      </button>
+                    </span>
+                  ))}
+                  {selectedShoeTypes.map(type => (
+                    <span key={type} className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-teal-50 text-teal-700 border border-teal-200">
+                      {type}
+                      <button 
+                        onClick={() => setSelectedShoeTypes(prev => prev.filter(t => t !== type))}
+                        className="ml-1.5 hover:scale-110 transition-transform"
+                      >
+                        <FaTimes className="w-2.5 h-2.5" />
+                      </button>
+                    </span>
+                  ))}
+                  {selectedSizes.map(size => (
+                    <span key={size} className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-teal-50 text-teal-700 border border-teal-200">
+                      Size {size}
+                      <button 
+                        onClick={() => setSelectedSizes(prev => prev.filter(s => s !== size))}
+                        className="ml-1.5 hover:scale-110 transition-transform"
+                      >
+                        <FaTimes className="w-2.5 h-2.5" />
+                      </button>
+                    </span>
+                  ))}
+                  {selectedWatchMovements.map(movement => (
+                    <span key={movement} className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-teal-50 text-teal-700 border border-teal-200">
+                      {movement}
+                      <button 
+                        onClick={() => setSelectedWatchMovements(prev => prev.filter(m => m !== movement))}
+                        className="ml-1.5 hover:scale-110 transition-transform"
+                      >
+                        <FaTimes className="w-2.5 h-2.5" />
+                      </button>
+                    </span>
+                  ))}
+                  {selectedWatchCaseMaterials.map(material => (
+                    <span key={material} className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-teal-50 text-teal-700 border border-teal-200">
+                      {material}
+                      <button 
+                        onClick={() => setSelectedWatchCaseMaterials(prev => prev.filter(m => m !== material))}
+                        className="ml-1.5 hover:scale-110 transition-transform"
+                      >
+                        <FaTimes className="w-2.5 h-2.5" />
+                      </button>
+                    </span>
+                  ))}
+                  {selectedWatchBandMaterials.map(material => (
+                    <span key={material} className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-teal-50 text-teal-700 border border-teal-200">
+                      {material}
+                      <button 
+                        onClick={() => setSelectedWatchBandMaterials(prev => prev.filter(m => m !== material))}
+                        className="ml-1.5 hover:scale-110 transition-transform"
+                      >
+                        <FaTimes className="w-2.5 h-2.5" />
+                      </button>
+                    </span>
+                  ))}
+                  {selectedWaterResistance.map(wr => (
+                    <span key={wr} className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-teal-50 text-teal-700 border border-teal-200">
+                      {wr}
+                      <button 
+                        onClick={() => setSelectedWaterResistance(prev => prev.filter(w => w !== wr))}
+                        className="ml-1.5 hover:scale-110 transition-transform"
+                      >
+                        <FaTimes className="w-2.5 h-2.5" />
+                      </button>
+                    </span>
+                  ))}
                   {selectedFabrics.map(fabric => (
-                    <span key={fabric} className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-pink-100 text-pink-800">
+                    <span key={fabric} className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-teal-50 text-teal-700 border border-teal-200">
                       {fabric}
                       <button 
                         onClick={() => toggleFabric(fabric)}
-                        className="ml-2 hover:text-pink-900"
+                        className="ml-1.5 hover:scale-110 transition-transform"
                       >
-                        ×
+                        <FaTimes className="w-2.5 h-2.5" />
                       </button>
                     </span>
                   ))}
@@ -429,16 +1321,16 @@ const ProductList = ({ defaultCategory } = {}) => {
               )}
             </div>
 
-            {/* Results Bar */}
-            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-6 bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-              <p className="text-sm text-gray-600">
-                Showing <span className="font-semibold text-gray-900">{filteredProducts.length}</span> products
+            {/* Modern Results Bar */}
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-4 mb-4 sm:mb-8 bg-white p-3 sm:p-5 rounded-xl sm:rounded-2xl shadow-sm sm:shadow-md border border-gray-100">
+              <p className="text-sm sm:text-base text-gray-700">
+                Showing <span className="font-bold text-gray-900 text-base sm:text-lg">{filteredProducts.length}</span> {filteredProducts.length === 1 ? 'product' : 'products'}
               </p>
-              <div className="flex items-center gap-2">
-                <label htmlFor="sort" className="text-sm text-gray-600 whitespace-nowrap">Sort by:</label>
+              <div className="flex items-center gap-2 sm:gap-3">
+                <label htmlFor="sort" className="text-xs sm:text-sm font-medium text-gray-700 whitespace-nowrap">Sort:</label>
                 <select 
                   id="sort" 
-                  className="text-sm border-gray-300 rounded-md focus:ring-pink-500 focus:border-pink-500"
+                  className="text-xs sm:text-sm border-2 border-gray-200 rounded-lg px-3 sm:px-4 py-1.5 sm:py-2 focus:ring-2 focus:ring-teal-600 focus:border-teal-600 bg-white font-medium text-gray-700 cursor-pointer transition-all hover:border-teal-600/50"
                   onChange={(e) => {
                     const sorted = [...filteredProducts];
                     switch(e.target.value) {
@@ -467,38 +1359,47 @@ const ProductList = ({ defaultCategory } = {}) => {
             
             {/* Product Grid */}
             {loading ? (
-              <div className="relative min-h-[400px] flex items-center justify-center">
-                {/* Rounded Loading Spinner */}
-                <div className="flex flex-col items-center justify-center space-y-4">
+              <div className="relative min-h-[500px] flex items-center justify-center">
+                {/* Modern Loading Spinner */}
+                <div className="flex flex-col items-center justify-center space-y-6">
                   <div className="relative">
-                    <div className="w-16 h-16 border-4 border-gray-200 rounded-full"></div>
-                    <div className="w-16 h-16 border-4 border-pink-500 border-t-transparent rounded-full animate-spin absolute top-0 left-0"></div>
+                    <div className="w-20 h-20 border-4 border-gray-200 rounded-full"></div>
+                    <div className="w-20 h-20 border-4 border-teal-600 border-t-transparent rounded-full animate-spin absolute top-0 left-0"></div>
                   </div>
-                  <p className="text-gray-600 font-medium">Loading products...</p>
+                  <p className="text-gray-700 font-semibold text-lg">Loading products...</p>
+                  <p className="text-gray-500 text-sm">Please wait while we fetch the best products for you</p>
                 </div>
               </div>
             ) : filteredProducts.length === 0 ? (
-              <div className="text-center py-16 bg-white rounded-lg shadow-sm">
+              <div className="text-center py-20 bg-white rounded-2xl shadow-lg border border-gray-100">
                 {activeFilterCount > 0 ? (
                   <>
-                    <p className="text-gray-500 text-lg mb-2">No products found matching your filters.</p>
+                    <div className="mb-6">
+                      <svg className="mx-auto h-20 w-20 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <p className="text-gray-700 text-xl font-semibold mb-2">No products found</p>
+                      <p className="text-gray-500">Try adjusting your filters to see more results</p>
+                    </div>
                     <button
                       onClick={resetFilters}
-                      className="mt-4 px-6 py-2 bg-pink-600 text-white rounded-lg hover:bg-pink-700 font-medium transition-colors"
+                      className="px-8 py-3 bg-gray-900 text-white rounded-xl hover:bg-teal-600 font-semibold transition-colors shadow-lg hover:shadow-xl transform hover:scale-105"
                     >
                       Clear all filters
                     </button>
                   </>
                 ) : (
                   <>
-                    <svg className="mx-auto h-16 w-16 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-                    </svg>
-                    <p className="text-gray-500 text-lg font-medium mb-2">No products found in this category.</p>
-                    <p className="text-gray-400 text-sm mb-4">Check back soon for new arrivals!</p>
+                    <div className="mb-6">
+                      <svg className="mx-auto h-20 w-20 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                      </svg>
+                      <p className="text-gray-700 text-xl font-semibold mb-2">No products available</p>
+                      <p className="text-gray-500 mb-1">Check back soon for new arrivals!</p>
+                    </div>
                     <Link
                       to="/"
-                      className="inline-block mt-4 px-6 py-2 bg-pink-600 text-white rounded-lg hover:bg-pink-700 font-medium transition-colors"
+                      className="inline-block px-8 py-3 bg-gray-900 text-white rounded-xl hover:bg-teal-600 font-semibold transition-colors shadow-lg hover:shadow-xl transform hover:scale-105"
                     >
                       Continue Shopping
                     </Link>
@@ -506,48 +1407,55 @@ const ProductList = ({ defaultCategory } = {}) => {
                 )}
               </div>
             ) : (
-              <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-5">
+              <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-4 md:gap-5 lg:gap-6">
                 {filteredProducts.map((p) => (
                   <div
                     key={p._id || p.title}
-                    className="group bg-white overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer border border-gray-100 hover:border-pink-100"
+                    className="group bg-white overflow-hidden rounded-xl sm:rounded-2xl shadow-sm sm:shadow-md hover:shadow-xl sm:hover:shadow-2xl transition-all duration-500 cursor-pointer border border-gray-100 hover:border-teal-300 sm:hover:border-[#7A2A2A]/20 transform hover:-translate-y-1 sm:hover:-translate-y-2"
                     onClick={() => handleCardClick(p)}
                   >
-                    <div className="relative w-full aspect-[3/4] bg-gray-50">
+                    <div className="relative w-full aspect-[3/4] bg-gray-100 overflow-hidden">
                       <img
-                        src={p.images?.image1 || 'https://via.placeholder.com/300x400?text=Image+Not+Available'}
+                        src={getProductImage(p, 'image1')}
                         alt={p.title}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                         onError={(e) => {
                           e.target.onerror = null;
-                          e.target.src = 'https://via.placeholder.com/300x400?text=Image+Not+Available';
+                          e.target.src = placeholders.productList;
                         }}
                       />
                       {(p.discountPercent > 0 || p.discount) && (
-                        <span className="absolute top-2 right-2 sm:top-3 sm:right-3 bg-white text-green-600 border border-green-600 text-[10px] sm:text-xs font-bold px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full whitespace-nowrap">
+                        <span className="absolute top-2 right-2 sm:top-4 sm:right-4 bg-teal-600 text-white text-xs font-bold px-2 py-1 sm:px-3 sm:py-1.5 rounded-md sm:rounded-lg shadow-md sm:shadow-lg uppercase">
                           {p.discountPercent || p.discount}% OFF
                         </span>
                       )}
+                      {/* Gradient overlay on hover */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                     </div>
 
-                    <div className="relative p-4">
-                      <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-[#7A2A2A] via-[#A56E2C] to-[#C89D4B] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left z-10"></div>
-                      <div className="flex justify-between items-start mb-1">
-                        <h3 className="text-sm font-medium text-gray-600 line-clamp-1">
+                    <div className="relative p-3 sm:p-4 md:p-5 bg-white">
+                      {/* Gradient accent bar - using teal theme */}
+                      <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-teal-600 via-cyan-600 to-teal-500 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"></div>
+                      
+                      <div className="flex justify-between items-start mb-1 sm:mb-2">
+                        <h3 className="text-xs font-semibold text-teal-600 uppercase tracking-wide line-clamp-1">
                           {p.product_info?.manufacturer || 'VARNICRAFTS'}
                         </h3>
                       </div>
-                      <p className="text-sm font-bold text-gray-900 line-clamp-2 mb-2 min-h-[2.5rem]">{p.title || 'Untitled Product'}</p>
+                      
+                      <p className="text-sm sm:text-base font-bold text-gray-900 line-clamp-2 mb-2 sm:mb-3 min-h-[2.5rem] sm:min-h-[3rem] group-hover:text-teal-600 transition-colors">
+                        {p.title || 'Untitled Product'}
+                      </p>
                 
-                      <div className="flex items-baseline gap-1.5 mt-2">
+                      <div className="flex items-baseline gap-1.5 sm:gap-2 mt-2 sm:mt-3">
                         <div className="flex items-center">
-                          <FaRupeeSign className="h-3.5 w-3.5 text-gray-900" />
-                          <span className="text-lg font-bold text-gray-900 ml-0.5">
+                          <FaRupeeSign className="h-3 w-3 sm:h-4 sm:w-4 text-gray-900" />
+                          <span className="text-lg sm:text-xl font-bold text-gray-900 ml-0.5">
                             {p.price?.toLocaleString() || Math.round(p.mrp - p.mrp * ((p.discountPercent || 0) / 100)).toLocaleString()}
                           </span>
                         </div>
-                        {p.mrp && (
-                          <span className="text-xs text-gray-400 line-through">
+                        {p.mrp && p.mrp > (p.price || 0) && (
+                          <span className="text-xs sm:text-sm text-gray-400 line-through">
                             ₹{p.mrp.toLocaleString()}
                           </span>
                         )}
@@ -561,29 +1469,45 @@ const ProductList = ({ defaultCategory } = {}) => {
         </div>
       </div>
 
-      {/* Mobile Filter Modal */}
+      {/* Modern Mobile Filter Modal */}
       {showMobileFilters && (
         <div className="fixed inset-0 z-50 lg:hidden">
-          <div className="fixed inset-0 bg-black bg-opacity-50" onClick={() => setShowMobileFilters(false)}></div>
-          <div className="fixed inset-y-0 right-0 max-w-sm w-full bg-white shadow-xl overflow-y-auto">
-            <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center z-10">
-              <h3 className="text-lg font-semibold text-gray-900">Filters</h3>
+          <div 
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity" 
+            onClick={() => setShowMobileFilters(false)}
+          ></div>
+          <div className="fixed inset-y-0 right-0 max-w-sm w-full bg-white shadow-2xl overflow-y-auto custom-scrollbar animate-in slide-in-from-right">
+            {/* Header */}
+            <div className="sticky top-0 bg-gray-900 px-6 py-5 flex justify-between items-center z-10 shadow-lg">
+              <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                <FaFilter className="text-teal-600" />
+                Filters
+              </h3>
               <button 
                 onClick={() => setShowMobileFilters(false)}
-                className="text-gray-400 hover:text-gray-600"
+                className="text-white hover:bg-teal-600 p-2 rounded-lg transition-colors"
               >
-                <FaTimes className="w-5 h-5" />
+                <FaTimes className="w-6 h-6" />
               </button>
             </div>
+            
+            {/* Filter Content */}
             <div className="p-6">
               <FilterContent />
             </div>
-            <div className="sticky bottom-0 bg-white border-t border-gray-200 px-6 py-4">
+            
+            {/* Footer */}
+            <div className="sticky bottom-0 bg-white border-t-2 border-gray-100 px-6 py-5 shadow-2xl">
+              <div className="mb-3 text-center">
+                <span className="text-sm text-gray-600">
+                  <span className="font-bold text-gray-900 text-lg">{filteredProducts.length}</span> products found
+                </span>
+              </div>
               <button
                 onClick={() => setShowMobileFilters(false)}
-                className="w-full px-6 py-3 bg-gradient-to-r from-[#7A2A2A] to-[#C89D4B] text-white font-medium rounded-lg hover:opacity-90 transition-opacity"
+                className="w-full px-6 py-4 bg-gray-900 text-white font-bold rounded-xl hover:bg-teal-600 transition-colors shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
               >
-                Show {filteredProducts.length} Products
+                Apply Filters
               </button>
             </div>
           </div>

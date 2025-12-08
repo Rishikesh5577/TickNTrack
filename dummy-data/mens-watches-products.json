@@ -1,0 +1,486 @@
+[
+  {
+    "title": "Titan Classic Analog Watch",
+    "mrp": 3499,
+    "discountPercent": 20,
+    "description": "Elegant analog watch with classic design. Features stainless steel case, leather strap, and water resistance up to 50m. Perfect for daily wear and formal occasions.",
+    "category": "Men Analog Watches",
+    "product_info": {
+      "brand": "Titan",
+      "manufacturer": "Titan Company Ltd.",
+      "watchBrand": "Titan",
+      "movementType": "Quartz",
+      "caseMaterial": "Stainless Steel",
+      "bandMaterial": "Leather",
+      "waterResistance": "50m",
+      "watchType": "Analog",
+      "IncludedComponents": "Watch, Original Box, Warranty Card, Instruction Manual"
+    },
+    "images": {
+      "image1": "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800",
+      "image2": "https://images.unsplash.com/photo-1524592094714-0f0654e20314?w=800",
+      "image3": "https://images.unsplash.com/photo-1548169874-53e85f753f1e?w=800"
+    }
+  },
+  {
+    "title": "Casio Digital Sport Watch",
+    "mrp": 2999,
+    "discountPercent": 15,
+    "description": "Rugged digital sports watch with multiple functions. Features stopwatch, alarm, backlight, and water resistance up to 100m. Ideal for sports and outdoor activities.",
+    "category": "Men Digital Watches",
+    "product_info": {
+      "brand": "Casio",
+      "manufacturer": "Casio Computer Co.",
+      "watchBrand": "Casio",
+      "movementType": "Quartz",
+      "caseMaterial": "Resin",
+      "bandMaterial": "Resin",
+      "waterResistance": "100m",
+      "watchType": "Digital",
+      "IncludedComponents": "Watch, Original Box, Warranty Card"
+    },
+    "images": {
+      "image1": "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=800",
+      "image2": "https://images.unsplash.com/photo-1524592094714-0f0654e20314?w=800",
+      "image3": "https://images.unsplash.com/photo-1548169874-53e85f753f1e?w=800"
+    }
+  },
+  {
+    "title": "Fastrack Reflex Smart Watch",
+    "mrp": 4999,
+    "discountPercent": 25,
+    "description": "Smart fitness watch with heart rate monitoring, step counter, sleep tracking, and smartphone notifications. Features AMOLED display and 7-day battery life.",
+    "category": "Men Smart Watches",
+    "product_info": {
+      "brand": "Fastrack",
+      "manufacturer": "Titan Company Ltd.",
+      "watchBrand": "Fastrack",
+      "movementType": "Digital",
+      "caseMaterial": "Aluminum",
+      "bandMaterial": "Silicone",
+      "waterResistance": "50m",
+      "watchType": "Smart Watch",
+      "IncludedComponents": "Watch, Charging Cable, Original Box, Warranty Card, Quick Start Guide"
+    },
+    "images": {
+      "image1": "https://images.unsplash.com/photo-1579586337278-3befd40fd17a?w=800",
+      "image2": "https://images.unsplash.com/photo-1524592094714-0f0654e20314?w=800",
+      "image3": "https://images.unsplash.com/photo-1548169874-53e85f753f1e?w=800"
+    }
+  },
+  {
+    "title": "Sonata Sports Watch",
+    "mrp": 1999,
+    "discountPercent": 30,
+    "description": "Durable sports watch with chronograph function. Features tachymeter, date display, and water resistance. Perfect for athletes and fitness enthusiasts.",
+    "category": "Men Sports Watches",
+    "product_info": {
+      "brand": "Sonata",
+      "manufacturer": "Titan Company Ltd.",
+      "watchBrand": "Sonata",
+      "movementType": "Quartz",
+      "caseMaterial": "Stainless Steel",
+      "bandMaterial": "Rubber",
+      "waterResistance": "100m",
+      "watchType": "Analog",
+      "IncludedComponents": "Watch, Original Box, Warranty Card"
+    },
+    "images": {
+      "image1": "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800",
+      "image2": "https://images.unsplash.com/photo-1524592094714-0f0654e20314?w=800",
+      "image3": "https://images.unsplash.com/photo-1548169874-53e85f753f1e?w=800"
+    }
+  },
+  {
+    "title": "Fossil Chronograph Watch",
+    "mrp": 8999,
+    "discountPercent": 20,
+    "description": "Premium chronograph watch with sophisticated design. Features multiple sub-dials, tachymeter bezel, and genuine leather strap. Perfect for business and casual wear.",
+    "category": "Men Chronograph Watches",
+    "product_info": {
+      "brand": "Fossil",
+      "manufacturer": "Fossil Group Inc.",
+      "watchBrand": "Fossil",
+      "movementType": "Quartz",
+      "caseMaterial": "Stainless Steel",
+      "bandMaterial": "Leather",
+      "waterResistance": "50m",
+      "watchType": "Analog",
+      "IncludedComponents": "Watch, Original Box, Warranty Card, Instruction Manual"
+    },
+    "images": {
+      "image1": "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800",
+      "image2": "https://images.unsplash.com/photo-1524592094714-0f0654e20314?w=800",
+      "image3": "https://images.unsplash.com/photo-1548169874-53e85f753f1e?w=800"
+    }
+  },
+  {
+    "title": "Rolex Submariner Inspired Luxury Watch",
+    "mrp": 49999,
+    "discountPercent": 10,
+    "description": "Luxury automatic watch with premium finish. Features automatic movement, sapphire crystal, and water resistance up to 200m. Timeless design for the sophisticated gentleman.",
+    "category": "Men Luxury Watches",
+    "product_info": {
+      "brand": "Timex",
+      "manufacturer": "Timex Group",
+      "watchBrand": "Timex",
+      "movementType": "Automatic",
+      "caseMaterial": "Stainless Steel",
+      "bandMaterial": "Stainless Steel",
+      "waterResistance": "200m",
+      "watchType": "Analog",
+      "IncludedComponents": "Watch, Original Box, Warranty Card, Certificate of Authenticity, Instruction Manual"
+    },
+    "images": {
+      "image1": "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800",
+      "image2": "https://images.unsplash.com/photo-1524592094714-0f0654e20314?w=800",
+      "image3": "https://images.unsplash.com/photo-1548169874-53e85f753f1e?w=800"
+    }
+  },
+  {
+    "title": "Tommy Hilfiger Classic Analog Watch",
+    "mrp": 5999,
+    "discountPercent": 18,
+    "description": "Stylish analog watch with modern design. Features clean dial, genuine leather strap, and date window. Perfect for everyday wear and casual occasions.",
+    "category": "Men Analog Watches",
+    "product_info": {
+      "brand": "Tommy Hilfiger",
+      "manufacturer": "Tommy Hilfiger Corporation",
+      "watchBrand": "Tommy Hilfiger",
+      "movementType": "Quartz",
+      "caseMaterial": "Stainless Steel",
+      "bandMaterial": "Leather",
+      "waterResistance": "30m",
+      "watchType": "Analog",
+      "IncludedComponents": "Watch, Original Box, Warranty Card"
+    },
+    "images": {
+      "image1": "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800",
+      "image2": "https://images.unsplash.com/photo-1524592094714-0f0654e20314?w=800",
+      "image3": "https://images.unsplash.com/photo-1548169874-53e85f753f1e?w=800"
+    }
+  },
+  {
+    "title": "G-Shock Digital Tough Watch",
+    "mrp": 8999,
+    "discountPercent": 15,
+    "description": "Ultra-durable digital watch built for extreme conditions. Features shock resistance, 200m water resistance, and multiple functions including world time and alarms.",
+    "category": "Men Digital Watches",
+    "product_info": {
+      "brand": "Casio",
+      "manufacturer": "Casio Computer Co.",
+      "watchBrand": "G-Shock",
+      "movementType": "Quartz",
+      "caseMaterial": "Resin",
+      "bandMaterial": "Resin",
+      "waterResistance": "200m",
+      "watchType": "Digital",
+      "IncludedComponents": "Watch, Original Box, Warranty Card, Instruction Manual"
+    },
+    "images": {
+      "image1": "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=800",
+      "image2": "https://images.unsplash.com/photo-1524592094714-0f0654e20314?w=800",
+      "image3": "https://images.unsplash.com/photo-1548169874-53e85f753f1e?w=800"
+    }
+  },
+  {
+    "title": "Samsung Galaxy Watch 6",
+    "mrp": 24999,
+    "discountPercent": 12,
+    "description": "Advanced smartwatch with health monitoring features. Tracks heart rate, sleep, stress, and workouts. Compatible with Android and iOS. Features rotating bezel and long battery life.",
+    "category": "Men Smart Watches",
+    "product_info": {
+      "brand": "Samsung",
+      "manufacturer": "Samsung Electronics",
+      "watchBrand": "Samsung",
+      "movementType": "Digital",
+      "caseMaterial": "Aluminum",
+      "bandMaterial": "Silicone",
+      "waterResistance": "50m",
+      "watchType": "Smart Watch",
+      "IncludedComponents": "Watch, Charging Dock, Strap, Original Box, Warranty Card, Quick Start Guide"
+    },
+    "images": {
+      "image1": "https://images.unsplash.com/photo-1579586337278-3befd40fd17a?w=800",
+      "image2": "https://images.unsplash.com/photo-1524592094714-0f0654e20314?w=800",
+      "image3": "https://images.unsplash.com/photo-1548169874-53e85f753f1e?w=800"
+    }
+  },
+  {
+    "title": "Apple Watch SE",
+    "mrp": 29999,
+    "discountPercent": 8,
+    "description": "Feature-rich smartwatch with fitness tracking and health monitoring. Features GPS, heart rate sensor, fall detection, and seamless iPhone integration.",
+    "category": "Men Smart Watches",
+    "product_info": {
+      "brand": "Apple",
+      "manufacturer": "Apple Inc.",
+      "watchBrand": "Apple",
+      "movementType": "Digital",
+      "caseMaterial": "Aluminum",
+      "bandMaterial": "Sport Band",
+      "waterResistance": "50m",
+      "watchType": "Smart Watch",
+      "IncludedComponents": "Watch, Charging Cable, Strap, Original Box, Warranty Card, Quick Start Guide"
+    },
+    "images": {
+      "image1": "https://images.unsplash.com/photo-1579586337278-3befd40fd17a?w=800",
+      "image2": "https://images.unsplash.com/photo-1524592094714-0f0654e20314?w=800",
+      "image3": "https://images.unsplash.com/photo-1548169874-53e85f753f1e?w=800"
+    }
+  },
+  {
+    "title": "Skmei Sports Digital Watch",
+    "mrp": 1299,
+    "discountPercent": 25,
+    "description": "Affordable digital sports watch with essential features. Includes stopwatch, alarm, backlight, and water resistance. Great value for money.",
+    "category": "Men Sports Watches",
+    "product_info": {
+      "brand": "Skmei",
+      "manufacturer": "Skmei Watch Co.",
+      "watchBrand": "Skmei",
+      "movementType": "Quartz",
+      "caseMaterial": "Plastic",
+      "bandMaterial": "Rubber",
+      "waterResistance": "50m",
+      "watchType": "Digital",
+      "IncludedComponents": "Watch, Original Box"
+    },
+    "images": {
+      "image1": "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=800",
+      "image2": "https://images.unsplash.com/photo-1524592094714-0f0654e20314?w=800",
+      "image3": "https://images.unsplash.com/photo-1548169874-53e85f753f1e?w=800"
+    }
+  },
+  {
+    "title": "Seiko Automatic Luxury Watch",
+    "mrp": 29999,
+    "discountPercent": 15,
+    "description": "Premium automatic mechanical watch with Japanese craftsmanship. Features self-winding movement, sapphire crystal, and exhibition case back. A timepiece for watch enthusiasts.",
+    "category": "Men Luxury Watches",
+    "product_info": {
+      "brand": "Seiko",
+      "manufacturer": "Seiko Watch Corporation",
+      "watchBrand": "Seiko",
+      "movementType": "Automatic",
+      "caseMaterial": "Stainless Steel",
+      "bandMaterial": "Stainless Steel",
+      "waterResistance": "100m",
+      "watchType": "Analog",
+      "IncludedComponents": "Watch, Original Box, Warranty Card, Certificate of Authenticity, Instruction Manual"
+    },
+    "images": {
+      "image1": "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800",
+      "image2": "https://images.unsplash.com/photo-1524592094714-0f0654e20314?w=800",
+      "image3": "https://images.unsplash.com/photo-1548169874-53e85f753f1e?w=800"
+    }
+  },
+  {
+    "title": "Timex Weekender Chronograph",
+    "mrp": 4499,
+    "discountPercent": 20,
+    "description": "Versatile chronograph watch with interchangeable straps. Features Indiglo night-light, date window, and water resistance. Perfect for weekend adventures.",
+    "category": "Men Chronograph Watches",
+    "product_info": {
+      "brand": "Timex",
+      "manufacturer": "Timex Group",
+      "watchBrand": "Timex",
+      "movementType": "Quartz",
+      "caseMaterial": "Brass",
+      "bandMaterial": "Nylon",
+      "waterResistance": "30m",
+      "watchType": "Analog",
+      "IncludedComponents": "Watch, Additional Strap, Original Box, Warranty Card"
+    },
+    "images": {
+      "image1": "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800",
+      "image2": "https://images.unsplash.com/photo-1524592094714-0f0654e20314?w=800",
+      "image3": "https://images.unsplash.com/photo-1548169874-53e85f753f1e?w=800"
+    }
+  },
+  {
+    "title": "Citizen Eco-Drive Analog Watch",
+    "mrp": 11999,
+    "discountPercent": 18,
+    "description": "Solar-powered watch that never needs battery replacement. Charges in any light source. Features date display and water resistance. Environmentally friendly timepiece.",
+    "category": "Men Analog Watches",
+    "product_info": {
+      "brand": "Citizen",
+      "manufacturer": "Citizen Watch Co.",
+      "watchBrand": "Citizen",
+      "movementType": "Solar",
+      "caseMaterial": "Stainless Steel",
+      "bandMaterial": "Leather",
+      "waterResistance": "100m",
+      "watchType": "Analog",
+      "IncludedComponents": "Watch, Original Box, Warranty Card, Instruction Manual"
+    },
+    "images": {
+      "image1": "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800",
+      "image2": "https://images.unsplash.com/photo-1524592094714-0f0654e20314?w=800",
+      "image3": "https://images.unsplash.com/photo-1548169874-53e85f753f1e?w=800"
+    }
+  },
+  {
+    "title": "Noise ColorFit Smart Watch",
+    "mrp": 3999,
+    "discountPercent": 30,
+    "description": "Budget-friendly smartwatch with color display. Features fitness tracking, sleep monitoring, and multiple watch faces. Long battery life and smartphone connectivity.",
+    "category": "Men Smart Watches",
+    "product_info": {
+      "brand": "Noise",
+      "manufacturer": "Noise Electronics",
+      "watchBrand": "Noise",
+      "movementType": "Digital",
+      "caseMaterial": "Plastic",
+      "bandMaterial": "Silicone",
+      "waterResistance": "IP67",
+      "watchType": "Smart Watch",
+      "IncludedComponents": "Watch, Charging Cable, Original Box, Warranty Card"
+    },
+    "images": {
+      "image1": "https://images.unsplash.com/photo-1579586337278-3befd40fd17a?w=800",
+      "image2": "https://images.unsplash.com/photo-1524592094714-0f0654e20314?w=800",
+      "image3": "https://images.unsplash.com/photo-1548169874-53e85f753f1e?w=800"
+    }
+  },
+  {
+    "title": "Fossil Machine Chronograph",
+    "mrp": 7999,
+    "discountPercent": 22,
+    "description": "Bold chronograph watch with industrial design. Features three sub-dials, tachymeter bezel, and genuine leather strap. Modern and stylish timepiece.",
+    "category": "Men Chronograph Watches",
+    "product_info": {
+      "brand": "Fossil",
+      "manufacturer": "Fossil Group Inc.",
+      "watchBrand": "Fossil",
+      "movementType": "Quartz",
+      "caseMaterial": "Stainless Steel",
+      "bandMaterial": "Leather",
+      "waterResistance": "50m",
+      "watchType": "Analog",
+      "IncludedComponents": "Watch, Original Box, Warranty Card"
+    },
+    "images": {
+      "image1": "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800",
+      "image2": "https://images.unsplash.com/photo-1524592094714-0f0654e20314?w=800",
+      "image3": "https://images.unsplash.com/photo-1548169874-53e85f753f1e?w=800"
+    }
+  },
+  {
+    "title": "Orient Automatic Diver Watch",
+    "mrp": 14999,
+    "discountPercent": 12,
+    "description": "Professional diver's watch with automatic movement. Features unidirectional rotating bezel, luminescent markers, and 200m water resistance. Built for underwater adventures.",
+    "category": "Men Sports Watches",
+    "product_info": {
+      "brand": "Orient",
+      "manufacturer": "Orient Watch Co.",
+      "watchBrand": "Orient",
+      "movementType": "Automatic",
+      "caseMaterial": "Stainless Steel",
+      "bandMaterial": "Stainless Steel",
+      "waterResistance": "200m",
+      "watchType": "Analog",
+      "IncludedComponents": "Watch, Original Box, Warranty Card, Instruction Manual"
+    },
+    "images": {
+      "image1": "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800",
+      "image2": "https://images.unsplash.com/photo-1524592094714-0f0654e20314?w=800",
+      "image3": "https://images.unsplash.com/photo-1548169874-53e85f753f1e?w=800"
+    }
+  },
+  {
+    "title": "Tag Heuer Inspired Luxury Chronograph",
+    "mrp": 59999,
+    "discountPercent": 10,
+    "description": "Ultra-luxury chronograph watch with precision engineering. Features Swiss-inspired movement, sapphire crystal, and premium materials. A statement piece for the discerning gentleman.",
+    "category": "Men Luxury Watches",
+    "product_info": {
+      "brand": "Tag Heuer",
+      "manufacturer": "Tag Heuer SA",
+      "watchBrand": "Tag Heuer",
+      "movementType": "Automatic",
+      "caseMaterial": "Stainless Steel",
+      "bandMaterial": "Leather",
+      "waterResistance": "100m",
+      "watchType": "Analog",
+      "IncludedComponents": "Watch, Original Box, Warranty Card, Certificate of Authenticity, Instruction Manual, Care Kit"
+    },
+    "images": {
+      "image1": "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800",
+      "image2": "https://images.unsplash.com/photo-1524592094714-0f0654e20314?w=800",
+      "image3": "https://images.unsplash.com/photo-1548169874-53e85f753f1e?w=800"
+    }
+  },
+  {
+    "title": "Fire-Boltt Smart Watch",
+    "mrp": 2999,
+    "discountPercent": 35,
+    "description": "Affordable smartwatch with fitness tracking features. Monitors heart rate, steps, sleep, and calories. Features color display and long battery life. Perfect for fitness enthusiasts on a budget.",
+    "category": "Men Smart Watches",
+    "product_info": {
+      "brand": "Fire-Boltt",
+      "manufacturer": "Fire-Boltt Technologies",
+      "watchBrand": "Fire-Boltt",
+      "movementType": "Digital",
+      "caseMaterial": "Aluminum",
+      "bandMaterial": "Silicone",
+      "waterResistance": "IP68",
+      "watchType": "Smart Watch",
+      "IncludedComponents": "Watch, Charging Cable, Original Box, Warranty Card"
+    },
+    "images": {
+      "image1": "https://images.unsplash.com/photo-1579586337278-3befd40fd17a?w=800",
+      "image2": "https://images.unsplash.com/photo-1524592094714-0f0654e20314?w=800",
+      "image3": "https://images.unsplash.com/photo-1548169874-53e85f753f1e?w=800"
+    }
+  },
+  {
+    "title": "Timex Easy Reader Digital Watch",
+    "mrp": 2499,
+    "discountPercent": 20,
+    "description": "Simple and functional digital watch with large display. Features Indiglo night-light, alarm, and stopwatch. Easy to read and reliable timepiece.",
+    "category": "Men Digital Watches",
+    "product_info": {
+      "brand": "Timex",
+      "manufacturer": "Timex Group",
+      "watchBrand": "Timex",
+      "movementType": "Quartz",
+      "caseMaterial": "Plastic",
+      "bandMaterial": "Resin",
+      "waterResistance": "30m",
+      "watchType": "Digital",
+      "IncludedComponents": "Watch, Original Box, Warranty Card"
+    },
+    "images": {
+      "image1": "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=800",
+      "image2": "https://images.unsplash.com/photo-1524592094714-0f0654e20314?w=800",
+      "image3": "https://images.unsplash.com/photo-1548169874-53e85f753f1e?w=800"
+    }
+  },
+  {
+    "title": "Daniel Wellington Classic Watch",
+    "mrp": 8999,
+    "discountPercent": 15,
+    "description": "Minimalist classic watch with timeless design. Features clean dial, genuine leather strap, and elegant case. Perfect for business and formal occasions.",
+    "category": "Men Analog Watches",
+    "product_info": {
+      "brand": "Daniel Wellington",
+      "manufacturer": "Daniel Wellington AB",
+      "watchBrand": "Daniel Wellington",
+      "movementType": "Quartz",
+      "caseMaterial": "Stainless Steel",
+      "bandMaterial": "Leather",
+      "waterResistance": "30m",
+      "watchType": "Analog",
+      "IncludedComponents": "Watch, Original Box, Warranty Card, Instruction Manual"
+    },
+    "images": {
+      "image1": "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800",
+      "image2": "https://images.unsplash.com/photo-1524592094714-0f0654e20314?w=800",
+      "image3": "https://images.unsplash.com/photo-1548169874-53e85f753f1e?w=800"
+    }
+  }
+]
+

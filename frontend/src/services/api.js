@@ -8,7 +8,7 @@ const getBackendUrl = () => {
 
 // const API_URL = `${getBackendUrl()}/api`;
 
-const API_URL = 'https://api.saarisanskar.in/api';
+const API_URL = `${getBackendUrl()}/api`;
 
 // ---------------------------------------------------------
 // PRODUCTS
@@ -184,4 +184,63 @@ export const getMyOrders = async () => {
   });
   if (!res.ok) throw new Error("Failed to fetch orders");
   return res.json();
+};
+
+
+// ---------------------------------------------------------
+// WISHLIST
+// ---------------------------------------------------------
+
+export const getWishlist = async () => {
+  const res = await fetch(`${API_URL}/wishlist`, {
+    headers: { "Content-Type": "application/json", ...authHeaders() },
+    credentials: "include",
+  });
+  if (!res.ok) {
+    // Return empty wishlist if not authenticated or error
+    if (res.status === 401) return { items: [] };
+    throw new Error("Failed to fetch wishlist");
+  }
+  return res.json();
+};
+
+export const addToWishlist = async (productId) => {
+  const res = await fetch(`${API_URL}/wishlist/add`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...authHeaders() },
+    body: JSON.stringify({ productId }),
+    credentials: "include",
+  });
+  if (!res.ok) {
+    if (res.status === 401) throw new Error("Please login to add to wishlist");
+    throw new Error("Failed to add to wishlist");
+  }
+  return res.json();
+};
+
+export const removeFromWishlist = async (productId) => {
+  const res = await fetch(`${API_URL}/wishlist/remove/${productId}`, {
+    method: "DELETE",
+    headers: { ...authHeaders() },
+    credentials: "include",
+  });
+  if (!res.ok) {
+    if (res.status === 401) throw new Error("Please login");
+    throw new Error("Failed to remove from wishlist");
+  }
+  return res.json();
+};
+
+export const getWishlistCount = async () => {
+  try {
+    const res = await fetch(`${API_URL}/wishlist/count`, {
+      headers: { "Content-Type": "application/json", ...authHeaders() },
+      credentials: "include",
+    });
+    if (!res.ok) return { count: 0 };
+    const data = await res.json();
+    return { count: data.count || 0 };
+  } catch {
+    return { count: 0 };
+  }
 };

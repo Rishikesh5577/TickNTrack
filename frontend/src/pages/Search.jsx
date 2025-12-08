@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useLocation, Link, useNavigate } from 'react-router-dom';
 import { FaRupeeSign, FaFilter, FaTimes, FaChevronDown, FaChevronUp } from 'react-icons/fa';
 import { searchProducts } from '../services/api';
+import { placeholders, getProductImage } from '../utils/imagePlaceholder';
 
 // Add CSS to hide scrollbar
 const styles = `
@@ -382,12 +383,12 @@ const Search = () => {
                 <Link to={`/product/${p._id || p.id || ''}`} className="block">
                   <div className="relative w-full aspect-[3/4] bg-gray-50">
                     <img
-                      src={p.images?.image1 || p.image || 'https://via.placeholder.com/300x400?text=Image+Not+Available'}
+                      src={getProductImage(p, 'image1') || p.image || placeholders.productList}
                       alt={p.title || p.name || 'Product'}
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                       onError={(e) => { 
                         e.target.onerror = null;
-                        e.target.src = 'https://via.placeholder.com/300x400?text=Image+Not+Available'; 
+                        e.target.src = placeholders.productList; 
                       }}
                     />
                     {(p.discountPercent > 0 || p.discount) && (

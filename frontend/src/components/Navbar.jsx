@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { searchProducts } from '../services/api';
+import { placeholders, getProductImage } from '../utils/imagePlaceholder';
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -12,7 +13,6 @@ const Navbar = () => {
   const [searchLoading, setSearchLoading] = useState(false);
   const [searchResults, setSearchResults] = useState([]);
   const [activeCategory, setActiveCategory] = useState(null);
-  const searchWrapRefMobile = useRef(null);
   const searchWrapRefDesktop = useRef(null);
   const categoryRef = useRef(null);
   const navigate = useNavigate();
@@ -29,25 +29,26 @@ const Navbar = () => {
   }, []);
 
   useEffect(() => {
-    const readWishlistCount = () => {
+    const loadWishlistCount = async () => {
       try {
-        const raw = localStorage.getItem('wishlist');
-        const list = raw ? JSON.parse(raw) : [];
-        setWishlistCount(Array.isArray(list) ? list.length : 0);
+        const { getWishlistCount } = await import('../services/api');
+        const data = await getWishlistCount();
+        setWishlistCount(data.count || 0);
       } catch {
         setWishlistCount(0);
       }
     };
-    readWishlistCount();
-    const onStorage = (e) => {
-      if (!e || e.key === 'wishlist') readWishlistCount();
+    
+    loadWishlistCount();
+    
+    // Listen for wishlist updates (from custom event)
+    const onWishlistUpdated = () => {
+      loadWishlistCount();
     };
-    const onCustom = () => readWishlistCount();
-    window.addEventListener('storage', onStorage);
-    window.addEventListener('wishlist:updated', onCustom);
+    
+    window.addEventListener('wishlist:updated', onWishlistUpdated);
     return () => {
-      window.removeEventListener('storage', onStorage);
-      window.removeEventListener('wishlist:updated', onCustom);
+      window.removeEventListener('wishlist:updated', onWishlistUpdated);
     };
   }, []);
 
@@ -124,7 +125,7 @@ const Navbar = () => {
     if (q.length < 2) {
       setSearchResults([]);
       setSearchLoading(false);
-      setSearchOpen(false);
+      // Don't close the dropdown if it's already open - let user continue typing
       return;
     }
     setSearchLoading(true);
@@ -146,9 +147,8 @@ const Navbar = () => {
   // Close dropdown on outside click
   useEffect(() => {
     const onClick = (e) => {
-      const inMobile = searchWrapRefMobile.current && searchWrapRefMobile.current.contains(e.target);
       const inDesktop = searchWrapRefDesktop.current && searchWrapRefDesktop.current.contains(e.target);
-      if (!inMobile && !inDesktop) setSearchOpen(false);
+      if (!inDesktop) setSearchOpen(false);
     };
     document.addEventListener('mousedown', onClick);
     return () => document.removeEventListener('mousedown', onClick);
@@ -160,69 +160,69 @@ const Navbar = () => {
       name: "MEN'S SHOES",
       path: '/category/shoes/mens-shoes',
       subcategories: [
-        { name: 'Sports Shoes', path: '/category/shoes/mens-shoes/sports-shoes' },
-        { name: 'Casual Shoes', path: '/category/shoes/mens-shoes/casual-shoes' },
-        { name: 'Formal Shoes', path: '/category/shoes/mens-shoes/formal-shoes' },
-        { name: 'Sneakers', path: '/category/shoes/mens-shoes/sneakers' },
-        { name: 'Boots', path: '/category/shoes/mens-shoes/boots' },
-        { name: 'Running Shoes', path: '/category/shoes/mens-shoes/running-shoes' },
+        { name: 'Men Sports Shoes', path: '/category/shoes/mens-shoes/Men-sports-shoes' },
+        { name: 'Men Casual Shoes', path: '/category/shoes/mens-shoes/Men-casual-shoes' },
+        { name: 'Men Formal Shoes', path: '/category/shoes/mens-shoes/Men-formal-shoes' },
+        { name: 'Men Sneakers', path: '/category/shoes/mens-shoes/Men-sneakers' },
+        { name: 'Men Boots', path: '/category/shoes/mens-shoes/Men-boots' },
+        { name: 'Men Sandals', path: '/category/shoes/mens-shoes/Men-sandals' },
       ]
     },
     {
       name: "CHILD SHOES",
       path: '/category/shoes/child-shoes',
       subcategories: [
-        { name: 'School Shoes', path: '/category/shoes/child-shoes/school-shoes' },
-        { name: 'Sports Shoes', path: '/category/shoes/child-shoes/sports-shoes' },
-        { name: 'Casual Shoes', path: '/category/shoes/child-shoes/casual-shoes' },
-        { name: 'Sandals', path: '/category/shoes/child-shoes/sandals' },
-        { name: 'Sneakers', path: '/category/shoes/child-shoes/sneakers' },
+        { name: 'Child School Shoes', path: '/category/shoes/child-shoes/child-school-shoes' },
+        { name: 'Child Sports Shoes', path: '/category/shoes/child-shoes/child-sports-shoes' },
+        { name: 'Child Casual Shoes', path: '/category/shoes/child-shoes/child-casual-shoes' },
+        { name: 'Child Sandals', path: '/category/shoes/child-shoes/child-sandals' },
+        { name: 'Child Sneakers', path: '/category/shoes/child-shoes/child-sneakers' },
       ]
     },
     {
       name: "WOMEN'S SHOES",
       path: '/category/shoes/womens-shoes',
       subcategories: [
-        { name: 'Heels', path: '/category/shoes/womens-shoes/heels' },
-        { name: 'Flats', path: '/category/shoes/womens-shoes/flats' },
-        { name: 'Sneakers', path: '/category/shoes/womens-shoes/sneakers' },
-        { name: 'Sports Shoes', path: '/category/shoes/womens-shoes/sports-shoes' },
-        { name: 'Casual Shoes', path: '/category/shoes/womens-shoes/casual-shoes' },
-        { name: 'Sandals', path: '/category/shoes/womens-shoes/sandals' },
+        { name: 'Women Heels', path: '/category/shoes/womens-shoes/Women-heels' },
+        { name: 'Women Flats', path: '/category/shoes/womens-shoes/Women-flats' },
+        { name: 'Women Sneakers', path: '/category/shoes/womens-shoes/Women-sneakers' },
+        { name: 'Women Sports Shoes', path: '/category/shoes/womens-shoes/Women-sports-shoes' },
+        { name: 'Women Casual Shoes', path: '/category/shoes/womens-shoes/Women-casual-shoes' },
+        { name: 'Women Sandals', path: '/category/shoes/womens-shoes/Women-sandals' },
       ]
     },
     {
       name: "GIRLS SHOES",
       path: '/category/shoes/girls-shoes',
       subcategories: [
-        { name: 'School Shoes', path: '/category/shoes/girls-shoes/school-shoes' },
-        { name: 'Sports Shoes', path: '/category/shoes/girls-shoes/sports-shoes' },
-        { name: 'Casual Shoes', path: '/category/shoes/girls-shoes/casual-shoes' },
-        { name: 'Sandals', path: '/category/shoes/girls-shoes/sandals' },
-        { name: 'Sneakers', path: '/category/shoes/girls-shoes/sneakers' },
+        { name: 'Girls School Shoes', path: '/category/shoes/girls-shoes/Girls-school-shoes' },
+        { name: 'Girls Sports Shoes', path: '/category/shoes/girls-shoes/Girls-sports-shoes' },
+        { name: 'Girls Casual Shoes', path: '/category/shoes/girls-shoes/Girls-casual-shoes' },
+        { name: 'Girls Sandals', path: '/category/shoes/girls-shoes/Girls-sandals' },
+        { name: 'Girls Sneakers', path: '/category/shoes/girls-shoes/Girls-sneakers' },
       ]
     },
     {
       name: "GIRL WATCHES",
       path: '/category/watches/girl-watches',
       subcategories: [
-        { name: 'Analog Watches', path: '/category/watches/girl-watches/analog-watches' },
-        { name: 'Digital Watches', path: '/category/watches/girl-watches/digital-watches' },
-        { name: 'Smart Watches', path: '/category/watches/girl-watches/smart-watches' },
-        { name: 'Fitness Trackers', path: '/category/watches/girl-watches/fitness-trackers' },
-        { name: 'Classic Watches', path: '/category/watches/girl-watches/classic-watches' },
+        { name: 'Girl Analog Watches', path: '/category/watches/girl-watches/Girl-analog-watches' },
+        { name: 'Girl Digital Watches', path: '/category/watches/girl-watches/Girl-digital-watches' },
+        { name: 'Girl Smart Watches', path: '/category/watches/girl-watches/Girl-smart-watches' },
+        { name: 'Girl Fitness Trackers', path: '/category/watches/girl-watches/Girl-fitness-trackers' },
+        { name: 'Girl Classic Watches', path: '/category/watches/girl-watches/Girl-classic-watches' },
       ]
     },
     {
       name: "MEN WATCHES",
       path: '/category/watches/men-watches',
       subcategories: [
-        { name: 'Analog Watches', path: '/category/watches/men-watches/analog-watches' },
-        { name: 'Digital Watches', path: '/category/watches/men-watches/digital-watches' },
-        { name: 'Smart Watches', path: '/category/watches/men-watches/smart-watches' },
-        { name: 'Sports Watches', path: '/category/watches/men-watches/sports-watches' },
-        { name: 'Luxury Watches', path: '/category/watches/men-watches/luxury-watches' },
-        { name: 'Chronograph Watches', path: '/category/watches/men-watches/chronograph-watches' },
+        { name: 'Men Analog Watches', path: '/category/watches/men-watches/Men-analog-watches' },
+        { name: 'Men Digital Watches', path: '/category/watches/men-watches/Men-digital-watches' },
+        { name: 'Men Smart Watches', path: '/category/watches/men-watches/Men-smart-watches' },
+        { name: 'Men Sports Watches', path: '/category/watches/men-watches/Men-sports-watches' },
+        { name: 'Men Luxury Watches', path: '/category/watches/men-watches/Men-luxury-watches' },
+        { name: 'Men Chronograph Watches', path: '/category/watches/men-watches/Men-chronograph-watches' },
       ]
     },
   ];
@@ -245,7 +245,7 @@ const Navbar = () => {
   return (
     <nav className="relative z-[70] bg-white">
       {/* Top Bar - Dark Grey with Social Icons and Account Links */}
-      <div className="bg-gray-800 text-white py-1.5 sm:py-2">
+      <div className="bg-gray-800 text-white py-1">
         <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
           <div className="flex items-center justify-between">
             {/* Social Media Icons - Left */}
@@ -316,9 +316,6 @@ const Navbar = () => {
                   My Account
                 </button>
               )}
-              <Link to={isAuthenticated ? "/profile" : "/signin"} className="text-white hover:text-gray-300 transition-colors whitespace-nowrap">
-                Track Order
-              </Link>
             </div>
           </div>
         </div>
@@ -327,12 +324,14 @@ const Navbar = () => {
       {/* Bottom Bar - White with Logo, Navigation, and Icons */}
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16 md:h-20">
+          <div className="flex items-center justify-between h-14 md:h-16">
             {/* Logo/Brand - Left */}
             <Link to="/" className="flex-shrink-0">
-              <div className="text-2xl md:text-3xl font-bold text-gray-900" style={{ fontFamily: 'cursive, serif' }}>
-                TickNTrack
-              </div>
+              <img 
+                src="https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765022427/TickNtrack_logo_borcim.png"
+                alt="TickNTrack"
+                className="h-10 md:h-12 w-auto object-contain"
+              />
             </Link>
 
             {/* Navigation Menu - Center (Desktop) with Categories */}
@@ -418,7 +417,7 @@ const Navbar = () => {
             </div>
 
             {/* Icons - Right (Search, Wishlist, Cart) */}
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-4 ml-auto md:ml-0">
               {/* Search Icon */}
               <div className="relative" ref={searchWrapRefDesktop}>
                 <button
@@ -432,7 +431,7 @@ const Navbar = () => {
                 </button>
                 {/* Search Dropdown */}
                 {searchOpen && (
-                  <div className="absolute right-0 top-full mt-2 w-80 bg-white border border-gray-200 rounded-lg shadow-xl z-[80]">
+                  <div className="fixed md:absolute right-4 md:right-0 left-4 md:left-auto top-[calc(var(--app-header-height,60px)+0.5rem)] md:top-full mt-0 md:mt-2 w-[calc(100vw-2rem)] md:w-80 bg-white border border-gray-200 rounded-lg shadow-xl z-[80]">
                     <div className="p-3">
                       <input
                         type="text"
@@ -463,10 +462,10 @@ const Navbar = () => {
                               className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 text-left"
                             >
                               <img
-                                src={p.images?.image1 || p.image || 'https://via.placeholder.com/60x80?text=No+Image'}
+                                src={getProductImage(p, 'image1') || p.image || placeholders.thumbnail}
                                 alt={p.title || p.name || 'Product'}
                                 className="w-12 h-16 object-cover rounded-md border border-gray-100"
-                                onError={(e) => { e.target.onerror = null; e.target.src = 'https://via.placeholder.com/60x80?text=No+Image'; }}
+                                onError={(e) => { e.target.onerror = null; e.target.src = placeholders.thumbnail; }}
                               />
                               <div className="min-w-0 flex-1">
                                 <p className="text-sm font-medium text-gray-900 truncate">{p.title || p.name || 'Product'}</p>
@@ -526,70 +525,6 @@ const Navbar = () => {
                   </svg>
                 )}
               </button>
-            </div>
-          </div>
-
-          {/* Mobile Search Bar */}
-          <div className="md:hidden px-4 pb-3">
-            <div className="relative" ref={searchWrapRefMobile}>
-              <input
-                type="text"
-                placeholder="Search..."
-                value={searchQuery}
-                onChange={(e) => { const v = e.target.value; setSearchQuery(v); setSearchOpen(v.trim().length >= 2); }}
-                onKeyPress={handleSearchKeyPress}
-                onFocus={() => { if (searchQuery.trim().length >= 2) setSearchOpen(true); }}
-                className="w-full px-3 py-2 pl-9 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-400"
-              />
-              <button
-                onClick={handleSearch}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-                type="button"
-                aria-label="Search"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
-                </svg>
-              </button>
-              {searchOpen && (
-                <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-xl z-[80] overflow-hidden">
-                  {searchLoading && (
-                    <div className="px-4 py-3 text-sm text-gray-500">Searching…</div>
-                  )}
-                  {!searchLoading && searchQuery.trim() && searchResults.length === 0 && (
-                    <div className="px-4 py-3 text-sm text-gray-500">No products found</div>
-                  )}
-                  {!searchLoading && searchResults.length > 0 && (
-                    <ul className="max-h-80 overflow-auto divide-y divide-gray-100">
-                      {searchResults.slice(0, 8).map((p) => (
-                        <li key={p._id || p.id || p.slug}>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setSearchOpen(false);
-                              navigate(`/product/${p._id || p.id || ''}`);
-                            }}
-                            className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 text-left"
-                          >
-                            <img
-                              src={p.images?.image1 || p.image || 'https://via.placeholder.com/60x80?text=No+Image'}
-                              alt={p.title || p.name || 'Product'}
-                              className="w-12 h-16 object-cover rounded-md border border-gray-100"
-                              onError={(e) => { e.target.onerror = null; e.target.src = 'https://via.placeholder.com/60x80?text=No+Image'; }}
-                            />
-                            <div className="min-w-0 flex-1">
-                              <p className="text-sm font-medium text-gray-900 truncate">{p.title || p.name || 'Product'}</p>
-                              {p.price && (
-                                <p className="text-xs text-gray-600">₹{Number(p.price).toLocaleString()}</p>
-                              )}
-                            </div>
-                          </button>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
-              )}
             </div>
           </div>
         </div>
