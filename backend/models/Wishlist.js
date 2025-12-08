@@ -25,3 +25,4 @@ export const Wishlist = mongoose.models.Wishlist || mongoose.model('Wishlist', W
 export default Wishlist;
 
 
+
