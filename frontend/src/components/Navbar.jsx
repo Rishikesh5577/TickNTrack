@@ -203,14 +203,14 @@ const Navbar = () => {
       ]
     },
     {
-      name: "GIRL WATCHES",
+      name: "WOMEN WATCHES",
       path: '/category/watches/girl-watches',
       subcategories: [
-        { name: 'Girl Analog Watches', path: '/category/watches/girl-watches/Girl-analog-watches' },
-        { name: 'Girl Digital Watches', path: '/category/watches/girl-watches/Girl-digital-watches' },
-        { name: 'Girl Smart Watches', path: '/category/watches/girl-watches/Girl-smart-watches' },
-        { name: 'Girl Fitness Trackers', path: '/category/watches/girl-watches/Girl-fitness-trackers' },
-        { name: 'Girl Classic Watches', path: '/category/watches/girl-watches/Girl-classic-watches' },
+        { name: 'Women Analog Watches', path: '/category/watches/Women-watches/Women-analog-watches' },
+        { name: 'Women Digital Watches', path: '/category/watches/Women-watches/Women-digital-watches' },
+        { name: 'Women Smart Watches', path: '/category/watches/Women-watches/Women-smart-watches' },
+        { name: 'Women Fitness Trackers', path: '/category/watches/Women-watches/Women-fitness-trackers' },
+        { name: 'Women Classic Watches', path: '/category/watches/Women-watches/Women-classic-watches' },
       ]
     },
     {

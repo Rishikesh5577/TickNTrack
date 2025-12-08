@@ -57,7 +57,7 @@ const TickNTrackSections = () => {
     ];
 
     return (
-      <section className="relative pt-8 md:pt-12 pb-24 bg-white overflow-hidden w-full">
+      <section className="relative pt-8 md:pt-12 pb-8 md:pb-12 bg-white overflow-hidden w-full">
         <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-4 2xl:px-6">
           {/* Section Header */}
           <div className="text-center max-w-3xl mx-auto mb-8 md:mb-16">
@@ -133,267 +133,116 @@ const TickNTrackSections = () => {
     );
   };
 
-  // Featured Products with Filters
-  const FeaturedProducts = () => {
-    const filters = ['All Products', 'Sneakers', 'Watches', 'Limited Edition', 'Best Sellers'];
-    
-    const products = [
-      {
-        id: 1,
-        name: "Nike Air Max 2024 Premium",
-        brand: "Nike",
-        category: "Athletic Footwear",
-        price: 16999,
-        originalPrice: 22999,
-        image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&h=600&fit=crop",
-        rating: 4.9,
-        reviews: 1847,
-        badge: "Best Seller",
-        inStock: true,
-        colors: 4
-      },
-      {
-        id: 2,
-        name: "Rolex Submariner Date 41mm",
-        brand: "Rolex",
-        category: "Luxury Timepieces",
-        price: 1299999,
-        originalPrice: null,
-        image: "https://images.unsplash.com/photo-1614164185128-e4ec99c436d7?w=600&h=600&fit=crop",
-        rating: 5.0,
-        reviews: 892,
-        badge: "Luxury",
-        inStock: true,
-        colors: 3
-      },
-      {
-        id: 3,
-        name: "Adidas Ultraboost 22 DNA",
-        brand: "Adidas",
-        category: "Running Shoes",
-        price: 18499,
-        originalPrice: 21999,
-        image: "https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?w=600&h=600&fit=crop",
-        rating: 4.8,
-        reviews: 2341,
-        badge: "Trending",
-        inStock: true,
-        colors: 5
-      },
-      {
-        id: 4,
-        name: "Omega Seamaster Diver 300M",
-        brand: "Omega",
-        category: "Luxury Timepieces",
-        price: 599999,
-        originalPrice: null,
-        image: "https://images.unsplash.com/photo-1547996160-81dfa63595aa?w=600&h=600&fit=crop",
-        rating: 4.9,
-        reviews: 567,
-        badge: "Premium",
-        inStock: true,
-        colors: 2
-      },
-      {
-        id: 5,
-        name: "Jordan Retro 1 High OG",
-        brand: "Air Jordan",
-        category: "Basketball Shoes",
-        price: 14999,
-        originalPrice: 17999,
-        image: "https://images.unsplash.com/photo-1556906781-9a412961c28c?w=600&h=600&fit=crop",
-        rating: 5.0,
-        reviews: 3456,
-        badge: "Exclusive",
-        inStock: true,
-        colors: 6
-      },
-      {
-        id: 6,
-        name: "TAG Heuer Carrera Calibre 16",
-        brand: "TAG Heuer",
-        category: "Sport Watches",
-        price: 399999,
-        originalPrice: null,
-        image: "https://images.unsplash.com/photo-1622434641406-a158123450f9?w=600&h=600&fit=crop",
-        rating: 4.8,
-        reviews: 423,
-        badge: "Sport",
-        inStock: true,
-        colors: 3
-      },
-      {
-        id: 7,
-        name: "New Balance 990v6 Made in USA",
-        brand: "New Balance",
-        category: "Lifestyle Sneakers",
-        price: 19999,
-        originalPrice: 24999,
-        image: "https://images.unsplash.com/photo-1539185441755-769473a23570?w=600&h=600&fit=crop",
-        rating: 4.7,
-        reviews: 1234,
-        badge: "Popular",
-        inStock: true,
-        colors: 4
-      },
-      {
-        id: 8,
-        name: "Puma RS-X Efekt Premium",
-        brand: "Puma",
-        category: "Casual Sneakers",
-        price: 9999,
-        originalPrice: 12999,
-        image: "https://images.unsplash.com/photo-1539185441755-769473a23570?w=600&h=600&fit=crop",
-        rating: 4.6,
-        reviews: 891,
-        badge: "New",
-        inStock: true,
-        colors: 5
-      }
+  // Category Grid Section
+  const CategoryGrid = () => {
+    const categories = [
+      { name: "Women Analog Watches", path: "/category/watches/Women-watches/Women-analog-watches", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765215874/unnamed_vxpktl.jpg" },
+      { name: "Women Digital Watches", path: "/category/watches/Women-watches/Women-digital-watches", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765215976/unnamed_whrlsk.jpg" },
+      { name: "Women Smart Watches", path: "/category/watches/Women-watches/Women-smart-watches", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765216050/unnamed_ysaacr.jpg" },
+      { name: "Women Fitness Trackers", path: "/category/watches/Women-watches/Women-fitness-trackers", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765216223/unnamed_nmip79.jpg" },
+      { name: "Women Classic Watches", path: "/category/watches/Women-watches/Women-classic-watches", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765216236/unnamed_o49ofl.jpg" },
+
+      // Men Watches Subcategories
+      { name: "Men Analog Watches", path: "/category/watches/men-watches/Men-analog-watches", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765216780/unnamed_v1mbbj.jpg" },
+      { name: "Men Digital Watches", path: "/category/watches/men-watches/Men-digital-watches", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765216828/unnamed_o0mzpn.jpg" },
+      { name: "Men Smart Watches", path: "/category/watches/men-watches/Men-smart-watches", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765216850/unnamed_gjfozw.jpg" },
+      { name: "Men Sports Watches", path: "/category/watches/men-watches/Men-sports-watches", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765216975/unnamed_nojuvl.jpg" },
+      { name: "Men Luxury Watches", path: "/category/watches/men-watches/Men-luxury-watches", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765217016/unnamed_g02sys.jpg" },
+      { name: "Men Chronograph Watches", path: "/category/watches/men-watches/Men-chronograph-watches", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765217016/unnamed_g02sys.jpg" },
+      // Men's Shoes Subcategories
+      { name: "Men Sports Shoes", path: "/category/shoes/mens-shoes/Men-sports-shoes", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765206732/unnamed_p3ovth.jpg" },
+      { name: "Men Casual Shoes", path: "/category/shoes/mens-shoes/Men-casual-shoes", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765206928/ac0404c8-d323-4367-a2fa-d988b9bb642b.png" },
+      { name: "Men Formal Shoes", path: "/category/shoes/mens-shoes/Men-formal-shoes", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765207062/b3aae7be-8c69-4702-99ce-ceea80362b2f.png" },
+      { name: "Men Sneakers", path: "/category/shoes/mens-shoes/Men-sneakers", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765207177/unnamed_prumtn.jpg" },
+      { name: "Men Boots", path: "/category/shoes/mens-shoes/Men-boots", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765207208/unnamed_howyee.jpg" },
+      { name: "Men Sandals", path: "/category/shoes/mens-shoes/Men-sandals", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765207245/unnamed_chcwum.jpg" },
+      
+      // Women's Shoes Subcategories
+      { name: "Women Heels", path: "/category/shoes/womens-shoes/Women-heels", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765207254/unnamed_av2vv2.jpg" },
+      { name: "Women Flats", path: "/category/shoes/womens-shoes/Women-flats", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765207315/unnamed_hmoyfa.jpg" },
+      { name: "Women Sneakers", path: "/category/shoes/womens-shoes/Women-sneakers", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765207807/unnamed_ldee8d.jpg" },
+      { name: "Women Sports Shoes", path: "/category/shoes/womens-shoes/Women-sports-shoes", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765207816/unnamed_p7tedm.jpg" },
+      { name: "Women Casual Shoes", path: "/category/shoes/womens-shoes/Women-casual-shoes", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765207827/unnamed_gwgxpw.jpg" },
+      { name: "Women Sandals", path: "/category/shoes/womens-shoes/Women-sandals", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765207839/unnamed_otxqea.jpg" },
+      
+      // Child Shoes Subcategories
+      { name: "Child School Shoes", path: "/category/shoes/child-shoes/child-school-shoes", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765215133/unnamed_q2frbc.jpg" },
+      { name: "Child Casual Shoes", path: "/category/shoes/child-shoes/child-casual-shoes", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765207857/unnamed_gist4w.jpg" },
+      { name: "Child Sandals", path: "/category/shoes/child-shoes/child-sandals", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765215289/unnamed_b10zkz.jpg" },
+      { name: "Child Sneakers", path: "/category/shoes/child-shoes/child-sneakers", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765207877/unnamed_e1x4se.jpg" },
+      
+      // Girls Shoes Subcategories
+      { name: "Girls School Shoes", path: "/category/shoes/girls-shoes/Girls-school-shoes", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765207882/unnamed_v7zvaw.jpg" },
+      { name: "Girls Sports Shoes", path: "/category/shoes/girls-shoes/Girls-sports-shoes", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765207898/unnamed_idwmpm.jpg" },
+      { name: "Girls Casual Shoes", path: "/category/shoes/girls-shoes/Girls-casual-shoes", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765207908/unnamed_jbojdu.jpg" },
+      { name: "Girls Sandals", path: "/category/shoes/girls-shoes/Girls-sandals", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765215519/unnamed_aby5ha.jpg" },
+      { name: "Girls Sneakers", path: "/category/shoes/girls-shoes/Girls-sneakers", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765207944/unnamed_m4wuui.jpg" },
+      
+      // Women Watches Subcategories
+      
+      
     ];
 
-    const formatPrice = (price) => {
-      return new Intl.NumberFormat('en-IN', {
-        style: 'currency',
-        currency: 'INR',
-        maximumFractionDigits: 0
-      }).format(price);
-    };
-
     return (
-      <section className="py-24 bg-gray-50 w-full">
+      <section className="pt-4 md:pt-6 pb-24 bg-gray-50 w-full">
         <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-4 2xl:px-6">
-          {/* Header */}
-          <div className="flex flex-col md:flex-row md:items-end md:justify-between mb-12">
-            <div>
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-full shadow-sm mb-4">
-                <TrendingUp className="w-4 h-4 text-teal-600" />
-                <span className="text-sm font-semibold text-gray-700 uppercase tracking-wider">Featured Products</span>
-              </div>
-              <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-2 tracking-tight">
-                Trending This Week
-              </h2>
-              <p className="text-lg text-gray-600">
-                Discover our most popular items selected by our community
-              </p>
-            </div>
-            
-            <button className="hidden md:inline-flex items-center gap-2 px-6 py-3 bg-gray-900 text-white rounded-xl font-semibold hover:bg-teal-600 transition-colors duration-300 shadow-lg hover:shadow-xl">
-              View All Products
-              <ChevronRight className="w-5 h-5" />
-            </button>
-          </div>
-
-          {/* Filter Tabs */}
-          <div className="flex flex-wrap gap-3 mb-12">
-            {filters.map((filter, idx) => (
-              <button
-                key={idx}
-                onClick={() => setActiveFilter(filter.toLowerCase().replace(' ', '-'))}
-                className={`px-6 py-2.5 rounded-xl font-semibold transition-all duration-300 ${
-                  activeFilter === filter.toLowerCase().replace(' ', '-') || (idx === 0 && activeFilter === 'all')
-                    ? 'bg-gray-900 text-white shadow-lg'
-                    : 'bg-white text-gray-700 hover:bg-gray-100 shadow-sm'
-                }`}
-              >
-                {filter}
-              </button>
-            ))}
-          </div>
-
-          {/* Products Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {products.map((product, idx) => (
+          {/* Category Grid */}
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+            {categories.map((category, idx) => (
               <div
-                key={product.id}
-                onMouseEnter={() => setHoveredCard(`prod-${idx}`)}
+                key={idx}
+                onClick={() => navigate(category.path)}
+                onMouseEnter={() => setHoveredCard(`cat-${idx}`)}
                 onMouseLeave={() => setHoveredCard(null)}
-                className="group bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-500 transform hover:-translate-y-2"
+                className="group relative overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-all duration-500 transform hover:-translate-y-2 cursor-pointer"
               >
-                {/* Product Image */}
-                <div className="relative aspect-square bg-gray-100 overflow-hidden">
+                <div className="aspect-square relative bg-gray-100 overflow-hidden">
                   <img
-                    src={product.image}
-                    alt={product.name}
+                    src={category.image}
+                    alt={category.name}
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                   />
-                  
-                  {/* Badges */}
-                  <div className="absolute top-4 left-4 right-4 flex justify-between items-start">
-                    <span className="px-3 py-1 bg-teal-600 text-white text-xs font-bold rounded-lg shadow-lg uppercase">
-                      {product.badge}
-                    </span>
-                    {product.originalPrice && (
-                      <span className="px-3 py-1 bg-red-500 text-white text-xs font-bold rounded-lg shadow-lg">
-                        {Math.round((1 - product.price / product.originalPrice) * 100)}% OFF
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Wishlist */}
-                  <button className={`absolute top-4 right-4 p-2.5 bg-white rounded-full shadow-lg transition-all duration-300 ${hoveredCard === `prod-${idx}` ? 'opacity-100 scale-100' : 'opacity-0 scale-75'}`}>
-                    <Heart className="w-5 h-5 text-gray-700 hover:text-red-500 hover:fill-red-500 transition-colors" />
-                  </button>
-
-                  {/* Quick View */}
-                  <div className={`absolute inset-x-4 bottom-4 transition-all duration-500 ${hoveredCard === `prod-${idx}` ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'}`}>
-                    <button className="w-full py-3 bg-gray-900 text-white rounded-xl font-semibold hover:bg-teal-600 transition-colors duration-300 shadow-xl flex items-center justify-center gap-2">
-                      <ShoppingBag className="w-4 h-4" />
-                      Add to Cart
-                    </button>
-                  </div>
+                  <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-colors duration-300" />
                 </div>
-
-                {/* Product Info */}
-                <div className="p-5">
-                  {/* Brand & Category */}
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs font-semibold text-teal-600 uppercase tracking-wide">{product.brand}</span>
-                    <span className="text-xs text-gray-500">{product.colors} colors</span>
-                  </div>
-
-                  {/* Product Name */}
-                  <h3 className="text-base font-bold text-gray-900 mb-2 line-clamp-2 min-h-[3rem] group-hover:text-teal-600 transition-colors">
-                    {product.name}
+                <div className="absolute bottom-0 left-0 right-0 p-4 md:p-6 bg-gradient-to-t from-black/80 via-black/60 to-transparent">
+                  <h3 className="text-white font-medium text-sm md:text-base lg:text-lg text-center uppercase">
+                    {category.name}
                   </h3>
-
-                  {/* Rating */}
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="flex items-center gap-1">
-                      {[...Array(5)].map((_, i) => (
-                        <Star key={i} className={`w-3.5 h-3.5 ${i < Math.floor(product.rating) ? 'fill-amber-400 text-amber-400' : 'text-gray-300'}`} />
-                      ))}
-                    </div>
-                    <span className="text-sm font-semibold text-gray-900">{product.rating}</span>
-                    <span className="text-xs text-gray-500">({product.reviews.toLocaleString()})</span>
-                  </div>
-
-                  {/* Price */}
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-xl font-bold text-gray-900">{formatPrice(product.price)}</span>
-                    {product.originalPrice && (
-                      <span className="text-sm text-gray-500 line-through">{formatPrice(product.originalPrice)}</span>
-                    )}
-                  </div>
-
-                  {/* Stock Status */}
-                  <div className="mt-3 flex items-center gap-2">
-                    <div className={`w-2 h-2 rounded-full ${product.inStock ? 'bg-green-500' : 'bg-red-500'}`} />
-                    <span className="text-xs font-medium text-gray-600">
-                      {product.inStock ? 'In Stock' : 'Out of Stock'}
-                    </span>
-                  </div>
                 </div>
               </div>
             ))}
           </div>
 
-          {/* Mobile View All */}
-          <div className="md:hidden text-center mt-12">
-            <button className="inline-flex items-center gap-2 px-8 py-4 bg-gray-900 text-white rounded-xl font-semibold hover:bg-teal-600 transition-colors duration-300 shadow-lg">
-              View All Products
-              <ChevronRight className="w-5 h-5" />
-            </button>
+          {/* Banner Image with Text Overlay */}
+          <div className="w-full mt-6 md:mt-8 relative">
+            <picture>
+              <source 
+                media="(max-width: 1023px)" 
+                srcSet="https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765205176/b073eda1-3a35-4ab9-93d4-5f66f27c046b.png" 
+              />
+              <source 
+                media="(min-width: 1024px)" 
+                srcSet="https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765205478/821ba8cf-8fd0-4568-8bc6-947bf94888b4.png" 
+              />
+              <img 
+                src="https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765205478/821ba8cf-8fd0-4568-8bc6-947bf94888b4.png" 
+                alt="TickNTrack Banner" 
+                className="w-full h-auto object-cover"
+              />
+            </picture>
+            
+            {/* Text Overlay for Desktop */}
+            <div className="hidden lg:flex absolute inset-0 items-center justify-end pr-8 md:pr-12 lg:pr-16 xl:pr-20">
+              <div className="text-right max-w-md">
+                <p className="text-sm md:text-base text-gray-700 mb-2 font-medium">Machine Washable</p>
+                <h2 className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-900 mb-2 leading-tight">
+                  SNEAKERS DESIGNED TO
+                </h2>
+                <h2 className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-900 leading-tight">
+                  MOVE YOU FORWARD.
+                </h2>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -437,7 +286,7 @@ const TickNTrackSections = () => {
     ];
 
     return (
-      <section className="py-24 bg-white w-full">
+      <section className="pt-8 md:pt-12 pb-24 bg-white w-full">
         <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-4 2xl:px-6">
           {/* Stats Bar */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-20">
@@ -515,7 +364,7 @@ const TickNTrackSections = () => {
   return (
     <div className="bg-white">
       <CollectionShowcase />
-      <FeaturedProducts />
+      <CategoryGrid />
       <TrustSection />
     </div>
   );

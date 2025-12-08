@@ -59,12 +59,12 @@ const PARENT_TO_SUBCATEGORIES = {
     'Girls Sandals',
     'Girls Sneakers'
   ],
-  "Girl Watches": [
-    'Girl Analog Watches',
-    'Girl Digital Watches',
-    'Girl Smart Watches',
-    'Girl Fitness Trackers',
-    'Girl Classic Watches'
+  "Women Watches": [
+    'Women Analog Watches',
+    'Women Digital Watches',
+    'Women Smart Watches',
+    'Women Fitness Trackers',
+    'Women Classic Watches'
   ],
   "Men Watches": [
     'Men Analog Watches',
@@ -84,7 +84,8 @@ const normalizeCategoryName = (name) => {
   const variations = {
     'Womens Shoes': "Women's Shoes",
     'Mens Shoes': "Men's Shoes",
-    'Girl Watches': 'Girl Watches',
+    'Women Watches': 'Women Watches',
+    'Girl Watches': 'Women Watches', // Backward compatibility
     'Men Watches': 'Men Watches'
   };
   return variations[normalized] || normalized;
