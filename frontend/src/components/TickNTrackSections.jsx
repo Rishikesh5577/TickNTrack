@@ -137,17 +137,17 @@ const TickNTrackSections = () => {
   const CategoryGrid = () => {
     const categories = [
       { name: "Women Analog Watches", path: "/category/watches/Women-watches/Women-analog-watches", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765215874/unnamed_vxpktl.jpg" },
+      { name: "Men Luxury Watches", path: "/category/watches/men-watches/Men-luxury-watches", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765217016/unnamed_g02sys.jpg" },
       { name: "Women Digital Watches", path: "/category/watches/Women-watches/Women-digital-watches", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765215976/unnamed_whrlsk.jpg" },
+      { name: "Men Digital Watches", path: "/category/watches/men-watches/Men-digital-watches", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765216828/unnamed_o0mzpn.jpg" },
+      { name: "Men Smart Watches", path: "/category/watches/men-watches/Men-smart-watches", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765216850/unnamed_gjfozw.jpg" },
       { name: "Women Smart Watches", path: "/category/watches/Women-watches/Women-smart-watches", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765216050/unnamed_ysaacr.jpg" },
+      { name: "Men Sports Watches", path: "/category/watches/men-watches/Men-sports-watches", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765216975/unnamed_nojuvl.jpg" },
       { name: "Women Fitness Trackers", path: "/category/watches/Women-watches/Women-fitness-trackers", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765216223/unnamed_nmip79.jpg" },
       { name: "Women Classic Watches", path: "/category/watches/Women-watches/Women-classic-watches", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765216236/unnamed_o49ofl.jpg" },
 
       // Men Watches Subcategories
       { name: "Men Analog Watches", path: "/category/watches/men-watches/Men-analog-watches", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765216780/unnamed_v1mbbj.jpg" },
-      { name: "Men Digital Watches", path: "/category/watches/men-watches/Men-digital-watches", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765216828/unnamed_o0mzpn.jpg" },
-      { name: "Men Smart Watches", path: "/category/watches/men-watches/Men-smart-watches", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765216850/unnamed_gjfozw.jpg" },
-      { name: "Men Sports Watches", path: "/category/watches/men-watches/Men-sports-watches", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765216975/unnamed_nojuvl.jpg" },
-      { name: "Men Luxury Watches", path: "/category/watches/men-watches/Men-luxury-watches", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765217016/unnamed_g02sys.jpg" },
       { name: "Men Chronograph Watches", path: "/category/watches/men-watches/Men-chronograph-watches", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765217016/unnamed_g02sys.jpg" },
       // Men's Shoes Subcategories
       { name: "Men Sports Shoes", path: "/category/shoes/mens-shoes/Men-sports-shoes", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765206732/unnamed_p3ovth.jpg" },
