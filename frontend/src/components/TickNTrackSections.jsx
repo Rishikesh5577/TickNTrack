@@ -162,24 +162,21 @@ const TickNTrackSections = () => {
       { name: "Women Flats", path: "/category/shoes/womens-shoes/Women-flats", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765207315/unnamed_hmoyfa.jpg" },
       { name: "Women Sneakers", path: "/category/shoes/womens-shoes/Women-sneakers", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765207807/unnamed_ldee8d.jpg" },
       { name: "Women Sports Shoes", path: "/category/shoes/womens-shoes/Women-sports-shoes", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765207816/unnamed_p7tedm.jpg" },
-      { name: "Women Casual Shoes", path: "/category/shoes/womens-shoes/Women-casual-shoes", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765207827/unnamed_gwgxpw.jpg" },
+      { name: "Women Chappals", path: "/category/shoes/womens-shoes/Women-chappals", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765207827/unnamed_gwgxpw.jpg" },
       { name: "Women Sandals", path: "/category/shoes/womens-shoes/Women-sandals", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765207839/unnamed_otxqea.jpg" },
       
-      // Child Shoes Subcategories
-      { name: "Child School Shoes", path: "/category/shoes/child-shoes/child-school-shoes", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765215133/unnamed_q2frbc.jpg" },
-      { name: "Child Casual Shoes", path: "/category/shoes/child-shoes/child-casual-shoes", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765207857/unnamed_gist4w.jpg" },
-      { name: "Child Sandals", path: "/category/shoes/child-shoes/child-sandals", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765215289/unnamed_b10zkz.jpg" },
-      { name: "Child Sneakers", path: "/category/shoes/child-shoes/child-sneakers", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765207877/unnamed_e1x4se.jpg" },
+      // Women Accessories Subcategories
+      { name: "Women Belts", path: "/category/accessories/women-accessories/women-belts", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765215874/unnamed_vxpktl.jpg" },
+      { name: "Women Goggles", path: "/category/accessories/women-accessories/women-goggles", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765215976/unnamed_whrlsk.jpg" },
+      { name: "Women Sunglasses", path: "/category/accessories/women-accessories/women-sunglasses", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765216050/unnamed_ysaacr.jpg" },
+      { name: "Women Handbags", path: "/category/accessories/women-accessories/women-handbags", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765216223/unnamed_nmip79.jpg" },
       
-      // Girls Shoes Subcategories
-      { name: "Girls School Shoes", path: "/category/shoes/girls-shoes/Girls-school-shoes", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765207882/unnamed_v7zvaw.jpg" },
-      { name: "Girls Sports Shoes", path: "/category/shoes/girls-shoes/Girls-sports-shoes", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765207898/unnamed_idwmpm.jpg" },
-      { name: "Girls Casual Shoes", path: "/category/shoes/girls-shoes/Girls-casual-shoes", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765207908/unnamed_jbojdu.jpg" },
-      { name: "Girls Sandals", path: "/category/shoes/girls-shoes/Girls-sandals", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765215519/unnamed_aby5ha.jpg" },
-      { name: "Girls Sneakers", path: "/category/shoes/girls-shoes/Girls-sneakers", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765207944/unnamed_m4wuui.jpg" },
-      
-      // Women Watches Subcategories
-      
+      // Men Accessories Subcategories
+      { name: "Men Belts", path: "/category/accessories/men-accessories/men-belts", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765216780/unnamed_v1mbbj.jpg" },
+      { name: "Men Goggles", path: "/category/accessories/men-accessories/men-goggles", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765216828/unnamed_o0mzpn.jpg" },
+      { name: "Men Sunglasses", path: "/category/accessories/men-accessories/men-sunglasses", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765216850/unnamed_gjfozw.jpg" },
+      { name: "Men Wallets", path: "/category/accessories/men-accessories/men-wallets", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765216975/unnamed_nojuvl.jpg" },
+      { name: "Men Caps", path: "/category/accessories/men-accessories/men-caps", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765217016/unnamed_g02sys.jpg" },
       
     ];
 

@@ -169,17 +169,6 @@ const Navbar = () => {
       ]
     },
     {
-      name: "CHILD SHOES",
-      path: '/category/shoes/child-shoes',
-      subcategories: [
-        { name: 'Child School Shoes', path: '/category/shoes/child-shoes/child-school-shoes' },
-        { name: 'Child Sports Shoes', path: '/category/shoes/child-shoes/child-sports-shoes' },
-        { name: 'Child Casual Shoes', path: '/category/shoes/child-shoes/child-casual-shoes' },
-        { name: 'Child Sandals', path: '/category/shoes/child-shoes/child-sandals' },
-        { name: 'Child Sneakers', path: '/category/shoes/child-shoes/child-sneakers' },
-      ]
-    },
-    {
       name: "WOMEN'S SHOES",
       path: '/category/shoes/womens-shoes',
       subcategories: [
@@ -187,19 +176,8 @@ const Navbar = () => {
         { name: 'Women Flats', path: '/category/shoes/womens-shoes/Women-flats' },
         { name: 'Women Sneakers', path: '/category/shoes/womens-shoes/Women-sneakers' },
         { name: 'Women Sports Shoes', path: '/category/shoes/womens-shoes/Women-sports-shoes' },
-        { name: 'Women Casual Shoes', path: '/category/shoes/womens-shoes/Women-casual-shoes' },
+        { name: 'Women Chappals', path: '/category/shoes/womens-shoes/Women-chappals' },
         { name: 'Women Sandals', path: '/category/shoes/womens-shoes/Women-sandals' },
-      ]
-    },
-    {
-      name: "GIRLS SHOES",
-      path: '/category/shoes/girls-shoes',
-      subcategories: [
-        { name: 'Girls School Shoes', path: '/category/shoes/girls-shoes/Girls-school-shoes' },
-        { name: 'Girls Sports Shoes', path: '/category/shoes/girls-shoes/Girls-sports-shoes' },
-        { name: 'Girls Casual Shoes', path: '/category/shoes/girls-shoes/Girls-casual-shoes' },
-        { name: 'Girls Sandals', path: '/category/shoes/girls-shoes/Girls-sandals' },
-        { name: 'Girls Sneakers', path: '/category/shoes/girls-shoes/Girls-sneakers' },
       ]
     },
     {
@@ -223,6 +201,28 @@ const Navbar = () => {
         { name: 'Men Sports Watches', path: '/category/watches/men-watches/Men-sports-watches' },
         { name: 'Men Luxury Watches', path: '/category/watches/men-watches/Men-luxury-watches' },
         { name: 'Men Chronograph Watches', path: '/category/watches/men-watches/Men-chronograph-watches' },
+      ]
+    },
+    {
+      name: "WOMEN ACCESSORIES",
+      path: '/category/accessories/women-accessories',
+      subcategories: [
+        { name: 'Women Belts', path: '/category/accessories/women-accessories/women-belts' },
+        { name: 'Women Goggles', path: '/category/accessories/women-accessories/women-goggles' },
+        { name: 'Women Sunglasses', path: '/category/accessories/women-accessories/women-sunglasses' },
+        { name: 'Women Handbags', path: '/category/accessories/women-accessories/women-handbags' },
+        { name: 'Women Wallets', path: '/category/accessories/women-accessories/women-wallets' },
+      ]
+    },
+    {
+      name: "MEN ACCESSORIES",
+      path: '/category/accessories/men-accessories',
+      subcategories: [
+        { name: 'Men Belts', path: '/category/accessories/men-accessories/men-belts' },
+        { name: 'Men Goggles', path: '/category/accessories/men-accessories/men-goggles' },
+        { name: 'Men Sunglasses', path: '/category/accessories/men-accessories/men-sunglasses' },
+        { name: 'Men Wallets', path: '/category/accessories/men-accessories/men-wallets' },
+        { name: 'Men Caps', path: '/category/accessories/men-accessories/men-caps' },
       ]
     },
   ];
