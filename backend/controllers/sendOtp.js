@@ -72,7 +72,7 @@ export async function sendOtp(req, res) {
       // Using Quick Route (route = "q") - NO DLT
       const params = new URLSearchParams();
       params.append('route', 'q');
-      params.append('message', `Your SaariSanskar OTP is ${otp}`);
+      params.append('message', `Your TicknTrack OTP is ${otp}`);
       params.append('numbers', phone);
 
       const smsResponse = await axios.post(

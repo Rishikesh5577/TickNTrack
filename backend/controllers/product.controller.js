@@ -91,6 +91,9 @@ const normalizeCategoryName = (name) => {
   return variations[normalized] || normalized;
 };
 
+// Helper function to escape special regex characters
+const escapeRegex = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
 export const getProducts = async (req, res) => {
   try {
     // Accept either `subcategory` (preferred) or `category` query param
@@ -105,9 +108,15 @@ export const getProducts = async (req, res) => {
       // Normalize category name to handle variations
       const normalizedCategory = normalizeCategoryName(category);
       
-      // Try multiple ways to match the category or subcategory fields
-      const re = new RegExp(category, 'i');
-      const normalizedRe = normalizedCategory !== category ? new RegExp(normalizedCategory, 'i') : null;
+      // Use word boundaries to ensure exact matching and prevent cross-contamination
+      // Escape special regex characters in category name
+      const escapedCategory = escapeRegex(category);
+      const escapedNormalized = escapeRegex(normalizedCategory);
+      
+      // Use word boundary regex to match exact category names
+      // This prevents "Men Watches" from matching "Women Watches"
+      const re = new RegExp(`^${escapedCategory}$|\\b${escapedCategory}\\b`, 'i');
+      const normalizedRe = normalizedCategory !== category ? new RegExp(`^${escapedNormalized}$|\\b${escapedNormalized}\\b`, 'i') : null;
       
       const orConditions = [
         { 'category.name': { $regex: re } },
@@ -129,7 +138,8 @@ export const getProducts = async (req, res) => {
       // If this is a parent category, also search for all its subcategories
       if (PARENT_TO_SUBCATEGORIES[normalizedCategory]) {
         PARENT_TO_SUBCATEGORIES[normalizedCategory].forEach((sub) => {
-          const subRe = new RegExp(sub, 'i');
+          const escapedSub = escapeRegex(sub);
+          const subRe = new RegExp(`^${escapedSub}$|\\b${escapedSub}\\b`, 'i');
           orConditions.push({ category: subRe });
           orConditions.push({ 'category.name': subRe });
           orConditions.push({ subcategory: subRe });
@@ -140,7 +150,8 @@ export const getProducts = async (req, res) => {
       // Also check if the original (non-normalized) category is a parent
       if (PARENT_TO_SUBCATEGORIES[category]) {
         PARENT_TO_SUBCATEGORIES[category].forEach((sub) => {
-          const subRe = new RegExp(sub, 'i');
+          const escapedSub = escapeRegex(sub);
+          const subRe = new RegExp(`^${escapedSub}$|\\b${escapedSub}\\b`, 'i');
           orConditions.push({ category: subRe });
           orConditions.push({ 'category.name': subRe });
           orConditions.push({ subcategory: subRe });
@@ -152,11 +163,11 @@ export const getProducts = async (req, res) => {
       Object.keys(PARENT_TO_SUBCATEGORIES).forEach((parent) => {
         if (PARENT_TO_SUBCATEGORIES[parent].some(sub => 
           sub.toLowerCase() === category.toLowerCase() || 
-          category.toLowerCase().includes(sub.toLowerCase()) ||
-          sub.toLowerCase().includes(category.toLowerCase())
+          category.toLowerCase() === sub.toLowerCase()
         )) {
-          // This is a subcategory, make sure we search for it
-          const subRe = new RegExp(category, 'i');
+          // This is a subcategory, make sure we search for it with exact matching
+          const escapedSub = escapeRegex(category);
+          const subRe = new RegExp(`^${escapedSub}$|\\b${escapedSub}\\b`, 'i');
           orConditions.push({ category: subRe });
           orConditions.push({ 'category.name': subRe });
         }
@@ -164,7 +175,9 @@ export const getProducts = async (req, res) => {
 
       if (CATEGORY_GROUPS[category]) {
         CATEGORY_GROUPS[category].forEach((sub) => {
-          orConditions.push({ category: { $regex: new RegExp(sub, 'i') } });
+          const escapedSub = escapeRegex(sub);
+          const subRe = new RegExp(`^${escapedSub}$|\\b${escapedSub}\\b`, 'i');
+          orConditions.push({ category: { $regex: subRe } });
         });
       }
 

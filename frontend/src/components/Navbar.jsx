@@ -182,7 +182,7 @@ const Navbar = () => {
     },
     {
       name: "WOMEN WATCHES",
-      path: '/category/watches/girl-watches',
+      path: '/category/watches/Women-watches',
       subcategories: [
         { name: 'Women Analog Watches', path: '/category/watches/Women-watches/Women-analog-watches' },
         { name: 'Women Digital Watches', path: '/category/watches/Women-watches/Women-digital-watches' },
