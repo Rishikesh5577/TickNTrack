@@ -122,7 +122,7 @@ const Wishlist = () => {
                 <img
                   src={getProductImage(p, 'image1')}
                   alt={p.title}
-                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                   onError={(e) => {
                     e.currentTarget.onerror = null;
                     e.currentTarget.src = placeholders.wishlist;

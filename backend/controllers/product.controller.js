@@ -73,6 +73,34 @@ const PARENT_TO_SUBCATEGORIES = {
     'Men Sports Watches',
     'Men Luxury Watches',
     'Men Chronograph Watches'
+  ],
+  "Women Accessories": [
+    'Women Belts',
+    'Women Goggles',
+    'Women Sunglasses',
+    'Women Handbags',
+    'Women Wallets'
+  ],
+  "Women's Accessories": [
+    'Women Belts',
+    'Women Goggles',
+    'Women Sunglasses',
+    'Women Handbags',
+    'Women Wallets'
+  ],
+  "Men Accessories": [
+    'Men Belts',
+    'Men Goggles',
+    'Men Sunglasses',
+    'Men Wallets',
+    'Men Caps'
+  ],
+  "Men's Accessories": [
+    'Men Belts',
+    'Men Goggles',
+    'Men Sunglasses',
+    'Men Wallets',
+    'Men Caps'
   ]
 };
 
@@ -86,7 +114,11 @@ const normalizeCategoryName = (name) => {
     'Mens Shoes': "Men's Shoes",
     'Women Watches': 'Women Watches',
     'Girl Watches': 'Women Watches', // Backward compatibility
-    'Men Watches': 'Men Watches'
+    'Men Watches': 'Men Watches',
+    'Women Accessories': 'Women Accessories',
+    "Women's Accessories": "Women's Accessories",
+    'Men Accessories': 'Men Accessories',
+    "Men's Accessories": "Men's Accessories"
   };
   return variations[normalized] || normalized;
 };

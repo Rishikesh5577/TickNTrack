@@ -1412,7 +1412,7 @@ const ProductList = ({ defaultCategory } = {}) => {
               </div>
             ) : (
               <>
-                <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-4 md:gap-5 lg:gap-6">
+                <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-3 gap-2 sm:gap-4 md:gap-5 lg:gap-6">
                   {filteredProducts.slice(0, displayCount).map((p) => (
                   <div
                     key={p._id || p.title}
@@ -1423,7 +1423,7 @@ const ProductList = ({ defaultCategory } = {}) => {
                       <img
                         src={getProductImage(p, 'image1')}
                         alt={p.title}
-                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                         onError={(e) => {
                           e.target.onerror = null;
                           e.target.src = placeholders.productList;

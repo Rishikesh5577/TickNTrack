@@ -19,7 +19,22 @@ export const fetchSarees = async (category, subcategory = null) => {
     let url = `${API_URL}/products`;
     const params = new URLSearchParams();
     
-    if (subcategory) {
+    // Parent categories that should be treated as category, not subcategory
+    const parentCategories = [
+      'Women Accessories',
+      "Women's Accessories",
+      'Men Accessories',
+      "Men's Accessories",
+      "Women's Shoes",
+      "Men's Shoes",
+      'Women Watches',
+      'Men Watches'
+    ];
+    
+    // If subcategory is actually a parent category, treat it as category
+    if (subcategory && parentCategories.includes(subcategory)) {
+      params.append('category', subcategory);
+    } else if (subcategory) {
       params.append('subcategory', subcategory);
     } else if (category) {
       params.append('category', category);
