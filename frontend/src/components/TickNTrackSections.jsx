@@ -57,15 +57,15 @@ const TickNTrackSections = () => {
     ];
 
     return (
-      <section className="relative pt-8 md:pt-12 pb-8 md:pb-12 bg-white overflow-hidden w-full">
+      <section className="relative pt-8 md:pt-12 pb-8 md:pb-12 bg-gradient-to-br from-gray-50 via-teal-50/30 to-cyan-50/30 overflow-hidden w-full">
         <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-4 2xl:px-6">
           {/* Section Header */}
           <div className="text-center max-w-3xl mx-auto mb-8 md:mb-16">
             <div className="inline-flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-1.5 md:py-2 bg-gray-100 rounded-full mb-3 md:mb-4">
               <Sparkles className="w-3 h-3 md:w-4 md:h-4 text-teal-600" />
-              <span className="text-xs md:text-sm font-semibold text-gray-700 uppercase tracking-wider">Curated Collections</span>
+              <span className="text-xs md:text-sm font-medium text-gray-700 uppercase tracking-wider">Curated Collections</span>
             </div>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-3 md:mb-4 tracking-tight px-2">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-medium text-gray-900 mb-3 md:mb-4 tracking-tight px-2 uppercase">
               Premium Product Categories
             </h2>
             <p className="text-sm sm:text-base md:text-lg text-gray-600 leading-relaxed px-2">
@@ -137,11 +137,14 @@ const TickNTrackSections = () => {
   const CategoryGrid = () => {
     const categories = [
       { name: "Women Analog Watches", path: "/category/watches/Women-watches/Women-analog-watches", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765215874/unnamed_vxpktl.jpg" },
-      { name: "Men Luxury Watches", path: "/category/watches/men-watches/Men-luxury-watches", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765217016/unnamed_g02sys.jpg" },
+      { name: "Men Caps", path: "/category/accessories/men-accessories/men-caps", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765627558/unnamed_frs0um.jpg" },
       { name: "Women Digital Watches", path: "/category/watches/Women-watches/Women-digital-watches", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765215976/unnamed_whrlsk.jpg" },
+      { name: "Women Goggles", path: "/category/accessories/women-accessories/women-goggles", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765624604/unnamed_zqbgyk.jpg" },
+      { name: "Men Luxury Watches", path: "/category/watches/men-watches/Men-luxury-watches", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765217016/unnamed_g02sys.jpg" },
       { name: "Men Digital Watches", path: "/category/watches/men-watches/Men-digital-watches", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765216828/unnamed_o0mzpn.jpg" },
-      { name: "Men Smart Watches", path: "/category/watches/men-watches/Men-smart-watches", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765216850/unnamed_gjfozw.jpg" },
+      { name: "Men Sunglasses", path: "/category/accessories/men-accessories/men-sunglasses", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765627303/unnamed_kjcjqf.jpg" },
       { name: "Women Smart Watches", path: "/category/watches/Women-watches/Women-smart-watches", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765216050/unnamed_ysaacr.jpg" },
+      { name: "Men Smart Watches", path: "/category/watches/men-watches/Men-smart-watches", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765216850/unnamed_gjfozw.jpg" },
       { name: "Men Sports Watches", path: "/category/watches/men-watches/Men-sports-watches", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765216975/unnamed_nojuvl.jpg" },
       { name: "Women Fitness Trackers", path: "/category/watches/Women-watches/Women-fitness-trackers", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765216223/unnamed_nmip79.jpg" },
       { name: "Women Classic Watches", path: "/category/watches/Women-watches/Women-classic-watches", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765216236/unnamed_o49ofl.jpg" },
@@ -166,22 +169,19 @@ const TickNTrackSections = () => {
       { name: "Women Sandals", path: "/category/shoes/womens-shoes/Women-sandals", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765207839/unnamed_otxqea.jpg" },
       
       // Women Accessories Subcategories
-      { name: "Women Belts", path: "/category/accessories/women-accessories/women-belts", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765215874/unnamed_vxpktl.jpg" },
-      { name: "Women Goggles", path: "/category/accessories/women-accessories/women-goggles", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765215976/unnamed_whrlsk.jpg" },
-      { name: "Women Sunglasses", path: "/category/accessories/women-accessories/women-sunglasses", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765216050/unnamed_ysaacr.jpg" },
-      { name: "Women Handbags", path: "/category/accessories/women-accessories/women-handbags", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765216223/unnamed_nmip79.jpg" },
+      { name: "Women Belts", path: "/category/accessories/women-accessories/women-belts", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765624402/unnamed_wsvlka.jpg" },
+      { name: "Women Sunglasses", path: "/category/accessories/women-accessories/women-sunglasses", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765624740/unnamed_p4eskj.jpg" },
       
       // Men Accessories Subcategories
-      { name: "Men Belts", path: "/category/accessories/men-accessories/men-belts", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765216780/unnamed_v1mbbj.jpg" },
-      { name: "Men Goggles", path: "/category/accessories/men-accessories/men-goggles", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765216828/unnamed_o0mzpn.jpg" },
-      { name: "Men Sunglasses", path: "/category/accessories/men-accessories/men-sunglasses", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765216850/unnamed_gjfozw.jpg" },
-      { name: "Men Wallets", path: "/category/accessories/men-accessories/men-wallets", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765216975/unnamed_nojuvl.jpg" },
-      { name: "Men Caps", path: "/category/accessories/men-accessories/men-caps", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765217016/unnamed_g02sys.jpg" },
+      { name: "Men Belts", path: "/category/accessories/men-accessories/men-belts", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765625319/unnamed_yb9rfg.jpg" },
+      { name: "Women Handbags", path: "/category/accessories/women-accessories/women-handbags", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765624892/unnamed_waspa8.jpg" },
+      { name: "Men Goggles", path: "/category/accessories/men-accessories/men-goggles", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765627211/unnamed_v26uui.jpg" },
+      { name: "Men Wallets", path: "/category/accessories/men-accessories/men-wallets", image: "https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765627384/unnamed_od7plr.jpg" },
       
     ];
 
     return (
-      <section className="pt-4 md:pt-6 pb-4 md:pb-6 bg-gray-50 w-full">
+      <section className="pt-4 md:pt-6 pb-4 md:pb-6 bg-gradient-to-br from-gray-50 via-teal-50/30 to-cyan-50/30 w-full">
         <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-4 2xl:px-6">
           {/* Category Grid */}
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
@@ -283,7 +283,7 @@ const TickNTrackSections = () => {
     ];
 
     return (
-      <section className="pt-2 md:pt-4 pb-24 bg-white w-full">
+      <section className="pt-2 md:pt-4 pb-24 bg-gradient-to-br from-gray-50 via-teal-50/30 to-cyan-50/30 w-full">
         <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-4 2xl:px-6">
           {/* Stats Bar */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-20">
@@ -345,7 +345,7 @@ const TickNTrackSections = () => {
   };
 
   return (
-    <div className="bg-white">
+    <div className="bg-gradient-to-br from-gray-50 via-teal-50/30 to-cyan-50/30">
       <CollectionShowcase />
       <CategoryGrid />
       <TrustSection />

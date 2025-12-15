@@ -72,6 +72,7 @@ const ProductList = ({ defaultCategory } = {}) => {
   const [error, setError] = useState(null);
   const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [displayCount, setDisplayCount] = useState(20); // Initial products to show
+  const [sortBy, setSortBy] = useState('relevance'); // Sort state
   
   // Filter states
   const [selectedPriceRange, setSelectedPriceRange] = useState(null);
@@ -502,6 +503,23 @@ const ProductList = ({ defaultCategory } = {}) => {
       });
     }
     
+    // Apply sorting
+    if (sortBy !== 'relevance') {
+      switch(sortBy) {
+        case 'price-low-high':
+          result.sort((a, b) => (a.price || 0) - (b.price || 0));
+          break;
+        case 'price-high-low':
+          result.sort((a, b) => (b.price || 0) - (a.price || 0));
+          break;
+        case 'newest':
+          result.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+          break;
+        default:
+          break;
+      }
+    }
+    
     setFilteredProducts(result);
     // Reset display count when filters change
     setDisplayCount(20);
@@ -518,7 +536,8 @@ const ProductList = ({ defaultCategory } = {}) => {
     selectedWatchBandMaterials,
     selectedWaterResistance,
     isShoesCategory,
-    isWatchCategory
+    isWatchCategory,
+    sortBy
   ]);
   
   const toggleFabric = (fabric) => {
@@ -576,16 +595,35 @@ const ProductList = ({ defaultCategory } = {}) => {
   ].reduce((a, b) => a + b, 0);
 
   const FilterContent = () => (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center pb-4 border-b border-gray-200">
-        <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-          <FaFilter className="text-teal-600" />
-          Filters
-        </h3>
+    <div className="space-y-0">
+      {/* Sort By Dropdown - Matching image design */}
+      <div className="mb-4 pb-4 border-b border-gray-200">
+        <div className="bg-white rounded-md border border-gray-200 p-3 relative">
+          <div className="flex items-center">
+            <span className="text-sm font-medium text-gray-700 mr-2">Sort By :</span>
+            <select
+              value={sortBy}
+              onChange={(e) => {
+                setSortBy(e.target.value);
+              }}
+              className="flex-1 text-sm font-medium text-gray-900 bg-transparent border-none outline-none appearance-none cursor-pointer pr-6"
+            >
+              <option value="relevance">Relevance</option>
+              <option value="price-low-high">Price: Low to High</option>
+              <option value="price-high-low">Price: High to Low</option>
+              <option value="newest">Newest Arrivals</option>
+            </select>
+            <FaChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-pink-500 text-xs pointer-events-none" />
+          </div>
+        </div>
+      </div>
+
+      <div className="flex justify-between items-center pb-4 border-b border-gray-200 mb-4">
+        <h3 className="text-lg font-semibold text-gray-900">Filters</h3>
         {activeFilterCount > 0 && (
           <button 
             onClick={resetFilters}
-            className="text-sm bg-gray-900 text-white px-4 py-1.5 rounded-lg hover:bg-teal-600 font-medium transition-colors shadow-sm"
+            className="text-sm text-gray-600 hover:text-gray-900 font-medium transition-colors"
           >
             Clear all
           </button>
@@ -593,28 +631,17 @@ const ProductList = ({ defaultCategory } = {}) => {
       </div>
 
       {/* Price Range Filter */}
-      <div className="border-b border-gray-200 pb-6">
+      <div className="border-b border-gray-200">
         <button
           onClick={() => toggleSection('price')}
-          className="flex justify-between items-center w-full mb-4 group"
+          className="flex justify-between items-center w-full py-3 px-0 bg-white hover:bg-gray-50 transition-colors"
         >
-          <h4 className="text-base font-semibold text-gray-900 group-hover:text-teal-600 transition-colors">Price Range</h4>
-          <div className="flex items-center gap-2">
-            {selectedPriceRange && (
-              <span className="inline-flex items-center justify-center h-5 w-5 bg-teal-600 text-white text-xs font-bold rounded-full">
-                ✓
-              </span>
-            )}
-            {openSections.price ? (
-              <FaChevronUp className="text-teal-600 transition-transform" />
-            ) : (
-              <FaChevronDown className="text-gray-400 group-hover:text-teal-600 transition-colors" />
-            )}
-          </div>
+          <h4 className="text-sm font-medium text-gray-900">Price</h4>
+          <FaChevronDown className={`text-gray-500 text-xs transition-transform ${openSections.price ? 'transform rotate-180' : ''}`} />
         </button>
         
         {openSections.price && (
-          <div className="space-y-2.5">
+          <div className="pb-4 space-y-2">
             {priceRanges.map(range => (
               <div key={range.id} className="flex items-center group">
                 <input
@@ -623,14 +650,14 @@ const ProductList = ({ defaultCategory } = {}) => {
                   name="priceRange"
                   checked={selectedPriceRange === range.id}
                   onChange={() => setSelectedPriceRange(range.id)}
-                  className="h-4 w-4 text-teal-600 focus:ring-teal-600 border-gray-300 cursor-pointer"
+                  className="h-4 w-4 text-pink-500 focus:ring-pink-500 border-gray-300 cursor-pointer"
                 />
                 <label 
                   htmlFor={`price-${range.id}`} 
-                  className={`ml-3 text-sm cursor-pointer flex-1 py-1.5 px-3 rounded-md transition-all ${
+                  className={`ml-3 text-sm cursor-pointer flex-1 py-1 transition-all ${
                     selectedPriceRange === range.id 
-                      ? 'bg-teal-50 text-teal-700 font-medium' 
-                      : 'text-gray-700 hover:bg-gray-50'
+                      ? 'text-gray-900 font-medium' 
+                      : 'text-gray-700'
                   }`}
                 >
                   {range.label}
@@ -643,28 +670,17 @@ const ProductList = ({ defaultCategory } = {}) => {
       
       {/* Brand Filter (for Shoes and Watches) */}
       {(isShoesCategory || isWatchCategory) && availableBrands.length > 0 && (
-        <div className="border-b border-gray-200 pb-6">
+        <div className="border-b border-gray-200">
           <button
             onClick={() => toggleSection('brand')}
-            className="flex justify-between items-center w-full mb-4 group"
+            className="flex justify-between items-center w-full py-3 px-0 bg-white hover:bg-gray-50 transition-colors"
           >
-            <h4 className="text-base font-semibold text-gray-900 group-hover:text-teal-600 transition-colors">Brand</h4>
-            <div className="flex items-center gap-2">
-              {selectedBrands.length > 0 && (
-                <span className="inline-flex items-center justify-center h-6 w-6 bg-teal-600 text-white text-xs font-bold rounded-full shadow-sm">
-                  {selectedBrands.length}
-                </span>
-              )}
-              {openSections.brand ? (
-                <FaChevronUp className="text-teal-600 transition-transform" />
-              ) : (
-                <FaChevronDown className="text-gray-400 group-hover:text-teal-600 transition-colors" />
-              )}
-            </div>
+            <h4 className="text-sm font-medium text-gray-900">Brand</h4>
+            <FaChevronDown className={`text-gray-500 text-xs transition-transform ${openSections.brand ? 'transform rotate-180' : ''}`} />
           </button>
           
           {openSections.brand && (
-            <div className="space-y-2.5 max-h-64 overflow-y-auto custom-scrollbar pr-2">
+            <div className="pb-4 space-y-2 max-h-64 overflow-y-auto scrollbar-hide pr-2">
               {availableBrands.map(brand => (
                 <div key={brand} className="flex items-center group">
                   <input
@@ -674,14 +690,14 @@ const ProductList = ({ defaultCategory } = {}) => {
                     onChange={() => setSelectedBrands(prev => 
                       prev.includes(brand) ? prev.filter(b => b !== brand) : [...prev, brand]
                     )}
-                    className="h-4 w-4 text-teal-600 focus:ring-teal-600 border-gray-300 rounded cursor-pointer"
+                    className="h-4 w-4 text-pink-500 focus:ring-pink-500 border-gray-300 rounded cursor-pointer"
                   />
                   <label 
                     htmlFor={`brand-${brand}`} 
-                    className={`ml-3 text-sm cursor-pointer flex-1 py-1.5 px-3 rounded-md transition-all ${
+                    className={`ml-3 text-sm cursor-pointer flex-1 py-1 transition-all ${
                       selectedBrands.includes(brand)
-                        ? 'bg-teal-50 text-teal-700 font-medium'
-                        : 'text-gray-700 hover:bg-gray-50'
+                        ? 'text-gray-900 font-medium'
+                        : 'text-gray-700'
                     }`}
                   >
                     {brand}
@@ -698,28 +714,17 @@ const ProductList = ({ defaultCategory } = {}) => {
         <>
           {/* Shoe Material Filter */}
           {availableShoeMaterials.length > 0 && (
-            <div className="border-b border-gray-200 pb-6">
+            <div className="border-b border-gray-200">
               <button
                 onClick={() => toggleSection('material')}
-                className="flex justify-between items-center w-full mb-4 group"
+                className="flex justify-between items-center w-full py-3 px-0 bg-white hover:bg-gray-50 transition-colors"
               >
-                <h4 className="text-base font-semibold text-gray-900 group-hover:text-teal-600 transition-colors">Material</h4>
-                <div className="flex items-center gap-2">
-                  {selectedShoeMaterials.length > 0 && (
-                    <span className="inline-flex items-center justify-center h-6 w-6 bg-teal-600 text-white text-xs font-bold rounded-full shadow-sm">
-                      {selectedShoeMaterials.length}
-                    </span>
-                  )}
-                  {openSections.material ? (
-                    <FaChevronUp className="text-teal-600 transition-transform" />
-                  ) : (
-                    <FaChevronDown className="text-gray-400 group-hover:text-teal-600 transition-colors" />
-                  )}
-                </div>
+                <h4 className="text-sm font-medium text-gray-900">Material</h4>
+                <FaChevronDown className={`text-gray-500 text-xs transition-transform ${openSections.material ? 'transform rotate-180' : ''}`} />
               </button>
               
               {openSections.material && (
-                <div className="space-y-2.5 max-h-64 overflow-y-auto custom-scrollbar pr-2">
+                <div className="pb-4 space-y-2 max-h-64 overflow-y-auto scrollbar-hide pr-2">
                   {availableShoeMaterials.map(material => (
                     <div key={material} className="flex items-center group">
                       <input
@@ -729,14 +734,14 @@ const ProductList = ({ defaultCategory } = {}) => {
                         onChange={() => setSelectedShoeMaterials(prev => 
                           prev.includes(material) ? prev.filter(m => m !== material) : [...prev, material]
                         )}
-                        className="h-4 w-4 text-teal-600 focus:ring-teal-600 border-gray-300 rounded cursor-pointer"
+                        className="h-4 w-4 text-pink-500 focus:ring-pink-500 border-gray-300 rounded cursor-pointer"
                       />
                       <label 
                         htmlFor={`shoe-material-${material}`} 
-                        className={`ml-3 text-sm cursor-pointer flex-1 py-1.5 px-3 rounded-md transition-all ${
+                        className={`ml-3 text-sm cursor-pointer flex-1 py-1 transition-all ${
                           selectedShoeMaterials.includes(material)
-                            ? 'bg-teal-50 text-teal-700 font-medium'
-                            : 'text-gray-700 hover:bg-gray-50'
+                            ? 'text-gray-900 font-medium'
+                            : 'text-gray-700'
                         }`}
                       >
                         {material}
@@ -750,28 +755,17 @@ const ProductList = ({ defaultCategory } = {}) => {
 
           {/* Shoe Type Filter */}
           {availableShoeTypes.length > 0 && (
-            <div className="border-b border-gray-200 pb-6">
+            <div className="border-b border-gray-200">
               <button
                 onClick={() => toggleSection('type')}
-                className="flex justify-between items-center w-full mb-4 group"
+                className="flex justify-between items-center w-full py-3 px-0 bg-white hover:bg-gray-50 transition-colors"
               >
-                <h4 className="text-base font-semibold text-gray-900 group-hover:text-teal-600 transition-colors">Type</h4>
-                <div className="flex items-center gap-2">
-                  {selectedShoeTypes.length > 0 && (
-                    <span className="inline-flex items-center justify-center h-6 w-6 bg-teal-600 text-white text-xs font-bold rounded-full shadow-sm">
-                      {selectedShoeTypes.length}
-                    </span>
-                  )}
-                  {openSections.type ? (
-                    <FaChevronUp className="text-teal-600 transition-transform" />
-                  ) : (
-                    <FaChevronDown className="text-gray-400 group-hover:text-teal-600 transition-colors" />
-                  )}
-                </div>
+                <h4 className="text-sm font-medium text-gray-900">Type</h4>
+                <FaChevronDown className={`text-gray-500 text-xs transition-transform ${openSections.type ? 'transform rotate-180' : ''}`} />
               </button>
               
               {openSections.type && (
-                <div className="space-y-2.5 max-h-64 overflow-y-auto custom-scrollbar pr-2">
+                <div className="pb-4 space-y-2 max-h-64 overflow-y-auto scrollbar-hide pr-2">
                   {availableShoeTypes.map(type => (
                     <div key={type} className="flex items-center group">
                       <input
@@ -781,14 +775,14 @@ const ProductList = ({ defaultCategory } = {}) => {
                         onChange={() => setSelectedShoeTypes(prev => 
                           prev.includes(type) ? prev.filter(t => t !== type) : [...prev, type]
                         )}
-                        className="h-4 w-4 text-teal-600 focus:ring-teal-600 border-gray-300 rounded cursor-pointer"
+                        className="h-4 w-4 text-pink-500 focus:ring-pink-500 border-gray-300 rounded cursor-pointer"
                       />
                       <label 
                         htmlFor={`shoe-type-${type}`} 
-                        className={`ml-3 text-sm cursor-pointer flex-1 py-1.5 px-3 rounded-md transition-all ${
+                        className={`ml-3 text-sm cursor-pointer flex-1 py-1 transition-all ${
                           selectedShoeTypes.includes(type)
-                            ? 'bg-teal-50 text-teal-700 font-medium'
-                            : 'text-gray-700 hover:bg-gray-50'
+                            ? 'text-gray-900 font-medium'
+                            : 'text-gray-700'
                         }`}
                       >
                         {type}
@@ -802,28 +796,17 @@ const ProductList = ({ defaultCategory } = {}) => {
 
           {/* Size Filter */}
           {availableSizes.length > 0 && (
-            <div className="border-b border-gray-200 pb-6">
+            <div className="border-b border-gray-200">
               <button
                 onClick={() => toggleSection('size')}
-                className="flex justify-between items-center w-full mb-4 group"
+                className="flex justify-between items-center w-full py-3 px-0 bg-white hover:bg-gray-50 transition-colors"
               >
-                <h4 className="text-base font-semibold text-gray-900 group-hover:text-teal-600 transition-colors">Size</h4>
-                <div className="flex items-center gap-2">
-                  {selectedSizes.length > 0 && (
-                    <span className="inline-flex items-center justify-center h-6 w-6 bg-teal-600 text-white text-xs font-bold rounded-full shadow-sm">
-                      {selectedSizes.length}
-                    </span>
-                  )}
-                  {openSections.size ? (
-                    <FaChevronUp className="text-teal-600 transition-transform" />
-                  ) : (
-                    <FaChevronDown className="text-gray-400 group-hover:text-teal-600 transition-colors" />
-                  )}
-                </div>
+                <h4 className="text-sm font-medium text-gray-900">Size</h4>
+                <FaChevronDown className={`text-gray-500 text-xs transition-transform ${openSections.size ? 'transform rotate-180' : ''}`} />
               </button>
               
               {openSections.size && (
-                <div className="space-y-2.5 max-h-64 overflow-y-auto custom-scrollbar pr-2">
+                <div className="pb-4 space-y-2 max-h-64 overflow-y-auto scrollbar-hide pr-2">
                   {availableSizes.map(size => (
                     <div key={size} className="flex items-center group">
                       <input
@@ -833,14 +816,14 @@ const ProductList = ({ defaultCategory } = {}) => {
                         onChange={() => setSelectedSizes(prev => 
                           prev.includes(size) ? prev.filter(s => s !== size) : [...prev, size]
                         )}
-                        className="h-4 w-4 text-teal-600 focus:ring-teal-600 border-gray-300 rounded cursor-pointer"
+                        className="h-4 w-4 text-pink-500 focus:ring-pink-500 border-gray-300 rounded cursor-pointer"
                       />
                       <label 
                         htmlFor={`size-${size}`} 
-                        className={`ml-3 text-sm cursor-pointer flex-1 py-1.5 px-3 rounded-md transition-all ${
+                        className={`ml-3 text-sm cursor-pointer flex-1 py-1 transition-all ${
                           selectedSizes.includes(size)
-                            ? 'bg-teal-50 text-teal-700 font-medium'
-                            : 'text-gray-700 hover:bg-gray-50'
+                            ? 'text-gray-900 font-medium'
+                            : 'text-gray-700'
                         }`}
                       >
                         {size}
@@ -859,28 +842,17 @@ const ProductList = ({ defaultCategory } = {}) => {
         <>
           {/* Movement Type Filter */}
           {availableWatchMovements.length > 0 && (
-            <div className="border-b border-gray-200 pb-6">
+            <div className="border-b border-gray-200">
               <button
                 onClick={() => toggleSection('movement')}
-                className="flex justify-between items-center w-full mb-4 group"
+                className="flex justify-between items-center w-full py-3 px-0 bg-white hover:bg-gray-50 transition-colors"
               >
-                <h4 className="text-base font-semibold text-gray-900 group-hover:text-teal-600 transition-colors">Movement Type</h4>
-                <div className="flex items-center gap-2">
-                  {selectedWatchMovements.length > 0 && (
-                    <span className="inline-flex items-center justify-center h-6 w-6 bg-teal-600 text-white text-xs font-bold rounded-full shadow-sm">
-                      {selectedWatchMovements.length}
-                    </span>
-                  )}
-                  {openSections.movement ? (
-                    <FaChevronUp className="text-teal-600 transition-transform" />
-                  ) : (
-                    <FaChevronDown className="text-gray-400 group-hover:text-teal-600 transition-colors" />
-                  )}
-                </div>
+                <h4 className="text-sm font-medium text-gray-900">Movement Type</h4>
+                <FaChevronDown className={`text-gray-500 text-xs transition-transform ${openSections.movement ? 'transform rotate-180' : ''}`} />
               </button>
               
               {openSections.movement && (
-                <div className="space-y-2.5 max-h-64 overflow-y-auto custom-scrollbar pr-2">
+                <div className="pb-4 space-y-2 max-h-64 overflow-y-auto scrollbar-hide pr-2">
                   {availableWatchMovements.map(movement => (
                     <div key={movement} className="flex items-center group">
                       <input
@@ -890,14 +862,14 @@ const ProductList = ({ defaultCategory } = {}) => {
                         onChange={() => setSelectedWatchMovements(prev => 
                           prev.includes(movement) ? prev.filter(m => m !== movement) : [...prev, movement]
                         )}
-                        className="h-4 w-4 text-teal-600 focus:ring-teal-600 border-gray-300 rounded cursor-pointer"
+                        className="h-4 w-4 text-pink-500 focus:ring-pink-500 border-gray-300 rounded cursor-pointer"
                       />
                       <label 
                         htmlFor={`movement-${movement}`} 
-                        className={`ml-3 text-sm cursor-pointer flex-1 py-1.5 px-3 rounded-md transition-all ${
+                        className={`ml-3 text-sm cursor-pointer flex-1 py-1 transition-all ${
                           selectedWatchMovements.includes(movement)
-                            ? 'bg-teal-50 text-teal-700 font-medium'
-                            : 'text-gray-700 hover:bg-gray-50'
+                            ? 'text-gray-900 font-medium'
+                            : 'text-gray-700'
                         }`}
                       >
                         {movement}
@@ -911,28 +883,17 @@ const ProductList = ({ defaultCategory } = {}) => {
 
           {/* Case Material Filter */}
           {availableWatchCaseMaterials.length > 0 && (
-            <div className="border-b border-gray-200 pb-6">
+            <div className="border-b border-gray-200">
               <button
                 onClick={() => toggleSection('caseMaterial')}
-                className="flex justify-between items-center w-full mb-4 group"
+                className="flex justify-between items-center w-full py-3 px-0 bg-white hover:bg-gray-50 transition-colors"
               >
-                <h4 className="text-base font-semibold text-gray-900 group-hover:text-teal-600 transition-colors">Case Material</h4>
-                <div className="flex items-center gap-2">
-                  {selectedWatchCaseMaterials.length > 0 && (
-                    <span className="inline-flex items-center justify-center h-6 w-6 bg-teal-600 text-white text-xs font-bold rounded-full shadow-sm">
-                      {selectedWatchCaseMaterials.length}
-                    </span>
-                  )}
-                  {openSections.caseMaterial ? (
-                    <FaChevronUp className="text-teal-600 transition-transform" />
-                  ) : (
-                    <FaChevronDown className="text-gray-400 group-hover:text-teal-600 transition-colors" />
-                  )}
-                </div>
+                <h4 className="text-sm font-medium text-gray-900">Case Material</h4>
+                <FaChevronDown className={`text-gray-500 text-xs transition-transform ${openSections.caseMaterial ? 'transform rotate-180' : ''}`} />
               </button>
               
               {openSections.caseMaterial && (
-                <div className="space-y-2.5 max-h-64 overflow-y-auto custom-scrollbar pr-2">
+                <div className="pb-4 space-y-2 max-h-64 overflow-y-auto scrollbar-hide pr-2">
                   {availableWatchCaseMaterials.map(material => (
                     <div key={material} className="flex items-center group">
                       <input
@@ -942,14 +903,14 @@ const ProductList = ({ defaultCategory } = {}) => {
                         onChange={() => setSelectedWatchCaseMaterials(prev => 
                           prev.includes(material) ? prev.filter(m => m !== material) : [...prev, material]
                         )}
-                        className="h-4 w-4 text-teal-600 focus:ring-teal-600 border-gray-300 rounded cursor-pointer"
+                        className="h-4 w-4 text-pink-500 focus:ring-pink-500 border-gray-300 rounded cursor-pointer"
                       />
                       <label 
                         htmlFor={`case-material-${material}`} 
-                        className={`ml-3 text-sm cursor-pointer flex-1 py-1.5 px-3 rounded-md transition-all ${
+                        className={`ml-3 text-sm cursor-pointer flex-1 py-1 transition-all ${
                           selectedWatchCaseMaterials.includes(material)
-                            ? 'bg-teal-50 text-teal-700 font-medium'
-                            : 'text-gray-700 hover:bg-gray-50'
+                            ? 'text-gray-900 font-medium'
+                            : 'text-gray-700'
                         }`}
                       >
                         {material}
@@ -963,28 +924,17 @@ const ProductList = ({ defaultCategory } = {}) => {
 
           {/* Band Material Filter */}
           {availableWatchBandMaterials.length > 0 && (
-            <div className="border-b border-gray-200 pb-6">
+            <div className="border-b border-gray-200">
               <button
                 onClick={() => toggleSection('bandMaterial')}
-                className="flex justify-between items-center w-full mb-4 group"
+                className="flex justify-between items-center w-full py-3 px-0 bg-white hover:bg-gray-50 transition-colors"
               >
-                <h4 className="text-base font-semibold text-gray-900 group-hover:text-teal-600 transition-colors">Band Material</h4>
-                <div className="flex items-center gap-2">
-                  {selectedWatchBandMaterials.length > 0 && (
-                    <span className="inline-flex items-center justify-center h-6 w-6 bg-teal-600 text-white text-xs font-bold rounded-full shadow-sm">
-                      {selectedWatchBandMaterials.length}
-                    </span>
-                  )}
-                  {openSections.bandMaterial ? (
-                    <FaChevronUp className="text-teal-600 transition-transform" />
-                  ) : (
-                    <FaChevronDown className="text-gray-400 group-hover:text-teal-600 transition-colors" />
-                  )}
-                </div>
+                <h4 className="text-sm font-medium text-gray-900">Band Material</h4>
+                <FaChevronDown className={`text-gray-500 text-xs transition-transform ${openSections.bandMaterial ? 'transform rotate-180' : ''}`} />
               </button>
               
               {openSections.bandMaterial && (
-                <div className="space-y-2.5 max-h-64 overflow-y-auto custom-scrollbar pr-2">
+                <div className="pb-4 space-y-2 max-h-64 overflow-y-auto scrollbar-hide pr-2">
                   {availableWatchBandMaterials.map(material => (
                     <div key={material} className="flex items-center group">
                       <input
@@ -994,14 +944,14 @@ const ProductList = ({ defaultCategory } = {}) => {
                         onChange={() => setSelectedWatchBandMaterials(prev => 
                           prev.includes(material) ? prev.filter(m => m !== material) : [...prev, material]
                         )}
-                        className="h-4 w-4 text-teal-600 focus:ring-teal-600 border-gray-300 rounded cursor-pointer"
+                        className="h-4 w-4 text-pink-500 focus:ring-pink-500 border-gray-300 rounded cursor-pointer"
                       />
                       <label 
                         htmlFor={`band-material-${material}`} 
-                        className={`ml-3 text-sm cursor-pointer flex-1 py-1.5 px-3 rounded-md transition-all ${
+                        className={`ml-3 text-sm cursor-pointer flex-1 py-1 transition-all ${
                           selectedWatchBandMaterials.includes(material)
-                            ? 'bg-teal-50 text-teal-700 font-medium'
-                            : 'text-gray-700 hover:bg-gray-50'
+                            ? 'text-gray-900 font-medium'
+                            : 'text-gray-700'
                         }`}
                       >
                         {material}
@@ -1015,28 +965,17 @@ const ProductList = ({ defaultCategory } = {}) => {
 
           {/* Water Resistance Filter */}
           {availableWaterResistance.length > 0 && (
-            <div className="border-b border-gray-200 pb-6">
+            <div className="border-b border-gray-200">
               <button
                 onClick={() => toggleSection('waterResistance')}
-                className="flex justify-between items-center w-full mb-4 group"
+                className="flex justify-between items-center w-full py-3 px-0 bg-white hover:bg-gray-50 transition-colors"
               >
-                <h4 className="text-base font-semibold text-gray-900 group-hover:text-teal-600 transition-colors">Water Resistance</h4>
-                <div className="flex items-center gap-2">
-                  {selectedWaterResistance.length > 0 && (
-                    <span className="inline-flex items-center justify-center h-6 w-6 bg-teal-600 text-white text-xs font-bold rounded-full shadow-sm">
-                      {selectedWaterResistance.length}
-                    </span>
-                  )}
-                  {openSections.waterResistance ? (
-                    <FaChevronUp className="text-teal-600 transition-transform" />
-                  ) : (
-                    <FaChevronDown className="text-gray-400 group-hover:text-teal-600 transition-colors" />
-                  )}
-                </div>
+                <h4 className="text-sm font-medium text-gray-900">Water Resistance</h4>
+                <FaChevronDown className={`text-gray-500 text-xs transition-transform ${openSections.waterResistance ? 'transform rotate-180' : ''}`} />
               </button>
               
               {openSections.waterResistance && (
-                <div className="space-y-2.5 max-h-64 overflow-y-auto custom-scrollbar pr-2">
+                <div className="pb-4 space-y-2 max-h-64 overflow-y-auto scrollbar-hide pr-2">
                   {availableWaterResistance.map(wr => (
                     <div key={wr} className="flex items-center group">
                       <input
@@ -1046,14 +985,14 @@ const ProductList = ({ defaultCategory } = {}) => {
                         onChange={() => setSelectedWaterResistance(prev => 
                           prev.includes(wr) ? prev.filter(w => w !== wr) : [...prev, wr]
                         )}
-                        className="h-4 w-4 text-teal-600 focus:ring-teal-600 border-gray-300 rounded cursor-pointer"
+                        className="h-4 w-4 text-pink-500 focus:ring-pink-500 border-gray-300 rounded cursor-pointer"
                       />
                       <label 
                         htmlFor={`water-resistance-${wr}`} 
-                        className={`ml-3 text-sm cursor-pointer flex-1 py-1.5 px-3 rounded-md transition-all ${
+                        className={`ml-3 text-sm cursor-pointer flex-1 py-1 transition-all ${
                           selectedWaterResistance.includes(wr)
-                            ? 'bg-teal-50 text-teal-700 font-medium'
-                            : 'text-gray-700 hover:bg-gray-50'
+                            ? 'text-gray-900 font-medium'
+                            : 'text-gray-700'
                         }`}
                       >
                         {wr}
@@ -1069,28 +1008,17 @@ const ProductList = ({ defaultCategory } = {}) => {
 
       {/* Fabric Filter (for non-shoe/watch products) */}
       {!isShoesCategory && !isWatchCategory && availableFabrics.length > 0 && (
-        <div className="border-b border-gray-200 pb-6">
+        <div className="border-b border-gray-200">
           <button
             onClick={() => toggleSection('material')}
-            className="flex justify-between items-center w-full mb-4 group"
+            className="flex justify-between items-center w-full py-3 px-0 bg-white hover:bg-gray-50 transition-colors"
           >
-            <h4 className="text-base font-semibold text-gray-900 group-hover:text-teal-600 transition-colors">Fabric</h4>
-            <div className="flex items-center gap-2">
-              {selectedFabrics.length > 0 && (
-                <span className="inline-flex items-center justify-center h-6 w-6 bg-teal-600 text-white text-xs font-bold rounded-full shadow-sm">
-                  {selectedFabrics.length}
-                </span>
-              )}
-              {openSections.material ? (
-                <FaChevronUp className="text-teal-600 transition-transform" />
-              ) : (
-                <FaChevronDown className="text-gray-400 group-hover:text-teal-600 transition-colors" />
-              )}
-            </div>
+            <h4 className="text-sm font-medium text-gray-900">Fabric</h4>
+            <FaChevronDown className={`text-gray-500 text-xs transition-transform ${openSections.material ? 'transform rotate-180' : ''}`} />
           </button>
           
           {openSections.material && (
-            <div className="space-y-2.5 max-h-64 overflow-y-auto custom-scrollbar pr-2">
+            <div className="pb-4 space-y-2 max-h-64 overflow-y-auto scrollbar-hide pr-2">
               {availableFabrics.map(material => (
                 <div key={material} className="flex items-center group">
                   <input
@@ -1098,14 +1026,14 @@ const ProductList = ({ defaultCategory } = {}) => {
                     id={`material-${material}`}
                     checked={selectedFabrics.includes(material)}
                     onChange={() => toggleFabric(material)}
-                    className="h-4 w-4 text-teal-600 focus:ring-teal-600 border-gray-300 rounded cursor-pointer"
+                    className="h-4 w-4 text-pink-500 focus:ring-pink-500 border-gray-300 rounded cursor-pointer"
                   />
                   <label 
                     htmlFor={`material-${material}`} 
-                    className={`ml-3 text-sm cursor-pointer flex-1 py-1.5 px-3 rounded-md transition-all ${
+                    className={`ml-3 text-sm cursor-pointer flex-1 py-1 transition-all ${
                       selectedFabrics.includes(material)
-                        ? 'bg-teal-50 text-teal-700 font-medium'
-                        : 'text-gray-700 hover:bg-gray-50'
+                        ? 'text-gray-900 font-medium'
+                        : 'text-gray-700'
                     }`}
                   >
                     {material}
@@ -1143,7 +1071,7 @@ const ProductList = ({ defaultCategory } = {}) => {
         {/* Modern Header */}
         <div className="mb-2 sm:mb-4">
           <div className="flex flex-col items-center text-center mb-2 sm:mb-3">
-            <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 tracking-tight mb-1 sm:mb-2">
+            <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-medium text-gray-900 uppercase mb-1 sm:mb-2">
               {effectiveSubCategory
                 ? effectiveSubCategory
                 : (effectiveCategory
@@ -1151,9 +1079,6 @@ const ProductList = ({ defaultCategory } = {}) => {
                     : 'All Products')}
             </h1>
             <div className="w-24 sm:w-32 h-1 sm:h-1.5 bg-gradient-to-r from-teal-600 via-cyan-600 to-teal-500 rounded-full shadow-sm"></div>
-            <p className="text-gray-600 mt-1 sm:mt-2 text-xs sm:text-sm md:text-base hidden sm:block">
-              Discover our premium collection
-            </p>
           </div>
         </div>
 
@@ -1162,7 +1087,7 @@ const ProductList = ({ defaultCategory } = {}) => {
           <aside className="hidden lg:block w-72 flex-shrink-0" style={{ alignSelf: 'flex-start', position: 'relative' }}>
             <div 
               ref={filterSidebarRef}
-              className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 overflow-y-auto custom-scrollbar filter-sticky-sidebar"
+              className="bg-white rounded-lg shadow-md border border-gray-200 p-5 overflow-y-auto scrollbar-hide filter-sticky-sidebar"
               style={{ 
                 position: 'sticky',
                 top: `${navbarHeight}px`,
@@ -1325,42 +1250,6 @@ const ProductList = ({ defaultCategory } = {}) => {
               )}
             </div>
 
-            {/* Modern Results Bar */}
-            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-4 mb-4 sm:mb-8 bg-white p-3 sm:p-5 rounded-xl sm:rounded-2xl shadow-sm sm:shadow-md border border-gray-100">
-              <p className="text-sm sm:text-base text-gray-700">
-                Showing <span className="font-bold text-gray-900 text-base sm:text-lg">{filteredProducts.length}</span> {filteredProducts.length === 1 ? 'product' : 'products'}
-              </p>
-              <div className="flex items-center gap-2 sm:gap-3">
-                <label htmlFor="sort" className="text-xs sm:text-sm font-medium text-gray-700 whitespace-nowrap">Sort:</label>
-                <select 
-                  id="sort" 
-                  className="text-xs sm:text-sm border-2 border-gray-200 rounded-lg px-3 sm:px-4 py-1.5 sm:py-2 focus:ring-2 focus:ring-teal-600 focus:border-teal-600 bg-white font-medium text-gray-700 cursor-pointer transition-all hover:border-teal-600/50"
-                  onChange={(e) => {
-                    const sorted = [...filteredProducts];
-                    switch(e.target.value) {
-                      case 'price-low-high':
-                        sorted.sort((a, b) => (a.price || 0) - (b.price || 0));
-                        break;
-                      case 'price-high-low':
-                        sorted.sort((a, b) => (b.price || 0) - (a.price || 0));
-                        break;
-                      case 'newest':
-                        sorted.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
-                        break;
-                      default:
-                        break;
-                    }
-                    setFilteredProducts(sorted);
-                  }}
-                >
-                  <option value="featured">Featured</option>
-                  <option value="price-low-high">Price: Low to High</option>
-                  <option value="price-high-low">Price: High to Low</option>
-                  <option value="newest">Newest Arrivals</option>
-                </select>
-              </div>
-            </div>
-            
             {/* Product Grid */}
             {loading ? (
               <div className="relative min-h-[500px] flex items-center justify-center">
@@ -1416,7 +1305,7 @@ const ProductList = ({ defaultCategory } = {}) => {
                   {filteredProducts.slice(0, displayCount).map((p) => (
                   <div
                     key={p._id || p.title}
-                    className="group bg-white overflow-hidden rounded-xl sm:rounded-2xl shadow-sm sm:shadow-md hover:shadow-xl sm:hover:shadow-2xl transition-all duration-500 cursor-pointer border border-gray-100 hover:border-teal-300 sm:hover:border-[#7A2A2A]/20 transform hover:-translate-y-1 sm:hover:-translate-y-2"
+                    className="group bg-white overflow-hidden rounded-lg shadow-sm sm:shadow-md hover:shadow-xl sm:hover:shadow-2xl transition-all duration-500 cursor-pointer border border-gray-100 hover:border-teal-300 sm:hover:border-[#7A2A2A]/20 transform hover:-translate-y-1 sm:hover:-translate-y-2"
                     onClick={() => handleCardClick(p)}
                   >
                     <div className="relative w-full aspect-[3/4] bg-gray-100 overflow-hidden">
@@ -1477,7 +1366,7 @@ const ProductList = ({ defaultCategory } = {}) => {
                       onClick={() => setDisplayCount(prev => prev + 20)}
                       className="px-8 py-3 sm:px-12 sm:py-4 bg-gradient-to-r from-teal-600 to-cyan-600 text-white font-bold rounded-xl hover:from-teal-700 hover:to-cyan-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 text-sm sm:text-base"
                     >
-                      Load More Products
+                      Load More {filteredProducts.length - displayCount} Products
                     </button>
                   </div>
                 )}

@@ -13,20 +13,57 @@ const Navbar = () => {
   const [searchLoading, setSearchLoading] = useState(false);
   const [searchResults, setSearchResults] = useState([]);
   const [activeCategory, setActiveCategory] = useState(null);
+  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 });
+  const [showSecondaryNav, setShowSecondaryNav] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
   const searchWrapRefDesktop = useRef(null);
   const categoryRef = useRef(null);
+  const categoryButtonRefs = useRef({});
+  const dropdownRef = useRef(null);
+  const isClickingCategoryRef = useRef(false);
   const navigate = useNavigate();
   const { cartCount } = useCart();
   const [wishlistCount, setWishlistCount] = useState(0);
 
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
+      const currentScrollY = window.scrollY;
+      setIsScrolled(currentScrollY > 20);
+      
+      // On mobile, always show secondary nav for easy category access
+      const isMobile = window.innerWidth < 768;
+      
+      if (isMobile) {
+        // Mobile: Always show secondary nav
+        setShowSecondaryNav(true);
+      } else {
+        // Desktop: Show secondary nav at top, hide when scrolling down, show when scrolling up
+        if (currentScrollY < 50) {
+          // At top - always show
+          setShowSecondaryNav(true);
+        } else if (currentScrollY > lastScrollY) {
+          // Scrolling down - hide
+          setShowSecondaryNav(false);
+        } else if (currentScrollY < lastScrollY) {
+          // Scrolling up - show
+          setShowSecondaryNav(true);
+        }
+      }
+      
+      setLastScrollY(currentScrollY);
     };
 
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+    // Initial check
+    handleScroll();
+    
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('resize', handleScroll, { passive: true });
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', handleScroll);
+    };
+  }, [lastScrollY]);
 
   useEffect(() => {
     const loadWishlistCount = async () => {
@@ -227,23 +264,176 @@ const Navbar = () => {
     },
   ];
 
+  // Calculate and update dropdown position
+  const calculateDropdownPosition = (categoryName) => {
+    const button = categoryButtonRefs.current[categoryName];
+    if (!button) {
+      // Retry after a short delay if button ref is not ready
+      setTimeout(() => {
+        const retryButton = categoryButtonRefs.current[categoryName];
+        if (retryButton) {
+          calculateDropdownPosition(categoryName);
+        }
+      }, 10);
+      return;
+    }
+
+    // Use requestAnimationFrame to ensure DOM is ready
+    requestAnimationFrame(() => {
+      const rect = button.getBoundingClientRect();
+      const dropdownWidth = 256; // w-64 = 256px
+      const gap = 8; // Gap between button and dropdown
+      
+      // For fixed positioning, use viewport coordinates directly
+      // Position dropdown directly below the category button, aligned to left edge of button
+      let top = rect.bottom + gap;
+      // Always align dropdown to the left edge of the button
+      let left = rect.left;
+      
+      // Ensure dropdown stays within viewport bounds
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+      const padding = 16; // Padding from viewport edges
+      
+      // Check if dropdown would overflow on the right
+      const rightEdge = left + dropdownWidth;
+      if (rightEdge > viewportWidth - padding) {
+        // Shift left just enough to fit within viewport, but never go left of button
+        const maxLeft = viewportWidth - padding - dropdownWidth;
+        left = Math.max(rect.left, maxLeft);
+      }
+      
+      // Never allow dropdown to go to the left of the button's left edge
+      if (left < rect.left) {
+        left = rect.left;
+      }
+      
+      // Only adjust if dropdown would go off-screen on the left (shouldn't happen now)
+      if (left < padding) {
+        left = Math.max(rect.left, padding);
+      }
+      
+      // Check if dropdown would overflow at bottom
+      const estimatedDropdownHeight = 450; // Approximate max height
+      if (top + estimatedDropdownHeight > viewportHeight - padding) {
+        // Show dropdown above the button instead
+        top = rect.top - estimatedDropdownHeight - gap;
+        // Ensure it doesn't go above viewport
+        if (top < padding) {
+          top = padding;
+        }
+      }
+      
+      // Ensure valid position values - always use button's left edge as base
+      const finalTop = Math.max(padding, top);
+      const finalLeft = left; // Use calculated left directly
+      
+      setDropdownPosition({
+        top: finalTop,
+        left: finalLeft,
+        width: rect.width
+      });
+    });
+  };
+
+  // Handle category click - toggle dropdown
+  const handleCategoryClick = (categoryName, event) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    // Mark that we're clicking a category button immediately
+    isClickingCategoryRef.current = true;
+
+    // Toggle dropdown for both desktop and mobile
+    if (activeCategory === categoryName) {
+      // Close if clicking the same category
+      setActiveCategory(null);
+      isClickingCategoryRef.current = false;
+    } else {
+      // Open new category - calculate position immediately (for desktop)
+      const isMobile = window.innerWidth < 768;
+      if (!isMobile) {
+        calculateDropdownPosition(categoryName);
+      }
+      // Set active category
+      setActiveCategory(categoryName);
+      
+      // Reset flag after a delay to allow scroll handler to see it
+      setTimeout(() => {
+        isClickingCategoryRef.current = false;
+      }, 400);
+    }
+  };
+
+  // Handle navigation from dropdown
+  const handleDropdownNavigation = (path) => {
+    setActiveCategory(null);
+    navigate(path);
+  };
+
+  // Update dropdown position on scroll and resize to keep it aligned with category button
+  useEffect(() => {
+    if (!activeCategory) return;
+
+    const updatePosition = () => {
+      calculateDropdownPosition(activeCategory);
+    };
+
+    // Initial position
+    updatePosition();
+
+    // Update position on scroll and resize to keep dropdown aligned with button
+    window.addEventListener('scroll', updatePosition, { passive: true });
+    window.addEventListener('resize', updatePosition);
+
+    return () => {
+      window.removeEventListener('scroll', updatePosition);
+      window.removeEventListener('resize', updatePosition);
+    };
+  }, [activeCategory]);
+
   // Close dropdown when clicking outside
   useEffect(() => {
+    if (!activeCategory) return;
+
     const handleClickOutside = (event) => {
-      // Don't close if clicking on a link
-      if (event.target.tagName === 'A' || event.target.closest('a')) {
-        return;
+      // Check if click is on a category button
+      const isCategoryButton = Object.values(categoryButtonRefs.current).some(
+        (button) => button && button.contains(event.target)
+      );
+
+      // Check if click is inside desktop dropdown
+      const isInsideDesktopDropdown = dropdownRef.current && dropdownRef.current.contains(event.target);
+      
+      // Check if click is inside mobile dropdown or secondary nav container
+      const isMobile = window.innerWidth < 768;
+      let isInsideMobileDropdown = false;
+      if (isMobile && categoryRef.current) {
+        const secondaryNavContainer = categoryRef.current.closest('.relative');
+        isInsideMobileDropdown = secondaryNavContainer && secondaryNavContainer.contains(event.target);
       }
-      if (categoryRef.current && !categoryRef.current.contains(event.target)) {
+
+      // Close if clicked outside both button and dropdown
+      if (!isCategoryButton && !isInsideDesktopDropdown && !isInsideMobileDropdown) {
         setActiveCategory(null);
       }
     };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+
+    // Use setTimeout to avoid immediate closure
+    const timeoutId = setTimeout(() => {
+      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('touchstart', handleClickOutside);
+    }, 10);
+
+    return () => {
+      clearTimeout(timeoutId);
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
+    };
+  }, [activeCategory]);
 
   return (
-    <nav className="relative z-[70] bg-white w-full">
+    <nav className="relative z-[9999] bg-gradient-to-br from-gray-50 via-teal-50/30 to-cyan-50/30 w-full">
       {/* Top Bar - Dark Grey with Social Icons and Account Links */}
       <div className="bg-gray-800 text-white py-1 w-full">
         <div className="w-full px-3 sm:px-4 md:px-6 lg:px-8 xl:px-4 2xl:px-6">
@@ -322,7 +512,7 @@ const Navbar = () => {
       </div>
 
       {/* Bottom Bar - White with Logo, Navigation, and Icons */}
-      <div className="bg-white border-b border-gray-200 w-full">
+      <div className="bg-gradient-to-br from-gray-50 via-teal-50/30 to-cyan-50/30 border-b border-gray-200 w-full">
         <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-4 2xl:px-6">
           <div className="flex items-center justify-between h-14 md:h-16">
             {/* Logo/Brand - Left */}
@@ -334,86 +524,32 @@ const Navbar = () => {
               />
             </Link>
 
-            {/* Navigation Menu - Center (Desktop) with Categories */}
-            <div className="hidden md:flex items-center justify-center flex-1 space-x-3 lg:space-x-5" ref={categoryRef}>
-              {categories.map((category) => (
-                <div key={category.name} className="relative group">
-                  <div
-                    className={`flex items-center text-gray-700 hover:text-gray-900 font-medium text-sm uppercase transition-all duration-200 cursor-pointer whitespace-nowrap px-2 py-1 rounded-md hover:bg-gray-50 ${
-                      activeCategory === category.name ? 'text-gray-900 bg-gray-50' : ''
-                    }`}
-                    onClick={() => {
-                      // Toggle dropdown when clicking on category name
-                      setActiveCategory(activeCategory === category.name ? null : category.name);
-                    }}
-                  >
-                    <span className="whitespace-nowrap">{category.name}</span>
-                    <svg
-                      className={`w-4 h-4 ml-1.5 flex-shrink-0 transition-transform duration-300 ${
-                        activeCategory === category.name ? 'rotate-180' : ''
-                      }`}
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </div>
+            {/* Navigation Menu - Center (Desktop) - Removed Categories */}
+            <div className="hidden md:flex items-center justify-center flex-1 space-x-3 lg:space-x-5">
+              <Link to="/" className="text-gray-700 hover:text-gray-900 font-medium text-sm uppercase transition-colors px-2 py-1">
+                HOME
+              </Link>
+              <Link to="/collections" className="text-gray-700 hover:text-gray-900 font-medium text-sm uppercase transition-colors px-2 py-1">
+                COLLECTIONS
+              </Link>
+              <Link to="/about" className="text-gray-700 hover:text-gray-900 font-medium text-sm uppercase transition-colors px-2 py-1">
+                ABOUT
+              </Link>
+              <Link to="/contact" className="text-gray-700 hover:text-gray-900 font-medium text-sm uppercase transition-colors px-2 py-1">
+                CONTACT
+              </Link>
+            </div>
 
-                  {/* Enhanced Dropdown */}
-                  {activeCategory === category.name && category.subcategories && (
-                    <div className="absolute left-1/2 transform -translate-x-1/2 mt-3 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
-                      <div className="bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden w-64 min-w-[200px]">
-                        {/* Header with gradient */}
-                        <div className="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200">
-                          <button
-                            type="button"
-                            className="w-full text-left block px-5 py-3.5 text-sm font-semibold text-gray-900 hover:text-gray-900 transition-colors duration-200 flex items-center gap-2 group"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              setActiveCategory(null);
-                              navigate(category.path);
-                            }}
-                          >
-                            <svg className="w-4 h-4 text-gray-400 group-hover:text-gray-900 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
-                            </svg>
-                            <span>All {category.name}</span>
-                            <svg className="w-3.5 h-3.5 ml-auto text-gray-400 group-hover:text-gray-900 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                            </svg>
-                          </button>
-                        </div>
-                        {/* Subcategories with better styling */}
-                        <div className="max-h-[60vh] overflow-y-auto custom-scrollbar">
-                          {category.subcategories.map((subcategory, idx) => (
-                            <button
-                              key={subcategory.name}
-                              type="button"
-                              className="w-full text-left block px-5 py-3 text-sm text-gray-700 hover:text-gray-900 hover:bg-gradient-to-r hover:from-gray-50 hover:to-gray-100 transition-all duration-200 border-l-3 border-transparent hover:border-gray-900 group"
-                              onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                setActiveCategory(null);
-                                navigate(subcategory.path);
-                              }}
-                            >
-                              <div className="flex items-center gap-3">
-                                <div className="w-1.5 h-1.5 rounded-full bg-gray-300 group-hover:bg-gray-900 transition-colors"></div>
-                                <span className="font-medium">{subcategory.name}</span>
-                                <svg className="w-3.5 h-3.5 ml-auto text-gray-300 group-hover:text-gray-900 opacity-0 group-hover:opacity-100 transition-all duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                                </svg>
-                              </div>
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ))}
+            {/* Login Button - Right (Desktop) */}
+            <div className="hidden md:flex items-center ml-4">
+              {!isAuthenticated && (
+                <button
+                  onClick={handleLogin}
+                  className="px-4 py-2 bg-gray-800 text-white rounded-lg font-medium hover:bg-gray-700 transition-colors duration-200 text-sm"
+                >
+                  Login
+                </button>
+              )}
             </div>
 
             {/* Icons - Right (Search, Wishlist, Cart) */}
@@ -531,24 +667,196 @@ const Navbar = () => {
 
         {/* Mobile Menu */}
         {isMobileMenuOpen && (
-          <div id="mobile-menu" className="md:hidden py-6 border-t border-gray-200 bg-white shadow-lg relative z-[70]">
-            {/* Mobile Navigation Links with Categories */}
-            <nav className="flex flex-col space-y-1 px-4">
-              {categories.map((category) => (
-                <div key={category.name}>
+          <div id="mobile-menu" className="md:hidden border-t border-gray-200 bg-white shadow-lg relative z-[70] max-h-[calc(100vh-120px)] overflow-y-auto">
+            <div className="py-4">
+              {/* Mobile Navigation Links */}
+              <nav className="flex flex-col space-y-1 px-4">
+                <Link
+                  to="/"
+                  className="w-full text-left text-gray-700 hover:text-gray-900 hover:bg-gray-50 font-medium py-3 px-4 rounded-lg transition-all duration-200 text-sm uppercase"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  HOME
+                </Link>
+                <Link
+                  to="/collections"
+                  className="w-full text-left text-gray-700 hover:text-gray-900 hover:bg-gray-50 font-medium py-3 px-4 rounded-lg transition-all duration-200 text-sm uppercase"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  COLLECTIONS
+                </Link>
+                <Link
+                  to="/about"
+                  className="w-full text-left text-gray-700 hover:text-gray-900 hover:bg-gray-50 font-medium py-3 px-4 rounded-lg transition-all duration-200 text-sm uppercase"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  ABOUT
+                </Link>
+                <Link
+                  to="/contact"
+                  className="w-full text-left text-gray-700 hover:text-gray-900 hover:bg-gray-50 font-medium py-3 px-4 rounded-lg transition-all duration-200 text-sm uppercase"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  CONTACT
+                </Link>
+              </nav>
+
+              {/* Categories Section */}
+              <div className="mt-4 pt-4 border-t border-gray-200">
+                <h3 className="px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Categories</h3>
+                <nav className="flex flex-col space-y-1 px-4">
+                  {categories.map((category) => (
+                    <div key={category.name} className="w-full">
+                      <button
+                        onClick={() => {
+                          if (activeCategory === category.name) {
+                            setActiveCategory(null);
+                          } else {
+                            setActiveCategory(category.name);
+                          }
+                        }}
+                        className="w-full flex items-center justify-between text-gray-700 hover:text-gray-900 hover:bg-gray-50 font-medium py-3 px-4 rounded-lg transition-all duration-200 text-xs uppercase"
+                      >
+                        <span className="text-left flex-1">{category.name}</span>
+                        <svg
+                          className={`w-4 h-4 flex-shrink-0 transition-transform duration-300 ml-2 ${
+                            activeCategory === category.name ? 'rotate-180' : ''
+                          }`}
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </button>
+                      {activeCategory === category.name && category.subcategories && (
+                        <div className="pl-4 space-y-1 mt-1 animate-in">
+                          <Link
+                            to={category.path}
+                            className="w-full text-left block text-gray-900 hover:text-gray-900 bg-gray-50 hover:bg-gray-100 font-semibold py-2.5 px-4 rounded-lg transition-all duration-200 text-xs flex items-center gap-2 group"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setActiveCategory(null);
+                              setIsMobileMenuOpen(false);
+                              window.scrollTo(0, 0);
+                            }}
+                          >
+                            <svg className="w-3.5 h-3.5 text-gray-400 group-hover:text-gray-900 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
+                            <span>All {category.name}</span>
+                          </Link>
+                          {category.subcategories.map((subcategory) => (
+                            <Link
+                              key={subcategory.name}
+                              to={subcategory.path}
+                              className="w-full text-left block text-gray-700 hover:text-gray-900 bg-white hover:bg-gray-50 font-medium py-2 px-4 rounded-lg transition-all duration-200 text-xs flex items-center gap-2 group"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setActiveCategory(null);
+                                setIsMobileMenuOpen(false);
+                                window.scrollTo(0, 0);
+                              }}
+                            >
+                              <div className="w-1.5 h-1.5 rounded-full bg-gray-300 group-hover:bg-gray-600 transition-colors"></div>
+                              <span>{subcategory.name}</span>
+                            </Link>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </nav>
+              </div>
+
+              {/* Auth Section in Mobile Menu */}
+              {!isAuthenticated && (
+                <div className="mt-6 pt-6 px-4 border-t border-gray-200">
                   <button
                     onClick={() => {
-                      if (activeCategory === category.name) {
-                        setActiveCategory(null);
-                      } else {
-                        setActiveCategory(category.name);
+                      handleLogin();
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className="w-full flex items-center justify-center space-x-2 py-3 px-4 bg-gray-800 text-white rounded-lg font-medium hover:bg-gray-700 transition-colors duration-200"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                    </svg>
+                    <span>Sign In</span>
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Secondary Navigation Bar - Categories */}
+      <div 
+        className={`bg-gradient-to-br from-gray-50 via-teal-50/30 to-cyan-50/30 border-b border-gray-200 w-full relative transition-all duration-300 ease-in-out ${
+          showSecondaryNav ? 'max-h-[70px] opacity-100 visible' : 'max-h-0 opacity-0 invisible'
+        }`}
+        style={{ zIndex: 9998 }}
+      >
+        <div className="w-full">
+          {/* Desktop: Centered horizontal layout */}
+          <div className="hidden md:flex items-center justify-center space-x-2 lg:space-x-3 xl:space-x-4 py-2.5 px-4 lg:px-6 xl:px-8">
+            {categories.map((category) => (
+              <div key={category.name} className="relative group flex-shrink-0">
+                <div
+                  ref={(el) => {
+                    if (el) {
+                      categoryButtonRefs.current[category.name] = el;
+                    }
+                  }}
+                    className={`flex items-center text-gray-700 hover:text-gray-900 font-medium text-xs uppercase transition-all duration-200 cursor-pointer whitespace-nowrap px-2 lg:px-2.5 py-0.5 rounded-md hover:bg-gray-50 ${
+                      activeCategory === category.name ? 'text-gray-900 bg-gray-50' : ''
+                    }`}
+                  onClick={(e) => handleCategoryClick(category.name, e)}
+                >
+                  <span className="whitespace-nowrap">{category.name}</span>
+                  <svg
+                    className={`w-3 h-3 lg:w-3.5 lg:h-3.5 ml-1 flex-shrink-0 transition-transform duration-300 ${
+                      activeCategory === category.name ? 'rotate-180' : ''
+                    }`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Mobile: Horizontal scrollable layout */}
+          <div className="md:hidden py-2.5 px-2 relative">
+            <div 
+              className="flex items-center space-x-1.5 overflow-x-auto scrollbar-hide" 
+              ref={categoryRef}
+              style={{
+                scrollbarWidth: 'none',
+                msOverflowStyle: 'none',
+                WebkitOverflowScrolling: 'touch'
+              }}
+            >
+              {categories.map((category) => (
+                <div key={category.name} className="relative group flex-shrink-0">
+                  <div
+                    ref={(el) => {
+                      if (el) {
+                        categoryButtonRefs.current[category.name] = el;
                       }
                     }}
-                    className="w-full flex items-center justify-between text-gray-700 hover:text-gray-900 hover:bg-gray-50 font-medium py-3.5 px-4 rounded-xl transition-all duration-200 text-sm uppercase whitespace-nowrap shadow-sm border border-transparent hover:border-gray-200"
+                    className={`flex items-center text-gray-700 hover:text-gray-900 font-medium text-xs uppercase transition-all duration-200 cursor-pointer whitespace-nowrap px-2.5 py-1 rounded-md hover:bg-gray-50 border border-transparent hover:border-gray-200 ${
+                      activeCategory === category.name ? 'text-gray-900 bg-gray-50 border-gray-200' : ''
+                    }`}
+                    onClick={(e) => handleCategoryClick(category.name, e)}
                   >
                     <span className="whitespace-nowrap">{category.name}</span>
                     <svg
-                      className={`w-5 h-5 flex-shrink-0 transition-transform duration-300 ml-2 ${
+                      className={`w-3 h-3 ml-1 flex-shrink-0 transition-transform duration-300 ${
                         activeCategory === category.name ? 'rotate-180' : ''
                       }`}
                       fill="none"
@@ -557,79 +865,114 @@ const Navbar = () => {
                     >
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                     </svg>
-                  </button>
-                  {activeCategory === category.name && category.subcategories && (
-                    <div className="pl-4 space-y-1.5 mt-2 animate-in">
-                      <Link
-                        to={category.path}
-                        className="w-full text-left block text-gray-900 hover:text-gray-900 bg-white hover:bg-gradient-to-r hover:from-gray-50 hover:to-gray-100 font-semibold py-3 px-4 rounded-lg transition-all duration-200 text-xs shadow-sm border border-gray-200 flex items-center gap-2 group cursor-pointer"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setActiveCategory(null);
-                          setIsMobileMenuOpen(false);
-                          window.scrollTo(0, 0);
-                        }}
-                      >
-                        <svg className="w-3.5 h-3.5 text-gray-400 group-hover:text-gray-900 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        </svg>
-                        <span>All {category.name}</span>
-                      </Link>
-                      {category.subcategories.map((subcategory) => (
-                        <Link
-                          key={subcategory.name}
-                          to={subcategory.path}
-                          className="w-full text-left block text-gray-700 hover:text-gray-900 bg-white hover:bg-gradient-to-r hover:from-gray-50 hover:to-gray-100 font-medium py-2.5 px-4 rounded-lg transition-all duration-200 text-xs border border-transparent hover:border-gray-200 flex items-center gap-2 group cursor-pointer"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setActiveCategory(null);
-                            setIsMobileMenuOpen(false);
-                            window.scrollTo(0, 0);
-                          }}
-                        >
-                          <div className="w-1.5 h-1.5 rounded-full bg-gray-300 group-hover:bg-gray-600 transition-colors"></div>
-                          <span>{subcategory.name}</span>
-                        </Link>
-                      ))}
-                    </div>
-                  )}
+                  </div>
                 </div>
               ))}
-            </nav>
+            </div>
+            
+            {/* Mobile Dropdown - Shows below secondary nav */}
+            {activeCategory && categories.find(cat => cat.name === activeCategory)?.subcategories && (
+              <div className="md:hidden absolute top-full left-0 right-0 bg-white border-b border-gray-200 shadow-lg z-[9999] animate-in">
+                <div className="max-h-[60vh] overflow-y-auto">
+                  {/* Header */}
+                  <button
+                    type="button"
+                    className="w-full text-left block px-4 py-3 bg-gray-50 border-b border-gray-200 font-semibold text-sm text-gray-900 flex items-center gap-2"
+                    onClick={() => {
+                      const category = categories.find(cat => cat.name === activeCategory);
+                      if (category) {
+                        handleDropdownNavigation(category.path);
+                      }
+                    }}
+                  >
+                    <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                    </svg>
+                    <span>All {activeCategory}</span>
+                    <svg className="w-3.5 h-3.5 ml-auto text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </button>
+                  
+                  {/* Subcategories */}
+                  <div className="py-2">
+                    {categories.find(cat => cat.name === activeCategory)?.subcategories.map((subcategory) => (
+                      <button
+                        key={subcategory.name}
+                        type="button"
+                        className="w-full text-left block px-4 py-3 text-sm text-gray-700 hover:text-gray-900 hover:bg-gray-50 transition-all duration-200 flex items-center gap-3 group"
+                        onClick={() => handleDropdownNavigation(subcategory.path)}
+                      >
+                        <div className="w-1.5 h-1.5 rounded-full bg-gray-300 group-hover:bg-gray-600 transition-colors"></div>
+                        <span className="font-medium">{subcategory.name}</span>
+                        <svg className="w-3.5 h-3.5 ml-auto text-gray-300 group-hover:text-gray-900 opacity-0 group-hover:opacity-100 transition-all duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
 
-            {/* Auth Section in Mobile Menu */}
-            <div className="mt-6 pt-6 px-4 border-t border-gray-200">
-              {isAuthenticated ? (
+      {/* Dropdown Portal - Rendered outside normal flow (Desktop only) */}
+      {activeCategory && categories.find(cat => cat.name === activeCategory)?.subcategories && dropdownPosition.left > 0 && dropdownPosition.top > 0 && (
+        <div
+          ref={dropdownRef}
+          className="hidden md:block fixed z-[9999] animate-in fade-in slide-in-from-top-2 duration-200"
+          style={{
+            top: `${dropdownPosition.top}px`,
+            left: `${dropdownPosition.left}px`,
+            pointerEvents: 'auto'
+          }}
+        >
+          <div className="bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden w-64 min-w-[200px]">
+            {/* Header with gradient */}
+            <div className="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200">
+              <button
+                type="button"
+                className="w-full text-left block px-5 py-3.5 text-sm font-semibold text-gray-900 hover:text-gray-900 transition-colors duration-200 flex items-center gap-2 group"
+                onClick={() => {
+                  const category = categories.find(cat => cat.name === activeCategory);
+                  if (category) {
+                    handleDropdownNavigation(category.path);
+                  }
+                }}
+              >
+                <svg className="w-4 h-4 text-gray-400 group-hover:text-gray-900 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                </svg>
+                <span>All {activeCategory}</span>
+                <svg className="w-3.5 h-3.5 ml-auto text-gray-400 group-hover:text-gray-900 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            </div>
+            {/* Subcategories */}
+            <div className="max-h-[60vh] overflow-y-auto custom-scrollbar">
+              {categories.find(cat => cat.name === activeCategory)?.subcategories.map((subcategory) => (
                 <button
-                  onClick={() => {
-                    handleLogout();
-                    setIsMobileMenuOpen(false);
-                  }}
-                  className="w-full flex items-center justify-center space-x-2 py-3 px-4 bg-gray-800 text-white rounded-lg font-medium hover:bg-gray-700 transition-colors duration-200"
+                  key={subcategory.name}
+                  type="button"
+                  className="w-full text-left block px-5 py-3 text-sm text-gray-700 hover:text-gray-900 hover:bg-gradient-to-r hover:from-gray-50 hover:to-gray-100 transition-all duration-200 border-l-3 border-transparent hover:border-gray-900 group"
+                  onClick={() => handleDropdownNavigation(subcategory.path)}
                 >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                  </svg>
-                  <span>Logout</span>
+                  <div className="flex items-center gap-3">
+                    <div className="w-1.5 h-1.5 rounded-full bg-gray-300 group-hover:bg-gray-900 transition-colors"></div>
+                    <span className="font-medium">{subcategory.name}</span>
+                    <svg className="w-3.5 h-3.5 ml-auto text-gray-300 group-hover:text-gray-900 opacity-0 group-hover:opacity-100 transition-all duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </div>
                 </button>
-              ) : (
-                <button
-                  onClick={() => {
-                    handleLogin();
-                    setIsMobileMenuOpen(false);
-                  }}
-                  className="w-full flex items-center justify-center space-x-2 py-3 px-4 bg-gray-800 text-white rounded-lg font-medium hover:bg-gray-700 transition-colors duration-200"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
-                  </svg>
-                  <span>Sign In</span>
-                </button>
-              )}
+              ))}
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* Custom Styles for Dropdown */}
       <style>{`
@@ -662,6 +1005,13 @@ const Navbar = () => {
         }
         .border-l-3 {
           border-left-width: 3px;
+        }
+        .scrollbar-hide {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+        .scrollbar-hide::-webkit-scrollbar {
+          display: none;
         }
       `}</style>
     </nav>

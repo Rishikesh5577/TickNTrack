@@ -19,7 +19,7 @@ const Home = () => {
             alt: 'Festive Offer - TickNTrack',
           },
         ]}
-        mobileSrc="https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765263320/1aec5eeb-e4e1-447c-9a8a-04e915142ec7_kt2uq8_481909.png"
+        mobileSrc="https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765774178/febeb7e114e3b4a6ecf505026489a318_qldt6e.jpg"
       />
 
       {/* TickNTrack Sections */}
