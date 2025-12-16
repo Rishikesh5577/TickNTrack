@@ -264,27 +264,12 @@ const Footer = () => {
               
               {/* PayTM */}
               <div className="w-16 h-10 bg-white rounded flex items-center justify-center shadow-sm hover:shadow-md transition-shadow p-1">
-                <img 
-                  src="https://static.paytm.in/merchants/paytm_logo.png" 
-                  alt="PayTM" 
-                  className="h-full w-auto object-contain"
-                  onError={(e) => {
-                    e.target.onerror = null;
-                    e.target.style.display = 'none';
-                    const parent = e.target.parentElement;
-                    if (parent && !parent.querySelector('.paytm-fallback')) {
-                      const fallback = document.createElement('div');
-                      fallback.className = 'paytm-fallback flex flex-col items-center';
-                      fallback.innerHTML = `
-                        <div class="w-10 h-5 bg-gradient-to-r from-blue-500 to-cyan-500 rounded flex items-center justify-center mb-0.5">
-                          <span class="text-white text-[9px] font-bold">Pay</span>
-                        </div>
-                        <span class="text-gray-800 text-[8px] font-bold">TM</span>
-                      `;
-                      parent.appendChild(fallback);
-                    }
-                  }}
-                />
+                <div className="flex flex-col items-center justify-center h-full w-full">
+                  <div className="w-10 h-5 bg-gradient-to-r from-blue-500 to-cyan-500 rounded flex items-center justify-center mb-0.5">
+                    <span className="text-white text-[9px] font-bold">Pay</span>
+                  </div>
+                  <span className="text-gray-800 text-[8px] font-bold">TM</span>
+                </div>
               </div>
               
               {/* COD */}

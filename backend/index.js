@@ -69,6 +69,10 @@ server.use('/api/orders', ordersRoutes);
 server.use('/api/admin', adminRoutes);
 server.use('/api/wishlist', wishlistRoutes);
 
+// Log registered routes for debugging
+console.log('Payment routes registered at /api/payment');
+console.log('COD endpoint available at POST /api/payment/cod');
+
 const PORT = process.env.PORT || 5000;
 
 // Connect DB
