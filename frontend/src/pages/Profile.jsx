@@ -241,16 +241,7 @@ export default function FlipkartAccountSettings() {
       ) : (
         <div className="flex flex-col lg:flex-row w-full min-h-screen">
           {/* Mobile Header */}
-          <div className="lg:hidden bg-white shadow-md px-4 py-4 flex items-center justify-between sticky z-40" style={{ top: 'var(--app-header-height, 0px)' }}>
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-teal-600 to-cyan-600 flex items-center justify-center text-white text-lg font-bold shadow-lg">
-                {(user.firstName || user.email || user.mobile || 'U').charAt(0).toUpperCase()}
-              </div>
-              <div>
-                <div className="text-xs text-gray-500">Hello,</div>
-                <div className="font-semibold text-gray-800">{user.firstName || user.email || user.mobile || 'User'}</div>
-              </div>
-            </div>
+          <div className="lg:hidden bg-white shadow-md px-4 py-3 flex items-center justify-end sticky z-40" style={{ top: 'var(--app-header-height, 0px)' }}>
             <button 
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
@@ -345,30 +336,42 @@ export default function FlipkartAccountSettings() {
           </div>
 
           {/* Main Content */}
-          <div className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto">
-            <div className="max-w-5xl mx-auto">
+          <div className="flex-1 p-3 sm:p-6 lg:p-8 overflow-y-auto">
+            <div className="max-w-5xl mx-auto w-full">
               <div className="lg:hidden mb-4">
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-3 gap-1.5">
                   <button
                     onClick={() => handleSectionChange('orders')}
-                    className={`px-3 py-2 rounded-lg text-sm font-medium ${activeSection === 'orders' ? 'bg-gradient-to-r from-teal-600 to-cyan-600 text-white shadow-md' : 'bg-gray-100 text-gray-700'}`}
+                    className={`px-2 py-2 rounded-lg text-xs font-medium whitespace-nowrap ${activeSection === 'orders' ? 'bg-gradient-to-r from-teal-600 to-cyan-600 text-white shadow-md' : 'bg-gray-100 text-gray-700'}`}
                   >
-                    Your Orders
+                    Your
                   </button>
                   <button
                     onClick={() => handleSectionChange('profile')}
-                    className={`px-3 py-2 rounded-lg text-sm font-medium ${activeSection === 'profile' ? 'bg-gradient-to-r from-teal-600 to-cyan-600 text-white shadow-md' : 'bg-gray-100 text-gray-700'}`}
+                    className={`px-2 py-2 rounded-lg text-xs font-medium whitespace-nowrap ${activeSection === 'profile' ? 'bg-gradient-to-r from-teal-600 to-cyan-600 text-white shadow-md' : 'bg-gray-100 text-gray-700'}`}
                   >
                     Profile
                   </button>
                   <button
                     onClick={() => handleSectionChange('addresses')}
-                    className={`px-3 py-2 rounded-lg text-sm font-medium ${activeSection === 'addresses' ? 'bg-gradient-to-r from-teal-600 to-cyan-600 text-white shadow-md' : 'bg-gray-100 text-gray-700'}`}
+                    className={`px-2 py-2 rounded-lg text-xs font-medium whitespace-nowrap ${activeSection === 'addresses' ? 'bg-gradient-to-r from-teal-600 to-cyan-600 text-white shadow-md' : 'bg-gray-100 text-gray-700'}`}
                   >
                     Addresses
                   </button>
                 </div>
               </div>
+              
+              {/* User Greeting - Mobile only */}
+              <div className="lg:hidden mb-4 flex items-center gap-3">
+                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-teal-600 to-cyan-600 flex items-center justify-center text-white text-xl font-bold shadow-lg flex-shrink-0">
+                  {(user.firstName || user.email || user.mobile || 'U').charAt(0).toUpperCase()}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="text-sm text-gray-600">Hello,</div>
+                  <div className="font-semibold text-gray-800 text-lg truncate">{user.firstName || user.email || user.mobile || 'User'}</div>
+                </div>
+              </div>
+              
               {activeSection === 'profile' && (
                 <div className="space-y-4 sm:space-y-6">
                   {/* Personal Information */}
