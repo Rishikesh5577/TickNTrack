@@ -54,7 +54,7 @@ const TermsAndConditions = () => {
             </h2>
             <ul className="list-disc list-inside space-y-1">
               <li>
-                We sell sarees and women's accessories. Product images are for
+                We sell premium products including footwear, watches, and accessories. Product images are for
                 reference; slight colour or texture variations may occur.
               </li>
               <li>

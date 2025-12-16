@@ -93,7 +93,7 @@ const Router = () => {
           <Route index element={<Home />} />
           <Route path="shop" element={<Shop />} />
           <Route path="collections" element={<Collections />} />
-          {/* Saree Categories */}
+          {/* Product Categories */}
           {/* Backwards-compatible static routes */}
           <Route path="category/banarasi" element={<CategoryList />} />
           <Route path="silk/banarasi" element={<CategoryList />} />

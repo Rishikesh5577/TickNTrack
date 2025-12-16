@@ -22,7 +22,7 @@ const ShippingPolicy = () => {
             This Shipping Policy explains how{" "}
             <strong>Shivrudray International Private Limited</strong> ("we",
             "our" or "us") handles shipping and delivery of orders placed for
-            sarees and women's accessories through our website.
+            products through our website.
           </p>
         </header>
 

@@ -2,14 +2,14 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { FaShoppingCart, FaRupeeSign, FaArrowLeft, FaStar, FaRegStar, FaBolt, FaSpinner, FaTimes, FaExpand, FaHeart, FaRegHeart, FaShareAlt } from "react-icons/fa";
 import { useCart } from "../context/CartContext";
-import { fetchSareeById, getWishlist, addToWishlist, removeFromWishlist } from "../services/api";
+import { fetchProductById, fetchProducts, getWishlist, addToWishlist, removeFromWishlist } from "../services/api";
 import { placeholders, getProductImage } from "../utils/imagePlaceholder";
 
 const ProductDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { addToCart } = useCart();
-  const [saree, setSaree] = useState(null);
+  const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [quantity, setQuantity] = useState(1);
@@ -18,30 +18,34 @@ const ProductDetail = () => {
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const location = useLocation();
   const [wishlisted, setWishlisted] = useState(false);
+  const [showButtons, setShowButtons] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
+  const [relatedProducts, setRelatedProducts] = useState([]);
+  const [loadingRelated, setLoadingRelated] = useState(false);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    const loadSaree = async () => {
+    const loadProduct = async () => {
       try {
         setLoading(true);
-        const data = await fetchSareeById(id);
-        setSaree(data);
+        const data = await fetchProductById(id);
+        setProduct(data);
       } catch (err) {
-        console.error('Failed to load saree details:', err);
-        setError('Failed to load saree details. Please try again later.');
+        console.error('Failed to load product details:', err);
+        setError('Failed to load product details. Please try again later.');
       } finally {
         setLoading(false);
       }
     };
 
-    loadSaree();
+    loadProduct();
   }, [id]);
 
   // Initialize wishlist state when product loads
   useEffect(() => {
     const checkWishlistStatus = async () => {
-      if (!saree) return;
-      const pid = saree._id || id;
+      if (!product) return;
+      const pid = product._id || id;
       try {
         const data = await getWishlist();
         const productIds = (data.items || []).map(item => item.product?._id || item.product).filter(Boolean);
@@ -52,19 +56,96 @@ const ProductDetail = () => {
       }
     };
     checkWishlistStatus();
-  }, [saree, id]);
+  }, [product, id]);
+
+  // Fetch related products based on category
+  useEffect(() => {
+    const loadRelatedProducts = async () => {
+      if (!product || !product.category) return;
+      
+      try {
+        setLoadingRelated(true);
+        const category = product.category;
+        const allProducts = await fetchProducts(category);
+        
+        // Filter out current product and limit to 8 products
+        const related = allProducts
+          .filter(p => p._id !== product._id)
+          .slice(0, 8);
+        
+        setRelatedProducts(related);
+      } catch (err) {
+        console.error('Failed to load related products:', err);
+        setRelatedProducts([]);
+      } finally {
+        setLoadingRelated(false);
+      }
+    };
+
+    loadRelatedProducts();
+  }, [product]);
+
+  // Handle scroll to hide/show buttons
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      const windowHeight = window.innerHeight;
+      const documentHeight = document.documentElement.scrollHeight;
+      
+      // Check if footer is in view
+      const footer = document.querySelector('footer');
+      let isFooterVisible = false;
+      
+      if (footer) {
+        const footerTop = footer.offsetTop;
+        const scrollPosition = window.scrollY + windowHeight;
+        
+        // Check if footer is visible in viewport (with 150px threshold)
+        isFooterVisible = scrollPosition >= footerTop - 150;
+      }
+      
+      // Hide buttons if:
+      // 1. Scrolling down (currentScrollY > lastScrollY) AND scrolled more than 100px
+      // 2. Footer is visible
+      // 3. Near bottom of page
+      const isScrollingDown = currentScrollY > lastScrollY && currentScrollY > 100;
+      const isNearBottom = currentScrollY + windowHeight >= documentHeight - 200;
+      
+      if (isScrollingDown || isFooterVisible || isNearBottom) {
+        setShowButtons(false);
+      } else if (currentScrollY < lastScrollY) {
+        // Show buttons when scrolling up (unless footer is visible)
+        if (!isFooterVisible) {
+          setShowButtons(true);
+        }
+      }
+      
+      // Always show buttons at the top
+      if (currentScrollY < 50) {
+        setShowButtons(true);
+      }
+      
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, [lastScrollY]);
 
   const handleAddToCart = async () => {
-    if (!saree) return;
+    if (!product) return;
     
     // Check if product requires size selection
-    const availableSizes = saree.product_info?.availableSizes || 
-      (saree.product_info?.shoeSize ? [saree.product_info.shoeSize] : []);
-    const isShoe = saree.category && (
-      saree.category.toLowerCase().includes('shoe') || 
-      saree.category.toLowerCase().includes('sneaker') ||
-      saree.category.toLowerCase().includes('boot') ||
-      saree.category.toLowerCase().includes('sandal')
+    const availableSizes = product.product_info?.availableSizes || 
+      (product.product_info?.shoeSize ? [product.product_info.shoeSize] : []);
+    const isShoe = product.category && (
+      product.category.toLowerCase().includes('shoe') || 
+      product.category.toLowerCase().includes('sneaker') ||
+      product.category.toLowerCase().includes('boot') ||
+      product.category.toLowerCase().includes('sandal')
     );
     
     // Require size selection if it's a shoe or has available sizes
@@ -76,7 +157,7 @@ const ProductDetail = () => {
     setIsAdding(true);
     try {
       await addToCart(id, quantity, selectedSize);
-      alert(`${saree.title} ${quantity > 1 ? `(${quantity} items) ` : ''}added to cart!`);
+      alert(`${product.title} ${quantity > 1 ? `(${quantity} items) ` : ''}added to cart!`);
     } catch (error) {
       console.error('Error adding to cart:', error);
       alert('Failed to add item to cart. Please try again.');
@@ -93,8 +174,8 @@ const ProductDetail = () => {
   const handleShare = async () => {
     try {
       const shareData = {
-        title: saree?.title || 'Saree',
-        text: saree?.description?.slice(0, 120) || 'Check out this saree!',
+        title: product?.title || 'Product',
+        text: product?.description?.slice(0, 120) || 'Check out this product!',
         url: window.location.href,
       };
       if (navigator.share) {
@@ -133,7 +214,7 @@ const ProductDetail = () => {
     );
   }
 
-  if (!saree) {
+  if (!product) {
     return (
       <div className="text-center py-12 bg-gradient-to-b from-teal-50 to-white min-h-screen">
         <p className="text-gray-600">Product not found</p>
@@ -147,7 +228,7 @@ const ProductDetail = () => {
     );
   }
 
-  const sellingPrice = Math.round(saree.mrp - (saree.mrp * (saree.discountPercent || 0) / 100));
+  const sellingPrice = Math.round(product.mrp - (product.mrp * (product.discountPercent || 0) / 100));
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-teal-50 via-white to-gray-50 pb-20 sm:pb-4 relative">
@@ -168,8 +249,8 @@ const ProductDetail = () => {
               <FaTimes className="w-8 h-8" />
             </button>
             <img
-              src={getProductImage(saree, 'image1')}
-              alt={saree.title}
+              src={getProductImage(product, 'image1')}
+              alt={product.title}
               className="max-w-full max-h-[80vh] object-contain"
               onClick={(e) => e.stopPropagation()}
               onError={(e) => {
@@ -188,8 +269,8 @@ const ProductDetail = () => {
           <div className="w-full overflow-hidden rounded-xl bg-gradient-to-br from-teal-50 to-gray-50 group relative border border-teal-100">
             <div className="relative pt-[100%] md:pt-[90%] overflow-hidden">
               <img
-                src={getProductImage(saree, 'image1')}
-                alt={saree.title}
+                src={getProductImage(product, 'image1')}
+                alt={product.title}
                 className="absolute top-0 left-0 w-full h-full object-contain cursor-zoom-in"
                 onClick={() => setIsImageModalOpen(true)}
                 onError={(e) => {
@@ -206,8 +287,8 @@ const ProductDetail = () => {
                     : 'bg-white text-red-600 hover:bg-red-50 border border-red-300') + ' rounded-full p-2 shadow-md cursor-pointer transition-all'}
                   onClick={async (e) => {
                     e.stopPropagation();
-                    if (!saree) return;
-                    const pid = saree._id || id;
+                    if (!product) return;
+                    const pid = product._id || id;
                     
                     try {
                       if (wishlisted) {
@@ -220,7 +301,7 @@ const ProductDetail = () => {
                         await addToWishlist(pid);
                         setWishlisted(true);
                         try { window.dispatchEvent(new Event('wishlist:updated')); } catch {}
-                        alert(`${saree.title} added to wishlist`);
+                        alert(`${product.title} added to wishlist`);
                       }
                     } catch (err) {
                       console.error('Error toggling wishlist:', err);
@@ -261,7 +342,7 @@ const ProductDetail = () => {
 
           {/* Product Details */}
           <div className="py-4 px-4">
-            <h1 className="text-3xl font-bold text-gray-900 mb-3 tracking-tight">{saree.title}</h1>
+            <h1 className="text-3xl font-bold text-gray-900 mb-3 tracking-tight">{product.title}</h1>
             
             <div className="flex items-center mb-4">
               <div className="flex text-teal-500 mr-2">
@@ -280,11 +361,11 @@ const ProductDetail = () => {
                 </span>
               </div>
               <span className="text-gray-400 text-lg line-through ml-4">
-                ₹{saree.mrp.toLocaleString()}
+                ₹{product.mrp.toLocaleString()}
               </span>
-              {saree.discountPercent > 0 && (
+              {product.discountPercent > 0 && (
                 <span className="bg-teal-100 text-teal-700 text-sm font-bold px-3 py-1 rounded-lg ml-4 shadow-sm">
-                  {saree.discountPercent}% OFF
+                  {product.discountPercent}% OFF
                 </span>
               )}
             </div>
@@ -295,12 +376,12 @@ const ProductDetail = () => {
                 Description
               </h3>
               <p className="text-gray-700 leading-relaxed mb-6 bg-teal-50 p-4 rounded-lg border border-teal-100">
-                {saree.description}
+                {product.description}
               </p>
 
               {/* Size Selector for Shoes */}
               {(() => {
-                const categoryLower = (saree.category || '').toLowerCase();
+                const categoryLower = (product.category || '').toLowerCase();
                 const isShoe = categoryLower.includes('shoe') || 
                               categoryLower.includes('sneaker') ||
                               categoryLower.includes('boot') ||
@@ -309,15 +390,15 @@ const ProductDetail = () => {
                               categoryLower.includes('flat');
                 
                 // Get available sizes from product_info
-                let availableSizes = saree.product_info?.availableSizes || [];
+                let availableSizes = product.product_info?.availableSizes || [];
                 
                 // If it's a shoe but no sizes defined, provide default sizes
                 if (isShoe && availableSizes.length === 0) {
                   // Default sizes for shoes (Indian sizes)
                   availableSizes = ['5', '6', '7', '8', '9', '10', '11'];
-                } else if (saree.product_info?.shoeSize && availableSizes.length === 0) {
+                } else if (product.product_info?.shoeSize && availableSizes.length === 0) {
                   // Legacy support: if only shoeSize exists, use it
-                  availableSizes = [saree.product_info.shoeSize];
+                  availableSizes = [product.product_info.shoeSize];
                 }
                 
                 // Show size selector if it's a shoe OR if product has availableSizes
@@ -384,7 +465,9 @@ const ProductDetail = () => {
               </div>
 
               {/* Sticky Buttons Container - Hidden on larger screens */}
-              <div className="fixed bottom-0 left-0 right-0 bg-white shadow-2xl border-t border-teal-100 p-3 z-50 sm:hidden">
+              <div className={`fixed bottom-0 left-0 right-0 bg-white shadow-2xl border-t border-teal-100 p-3 z-50 sm:hidden transition-transform duration-300 ${
+                showButtons ? 'translate-y-0' : 'translate-y-full'
+              }`}>
                 <div className="flex gap-3 max-w-md mx-auto">
                   <button 
                     className="flex-1 bg-white text-teal-600 py-3 rounded-xl flex items-center justify-center space-x-2 hover:bg-teal-600 hover:text-white transition-all disabled:opacity-70 cursor-pointer shadow-md border-2 border-teal-600 font-semibold text-sm transform hover:scale-105 active:scale-95"
@@ -431,46 +514,46 @@ const ProductDetail = () => {
                 <div className="space-y-4 text-gray-800">
                   <div className="flex items-center py-2 border-b border-teal-100">
                     <span className="w-40 font-semibold text-teal-700">Brand:</span>
-                    <span className="font-medium">{saree.product_info?.brand || 'N/A'}</span>
+                    <span className="font-medium">{product.product_info?.brand || 'N/A'}</span>
                   </div>
                   <div className="flex items-center py-2 border-b border-teal-100">
                     <span className="w-40 font-semibold text-teal-700">Manufacturer:</span>
-                    <span className="font-medium">{saree.product_info?.manufacturer || 'N/A'}</span>
+                    <span className="font-medium">{product.product_info?.manufacturer || 'N/A'}</span>
                   </div>
                   <div className="flex items-center py-2 border-b border-teal-100">
                     <span className="w-40 font-semibold text-teal-700">Category:</span>
-                    <span className="font-medium bg-teal-100 text-teal-800 px-3 py-1 rounded-lg inline-block">{saree.category}</span>
+                    <span className="font-medium bg-teal-100 text-teal-800 px-3 py-1 rounded-lg inline-block">{product.category}</span>
                   </div>
                   <div className="flex items-center py-2 border-b border-teal-100">
                     <span className="w-40 font-semibold text-teal-700">Material:</span>
-                    <span className="font-medium">{saree.product_info?.SareeMaterial || saree.product_info?.shoeMaterial || 'N/A'}</span>
+                    <span className="font-medium">{product.product_info?.SareeMaterial || product.product_info?.shoeMaterial || product.product_info?.material || 'N/A'}</span>
                   </div>
                   <div className="flex items-center py-2 border-b border-teal-100">
                     <span className="w-40 font-semibold text-teal-700">Color:</span>
-                    <span className="font-medium">{saree.product_info?.SareeColor || saree.product_info?.shoeColor || 'N/A'}</span>
+                    <span className="font-medium">{product.product_info?.SareeColor || product.product_info?.shoeColor || product.product_info?.color || 'N/A'}</span>
                   </div>
-                  {saree.product_info?.SareeLength && (
+                  {product.product_info?.SareeLength && (
                     <div className="flex items-center py-2 border-b border-teal-100">
                       <span className="w-40 font-semibold text-teal-700">Length:</span>
-                      <span className="font-medium">{saree.product_info.SareeLength}</span>
+                      <span className="font-medium">{product.product_info.SareeLength}</span>
                     </div>
                   )}
-                  {saree.product_info?.availableSizes && saree.product_info.availableSizes.length > 0 && (
+                  {product.product_info?.availableSizes && product.product_info.availableSizes.length > 0 && (
                     <div className="flex items-center py-2 border-b border-teal-100">
                       <span className="w-40 font-semibold text-teal-700">Available Sizes:</span>
-                      <span className="font-medium">{saree.product_info.availableSizes.join(', ')}</span>
+                      <span className="font-medium">{product.product_info.availableSizes.join(', ')}</span>
                     </div>
                   )}
-                  {saree.product_info?.shoeType && (
+                  {product.product_info?.shoeType && (
                     <div className="flex items-center py-2 border-b border-teal-100">
                       <span className="w-40 font-semibold text-teal-700">Type:</span>
-                      <span className="font-medium">{saree.product_info.shoeType}</span>
+                      <span className="font-medium">{product.product_info.shoeType}</span>
                     </div>
                   )}
-                  {saree.product_info?.IncludedComponents && (
+                  {product.product_info?.IncludedComponents && (
                     <div className="flex items-center py-2">
                       <span className="w-40 font-semibold text-teal-700">Included:</span>
-                      <span className="font-medium">{saree.product_info.IncludedComponents}</span>
+                      <span className="font-medium">{product.product_info.IncludedComponents}</span>
                     </div>
                   )}
                 </div>
@@ -491,6 +574,72 @@ const ProductDetail = () => {
           </div>
         </div>
       </div>
+
+      {/* Related Products Section */}
+      {relatedProducts.length > 0 && (
+        <div className="mt-12 px-4 sm:px-6 lg:px-8">
+          <div className="max-w-7xl mx-auto">
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6 flex items-center gap-3">
+              <span className="w-1 h-8 bg-gradient-to-b from-teal-600 to-cyan-500 rounded-full"></span>
+              Related Products
+            </h2>
+            
+            {loadingRelated ? (
+              <div className="flex justify-center items-center py-12">
+                <FaSpinner className="animate-spin text-4xl text-teal-600" />
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+                {relatedProducts.map((product) => {
+                  const productPrice = Math.round(product.mrp - (product.mrp * (product.discountPercent || 0) / 100));
+                  return (
+                    <div
+                      key={product._id}
+                      className="group bg-white overflow-hidden rounded-lg shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer border border-gray-100 hover:border-teal-300"
+                      onClick={() => navigate(`/product/${product._id}`)}
+                    >
+                      <div className="relative w-full aspect-[3/4] bg-gray-100 overflow-hidden">
+                        <img
+                          src={getProductImage(product, 'image1')}
+                          alt={product.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          onError={(e) => {
+                            e.target.onerror = null;
+                            e.target.src = placeholders.productList;
+                          }}
+                        />
+                        {product.discountPercent > 0 && (
+                          <span className="absolute top-2 right-2 bg-teal-600 text-white text-xs font-bold px-2 py-1 rounded-md shadow-md">
+                            {product.discountPercent}% OFF
+                          </span>
+                        )}
+                      </div>
+                      <div className="p-3 sm:p-4">
+                        <h3 className="text-sm sm:text-base font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-teal-600 transition-colors">
+                          {product.title}
+                        </h3>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center">
+                            <FaRupeeSign className="text-teal-600 text-sm" />
+                            <span className="text-lg font-bold text-teal-700 ml-1">
+                              {productPrice.toLocaleString()}
+                            </span>
+                          </div>
+                          {product.mrp > productPrice && (
+                            <span className="text-gray-400 text-sm line-through">
+                              ₹{product.mrp.toLocaleString()}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

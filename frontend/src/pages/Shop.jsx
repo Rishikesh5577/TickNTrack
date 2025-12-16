@@ -6,7 +6,7 @@ const Shop = () => {
           Shop 
         </h1>
         <p className="text-center text-gray-600 mb-12 max-w-2xl mx-auto">
-          Browse through our exquisite collection of traditional and contemporary sarees
+          Browse through our exquisite collection of premium products
         </p>
         
         <div className="text-center py-20">

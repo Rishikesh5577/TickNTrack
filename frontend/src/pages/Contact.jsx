@@ -19,7 +19,7 @@ const Contact = () => {
               GET IN TOUCH
             </h2>
             <p className="text-lg text-gray-700 leading-relaxed mb-12 text-center">
-              Have a question about our sarees or need assistance with your order? We're here to help! Reach out to us and we'll respond as soon as possible.
+              Have a question about our products or need assistance with your order? We're here to help! Reach out to us and we'll respond as soon as possible.
             </p>
           </div>
 

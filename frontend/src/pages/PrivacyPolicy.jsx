@@ -22,7 +22,7 @@ const PrivacyPolicy = () => {
             This Privacy Policy explains how{" "}
             <strong>Shivrudray International Private Limited</strong> ("we",
             "our" or "us") collects, uses, shares and protects your information
-            when you browse or shop for our sarees and women's accessories
+            when you browse or shop for our products
             through our website (the "Service").
           </p>
         </header>
@@ -79,7 +79,7 @@ const PrivacyPolicy = () => {
               </li>
               <li>
                 <strong>Order & Transaction Information:</strong> Products
-                purchased (sarees and accessories), order history, payment
+                purchased (products), order history, payment
                 method used and transaction identifiers. Card details are
                 processed securely by our payment gateway; we do not store your
                 full card information.
@@ -164,7 +164,7 @@ const PrivacyPolicy = () => {
             </p>
             <ul className="list-disc list-inside space-y-1">
               <li>Remember your cart items and login sessions.</li>
-              <li>Show recently viewed sarees and accessory suggestions.</li>
+              <li>Show recently viewed products and suggestions.</li>
               <li>Measure website performance and fix issues.</li>
             </ul>
             <p className="mt-2">

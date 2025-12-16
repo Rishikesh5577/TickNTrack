@@ -14,7 +14,7 @@ const API_URL = `${getBackendUrl()}/api`;
 // PRODUCTS
 // ---------------------------------------------------------
 
-export const fetchSarees = async (category, subcategory = null) => {
+export const fetchProducts = async (category, subcategory = null) => {
   try {
     let url = `${API_URL}/products`;
     const params = new URLSearchParams();
@@ -74,11 +74,15 @@ export const fetchSarees = async (category, subcategory = null) => {
 };
 
 
-export const fetchSareeById = async (id) => {
+export const fetchProductById = async (id) => {
   const response = await fetch(`${API_URL}/products/${id}`);
-  if (!response.ok) throw new Error("Failed to fetch saree details");
+  if (!response.ok) throw new Error("Failed to fetch product details");
   return response.json();
 };
+
+// Legacy alias for backward compatibility
+export const fetchSarees = fetchProducts;
+export const fetchSareeById = fetchProductById;
 
 
 // ---------------------------------------------------------

@@ -22,7 +22,7 @@ const RefundCancellationPolicy = () => {
             This Refund & Cancellation Policy explains how{" "}
             <strong>Shivrudray International Private Limited</strong> ("we",
             "our" or "us") handles refunds, returns, exchanges and cancellations
-            for orders placed for sarees and women's accessories through our
+            for orders placed for products through our
             website.
           </p>
         </header>

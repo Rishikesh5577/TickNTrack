@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { FaRupeeSign, FaSpinner, FaFilter, FaTimes, FaChevronDown, FaChevronUp, FaHeart, FaRegHeart } from 'react-icons/fa';
-import { fetchSarees, addToWishlist, removeFromWishlist, getWishlist } from '../services/api';
+import { fetchProducts, addToWishlist, removeFromWishlist, getWishlist } from '../services/api';
 import { placeholders, getProductImage } from '../utils/imagePlaceholder';
 
 // Add CSS to hide scrollbar and loading animation
@@ -379,7 +379,7 @@ const ProductList = ({ defaultCategory } = {}) => {
         setDisplayCount(20); // Reset to initial 20 products when category changes
         
         // Use subcategory if available, otherwise use category
-        const data = await fetchSarees(effectiveCategory, effectiveSubCategory || null);
+        const data = await fetchProducts(effectiveCategory, effectiveSubCategory || null);
         setProducts(Array.isArray(data) ? data : []);
         setFilteredProducts(Array.isArray(data) ? data : []);
       } catch (err) {
@@ -1364,7 +1364,7 @@ const ProductList = ({ defaultCategory } = {}) => {
                   {filteredProducts.slice(0, displayCount).map((p) => (
                   <div
                     key={p._id || p.title}
-                    className="group bg-white overflow-hidden rounded-lg shadow-sm sm:shadow-md hover:shadow-xl sm:hover:shadow-2xl transition-all duration-500 cursor-pointer border border-gray-100 hover:border-teal-300 sm:hover:border-[#7A2A2A]/20"
+                    className="group bg-white overflow-hidden rounded-lg shadow-sm sm:shadow-md hover:shadow-xl sm:hover:shadow-2xl transition-all duration-500 cursor-pointer border border-gray-200 hover:border-2 hover:border-teal-500"
                     onClick={() => handleCardClick(p)}
                   >
                     <div className="relative w-full aspect-[3/4] bg-gray-100 overflow-hidden">
@@ -1404,9 +1404,6 @@ const ProductList = ({ defaultCategory } = {}) => {
                     </div>
 
                     <div className="relative p-3 sm:p-4 md:p-5 bg-white">
-                      {/* Gradient accent bar - using teal theme */}
-                      <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-teal-600 via-cyan-600 to-teal-500 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"></div>
-                      
                       <div className="flex justify-between items-start mb-1 sm:mb-2">
                         <h3 className="text-xs font-semibold text-teal-600 uppercase tracking-wide line-clamp-1">
                           {p.product_info?.manufacturer || 'VARNICRAFTS'}
