@@ -1,7 +1,7 @@
 import React, { useState, useContext, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
-import { getMyAddress, saveMyAddress, deleteAddressById, createPaymentOrder, verifyPayment } from '../services/api';
+import { getMyAddress, saveMyAddress, deleteAddressById, createPaymentOrder, verifyPayment, createCODOrder } from '../services/api';
 
 const indianStates = [
   'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh',
@@ -65,6 +65,7 @@ export default function AddressForm() {
 
   const [showSuccess, setShowSuccess] = useState(false);
   const [showForm, setShowForm] = useState(true);
+  const [paymentMethod, setPaymentMethod] = useState('razorpay'); // 'razorpay' or 'cod'
   const { cart, cartTotal: total, loadCart } = useCart();
 
   // Calculate price details
@@ -95,6 +96,26 @@ export default function AddressForm() {
       alert('Please save your delivery address first.');
       return;
     }
+
+    // Handle COD orders
+    if (paymentMethod === 'cod') {
+      try {
+        const result = await createCODOrder();
+        if (result && result.success) {
+          await loadCart();
+          const orderId = result.order?._id || result.order?.id;
+          navigate(`/order/success?orderId=${orderId}&paymentMethod=cod`);
+        } else {
+          alert('Failed to place COD order. Please try again.');
+        }
+      } catch (e) {
+        console.error('COD order error:', e);
+        alert('Failed to place COD order. Please try again.');
+      }
+      return;
+    }
+
+    // Handle Razorpay payment
     try {
       if (!window.Razorpay) {
         await new Promise((resolve, reject) => {
@@ -125,7 +146,8 @@ export default function AddressForm() {
             const r = await verifyPayment(response);
             if (r && r.success) {
               await loadCart();
-              navigate('/profile?tab=orders');
+              const orderId = r.order?._id || r.order?.id;
+              navigate(`/order/success?orderId=${orderId}&paymentMethod=razorpay`);
             } else {
               alert('Payment verification failed');
             }
@@ -696,16 +718,53 @@ export default function AddressForm() {
               <span className="text-teal-700">₹{priceDetails.total.toLocaleString()}</span>
             </div>
 
+            {/* Payment Method Selection */}
+            <div className="mb-4 pb-4 border-b-2 border-teal-200">
+              <h4 className="text-sm font-semibold text-gray-900 mb-3">Payment Method</h4>
+              <div className="space-y-2">
+                <label className="flex items-center gap-3 p-3 border-2 rounded-lg cursor-pointer transition-all hover:bg-teal-50 border-gray-200 hover:border-teal-300">
+                  <input
+                    type="radio"
+                    name="paymentMethod"
+                    value="razorpay"
+                    checked={paymentMethod === 'razorpay'}
+                    onChange={(e) => setPaymentMethod(e.target.value)}
+                    className="w-4 h-4 text-teal-600 focus:ring-teal-500"
+                  />
+                  <div className="flex-1">
+                    <span className="font-medium text-gray-900">Online Payment</span>
+                    <p className="text-xs text-gray-600">Pay via UPI, Cards, Net Banking</p>
+                  </div>
+                </label>
+                <label className="flex items-center gap-3 p-3 border-2 rounded-lg cursor-pointer transition-all hover:bg-teal-50 border-gray-200 hover:border-teal-300">
+                  <input
+                    type="radio"
+                    name="paymentMethod"
+                    value="cod"
+                    checked={paymentMethod === 'cod'}
+                    onChange={(e) => setPaymentMethod(e.target.value)}
+                    className="w-4 h-4 text-teal-600 focus:ring-teal-500"
+                  />
+                  <div className="flex-1">
+                    <span className="font-medium text-gray-900">Cash on Delivery (COD)</span>
+                    <p className="text-xs text-gray-600">Pay when you receive the order</p>
+                  </div>
+                </label>
+              </div>
+            </div>
+
             <button 
               onClick={handlePayment}
               disabled={!hasSavedAddress}
               className={`w-full mt-4 py-4 px-4 rounded-xl transition-all font-bold cursor-pointer shadow-lg ${
                 hasSavedAddress 
-                  ? 'bg-gradient-to-r from-teal-600 to-cyan-600 text-white hover:from-teal-700 hover:to-cyan-700 hover:shadow-xl transform hover:scale-105 active:scale-95' 
+                  ? paymentMethod === 'cod'
+                    ? 'bg-gradient-to-r from-orange-600 to-red-600 text-white hover:from-orange-700 hover:to-red-700 hover:shadow-xl transform hover:scale-105 active:scale-95'
+                    : 'bg-gradient-to-r from-teal-600 to-cyan-600 text-white hover:from-teal-700 hover:to-cyan-700 hover:shadow-xl transform hover:scale-105 active:scale-95'
                   : 'bg-gray-300 text-gray-600 cursor-not-allowed'
               }`}
             >
-              PROCEED TO PAYMENT
+              {paymentMethod === 'cod' ? 'PLACE ORDER (COD)' : 'PROCEED TO PAYMENT'}
             </button>
           </div>
         </div>

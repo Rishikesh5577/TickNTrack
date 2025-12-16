@@ -27,7 +27,7 @@ const Contact = () => {
           <div className="space-y-6">
             <div className="p-6 bg-white border-2 border-gray-200 rounded-lg shadow-md">
               <h3 className="text-2xl font-semibold text-gray-900 mb-4 text-center">
-                Shivrudray International Private Limited
+                TickNTrack Private Limited
               </h3>
             </div>
 
@@ -37,8 +37,8 @@ const Contact = () => {
                 <div className="min-w-0 flex-1">
                   <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2">Email</h3>
                   <p className="text-sm sm:text-base text-gray-700 break-words">
-                    <a href="mailto:shivrudrayinternational03@gmail.com" className="hover:text-amber-600 transition-colors break-all">
-                      shivrudrayinternational03@gmail.com
+                    <a href="mailto:support@tickntrack.com" className="hover:text-amber-600 transition-colors break-all">
+                      support@tickntrack.com
                     </a>
                   </p>
                 </div>
@@ -48,8 +48,8 @@ const Contact = () => {
                 <div className="text-2xl sm:text-3xl text-amber-600 flex-shrink-0">📞</div>
                 <div className="min-w-0 flex-1">
                   <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2">Phone</h3>
-                  <p className="text-sm sm:text-base text-gray-700 break-words">+91 92744 90602</p>
-                  <p className="text-sm sm:text-base text-gray-700 break-words">+91 92740 99941</p>
+                  <p className="text-sm sm:text-base text-gray-700 break-words">+91 1800 123 4567</p>
+                  <p className="text-sm sm:text-base text-gray-700 break-words">+91 98765 43210</p>
                 </div>
               </div>
             </div>
@@ -59,7 +59,7 @@ const Contact = () => {
               <div className="min-w-0 flex-1">
                 <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2">Address</h3>
                 <p className="text-sm sm:text-base text-gray-700 leading-relaxed break-words">
-                  Broker Office No. A-417, THE APMC RS No. 261, Morbi Rajkot Highway, Bedi, Rajkot – 360003, Gujarat, India
+                  123 Fashion Street, Business District, Mumbai – 400001, Maharashtra, India
                 </p>
               </div>
             </div>

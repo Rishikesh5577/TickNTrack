@@ -191,6 +191,16 @@ export const verifyPayment = async (payload) => {
   return res.json();
 };
 
+export const createCODOrder = async () => {
+  const res = await fetch(`${API_URL}/payment/cod`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...authHeaders() },
+    credentials: "include",
+  });
+  if (!res.ok) throw new Error("Failed to create COD order");
+  return res.json();
+};
+
 
 // ---------------------------------------------------------
 // ORDERS
@@ -202,6 +212,19 @@ export const getMyOrders = async () => {
     credentials: "include",
   });
   if (!res.ok) throw new Error("Failed to fetch orders");
+  return res.json();
+};
+
+export const cancelOrder = async (orderId) => {
+  const res = await fetch(`${API_URL}/orders/${orderId}/cancel`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json", ...authHeaders() },
+    credentials: "include",
+  });
+  if (!res.ok) {
+    const error = await res.json();
+    throw new Error(error.message || "Failed to cancel order");
+  }
   return res.json();
 };
 

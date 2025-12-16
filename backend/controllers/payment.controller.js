@@ -100,6 +100,7 @@ export const verifyPayment = async (req, res) => {
       amount,
       currency: 'INR',
       status: 'paid',
+      paymentMethod: 'razorpay',
       razorpayOrderId: razorpay_order_id,
       razorpayPaymentId: razorpay_payment_id,
       razorpaySignature: razorpay_signature,
@@ -113,5 +114,104 @@ export const verifyPayment = async (req, res) => {
   } catch (err) {
     console.error('Razorpay verifyPayment error:', err?.message || err);
     return res.status(500).json({ error: 'Verification failed' });
+  }
+};
+
+export const createCODOrder = async (req, res) => {
+  try {
+    const userId = req.userId;
+    if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+
+    const cart = await Cart.findOne({ user: userId }).populate('items.product');
+    if (!cart || !Array.isArray(cart.items) || cart.items.length === 0) {
+      return res.status(400).json({ error: 'Cart is empty' });
+    }
+
+    // Filter out invalid products and map to order items
+    const items = cart.items
+      .filter(i => {
+        const p = i.product;
+        if (!p || !p._id) {
+          console.warn('Skipping invalid product in cart:', i);
+          return false;
+        }
+        return true;
+      })
+      .map(i => {
+        const p = i.product;
+        let base = 0;
+        if (p && typeof p.price === 'number') {
+          base = Number(p.price) || 0;
+        } else {
+          const mrp = Number(p?.mrp) || 0;
+          const discountPercent = Number(p?.discountPercent) || 0;
+          base = Math.round(mrp - (mrp * discountPercent) / 100) || 0;
+        }
+        return { 
+          product: p._id, 
+          quantity: i.quantity || 1, 
+          price: base,
+          size: i.size || undefined
+        };
+      });
+
+    // Check if we have any valid items after filtering
+    if (items.length === 0) {
+      return res.status(400).json({ error: 'No valid products in cart' });
+    }
+
+    const amount = items.reduce((sum, it) => sum + (it.price * it.quantity), 0);
+
+    // Load user's current address to snapshot into the order
+    let shippingAddress = null;
+    try {
+      const addr = await Address.findOne({ userId });
+      if (addr) {
+        const { fullName, mobileNumber, pincode, locality, address, city, state, landmark, alternatePhone, addressType } = addr;
+        shippingAddress = { fullName, mobileNumber, pincode, locality, address, city, state, landmark, alternatePhone, addressType };
+      }
+    } catch (addrErr) {
+      console.error('Error loading address:', addrErr);
+    }
+
+    const orderData = {
+      user: userId,
+      items,
+      amount,
+      currency: 'INR',
+      status: 'pending',
+      paymentMethod: 'cod',
+    };
+
+    if (shippingAddress) {
+      orderData.shippingAddress = shippingAddress;
+    }
+
+    console.log('Creating COD order with data:', JSON.stringify(orderData, null, 2));
+    
+    const order = await Order.create(orderData);
+    console.log('COD order created successfully:', order._id);
+
+    cart.items = [];
+    await cart.save();
+    console.log('Cart cleared after COD order');
+
+    return res.json({ success: true, order });
+  } catch (err) {
+    console.error('COD order creation error:', err?.message || err);
+    console.error('Error stack:', err?.stack);
+    console.error('Error name:', err?.name);
+    if (err.errors) {
+      console.error('Validation errors:', JSON.stringify(err.errors, null, 2));
+    }
+    return res.status(500).json({ 
+      error: 'Failed to create COD order',
+      message: err?.message || 'Unknown error',
+      details: process.env.NODE_ENV === 'development' ? {
+        message: err?.message,
+        name: err?.name,
+        errors: err?.errors
+      } : undefined
+    });
   }
 };

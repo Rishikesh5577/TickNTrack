@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../utils/api';
-import { getMyAddress, getMyOrders } from '../services/api';
+import { getMyAddress, getMyOrders, cancelOrder } from '../services/api';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { FiSettings } from 'react-icons/fi';
 
@@ -42,7 +42,9 @@ export default function FlipkartAccountSettings() {
       on_the_way: 'bg-indigo-100 text-indigo-700 border border-indigo-200',
       delivered: 'bg-emerald-100 text-emerald-700 border border-emerald-200',
       failed: 'bg-rose-100 text-rose-700 border border-rose-200',
-      paid: 'bg-rose-100 text-rose-700 border border-rose-200',
+      paid: 'bg-green-100 text-green-700 border border-green-200',
+      pending: 'bg-yellow-100 text-yellow-700 border border-yellow-200',
+      cancelled: 'bg-red-100 text-red-700 border border-red-200',
     };
     const cls = map[s] || 'bg-gray-100 text-gray-700 border border-gray-200';
     return <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${cls}`}>{status}</span>;
@@ -155,6 +157,26 @@ export default function FlipkartAccountSettings() {
     } finally {
       setLoadingOrders(false);
     }
+  };
+
+  const handleCancelOrder = async (orderId) => {
+    if (!window.confirm('Are you sure you want to cancel this order? This action cannot be undone.')) {
+      return;
+    }
+
+    try {
+      await cancelOrder(orderId);
+      alert('Order cancelled successfully!');
+      await refreshOrders();
+    } catch (error) {
+      console.error('Cancel order error:', error);
+      alert(error.message || 'Failed to cancel order. Please try again.');
+    }
+  };
+
+  const canCancelOrder = (status) => {
+    const cancellableStatuses = ['pending', 'created', 'paid'];
+    return cancellableStatuses.includes(String(status || '').toLowerCase());
   };
 
   const toggleMenu = (menu) => {
@@ -482,9 +504,9 @@ export default function FlipkartAccountSettings() {
                     <div className="space-y-6">
                       {orders.map((order) => (
                         <div key={order._id} className="border-2 border-gray-200 rounded-xl p-4 sm:p-5 hover:border-teal-600 hover:shadow-lg transition-all duration-300 bg-gradient-to-br from-white to-gray-50">
-                          <div className="flex items-center justify-between">
+                          <div className="flex items-center justify-between flex-wrap gap-2">
                             <div className="text-sm text-gray-600">Order ID: <span className="font-mono">{String(order._id).slice(-8)}</span></div>
-                            <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-3 flex-wrap">
                               <StatusBadge status={order.status} />
                               <div className="text-sm font-semibold text-gray-800">₹{order.amount}</div>
                             </div>
@@ -505,6 +527,19 @@ export default function FlipkartAccountSettings() {
                               </div>
                             ))}
                           </div>
+                          {canCancelOrder(order.status) && (
+                            <div className="mt-4 pt-4 border-t border-gray-200">
+                              <button
+                                onClick={() => handleCancelOrder(order._id)}
+                                className="w-full sm:w-auto px-6 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold transition-all shadow-md hover:shadow-lg transform hover:scale-105 active:scale-95 flex items-center justify-center gap-2"
+                              >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                                Cancel Order
+                              </button>
+                            </div>
+                          )}
                         </div>
                       ))}
                     </div>

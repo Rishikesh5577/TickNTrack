@@ -29,3 +29,39 @@ export const getOrderById = async (req, res) => {
     return res.status(500).json({ message: 'Failed to fetch order', error: err.message });
   }
 };
+
+export const cancelOrder = async (req, res) => {
+  try {
+    const userId = req.userId;
+    if (!userId) return res.status(401).json({ message: 'Unauthorized' });
+
+    const { id } = req.params;
+    const order = await Order.findOne({ _id: id, user: userId });
+    
+    if (!order) {
+      return res.status(404).json({ message: 'Order not found' });
+    }
+
+    // Check if order can be cancelled
+    const cancellableStatuses = ['pending', 'created', 'paid'];
+    if (!cancellableStatuses.includes(order.status)) {
+      return res.status(400).json({ 
+        message: 'Order cannot be cancelled',
+        reason: `Order status is ${order.status}. Only pending, created, or paid orders can be cancelled.`
+      });
+    }
+
+    // Update order status to cancelled
+    order.status = 'cancelled';
+    await order.save();
+
+    return res.json({ 
+      success: true, 
+      message: 'Order cancelled successfully',
+      order 
+    });
+  } catch (err) {
+    console.error('Cancel order error:', err);
+    return res.status(500).json({ message: 'Failed to cancel order', error: err.message });
+  }
+};
