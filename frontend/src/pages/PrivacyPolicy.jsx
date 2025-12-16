@@ -20,7 +20,7 @@ const PrivacyPolicy = () => {
           </p>
           <p className="mt-3 text-sm lg:text-base text-gray-700 max-w-3xl mx-auto">
             This Privacy Policy explains how{" "}
-            <strong>Shivrudray International Private Limited</strong> ("we",
+            <strong>TickNTrack</strong> ("we",
             "our" or "us") collects, uses, shares and protects your information
             when you browse or shop for our products
             through our website (the "Service").
@@ -329,16 +329,15 @@ const PrivacyPolicy = () => {
               queries relating to your personal data or this Privacy Policy.
             </p>
             <p className="leading-relaxed">
-              <strong>Grievance Officer:</strong> Mr. Chandrakant Maheshbhai
-              Teraiya (Director) <br />
+              <strong>Grievance Officer:</strong> TickNTrack Support Team <br />
               Email:{" "}
               <span className="text-blue-600">
-                shivrudrayinternational03@gmail.com
+                support@tickntrack.com
               </span>{" "}
               <br />
               Phone:{" "}
               <span className="text-blue-600">
-                +91 92744 90602
+                +91 98765 43210
               </span>
             </p>
           </section>
@@ -366,20 +365,18 @@ const PrivacyPolicy = () => {
               Policy or your personal information, you may contact us at:
             </p>
             <p className="leading-relaxed">
-              <strong>Shivrudray International Private Limited</strong> <br />
+              <strong>TickNTrack</strong> <br />
               Email:{" "}
               <span className="text-blue-600">
-                shivrudrayinternational03@gmail.com
+                support@tickntrack.com
               </span>{" "}
               <br />
               Phone:{" "}
               <span className="text-blue-600">
-                +91 92744 90602 / +91 92740 99941
+                +91 98765 43210
               </span>
               <br />
-              Address: Broker Office No. A-417, THE APMC RS No. 261, Morbi
-              Rajkot Highway, Bedi, Rajkot – 360003, Gujarat, India <br />
-              GSTIN: 24ABRCS1773P1ZI
+              Address: 123 Fashion Street, Mumbai, Maharashtra 400001, India
             </p>
           </section>
         </div>

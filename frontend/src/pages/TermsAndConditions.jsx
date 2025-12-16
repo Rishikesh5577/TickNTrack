@@ -28,7 +28,7 @@ const TermsAndConditions = () => {
             <p className="leading-relaxed">
               These Terms & Conditions ("Terms") govern your use of the website
               and services offered by{" "}
-              <strong>Shivrudray International Private Limited</strong>
+              <strong>TickNTrack</strong>
               ("we", "our", "us"). By accessing or purchasing from our website,
               you agree to be bound by these Terms. If you do not agree, please
               do not use our website.
@@ -147,7 +147,7 @@ const TermsAndConditions = () => {
             <p className="leading-relaxed">
               All content on the website including logos, product photos,
               designs, text, graphics and layout is the property of{" "}
-              <strong>Shivrudray International Private Limited</strong> or its
+              <strong>TickNTrack</strong> or its
               licensors and is protected by applicable copyright and trademark
               laws. Unauthorised use, reproduction or distribution is strictly
               prohibited.
@@ -211,8 +211,8 @@ const TermsAndConditions = () => {
             </h2>
             <p className="leading-relaxed">
               These Terms are governed by the laws of India. Any disputes shall
-              be subject to the exclusive jurisdiction of the courts at Rajkot,
-              Gujarat.
+              be subject to the exclusive jurisdiction of the courts at Mumbai,
+              Maharashtra.
             </p>
           </section>
 
@@ -224,19 +224,18 @@ const TermsAndConditions = () => {
             <p className="leading-relaxed">
               For any queries regarding these Terms, contact:
               <br />
-              <strong>Shivrudray International Private Limited</strong> <br />
+              <strong>TickNTrack</strong> <br />
               Email:{" "}
               <span className="text-blue-600">
-                shivrudrayinternational03@gmail.com
+                support@tickntrack.com
               </span>{" "}
               <br />
               Phone:{" "}
               <span className="text-blue-600">
-                +91 92744 90602 / +91 92740 99941
+                +91 98765 43210
               </span>{" "}
               <br />
-              Address: Broker Office No. A-417, THE APMC RS No. 261, Morbi
-              Rajkot Highway, Bedi, Rajkot – 360003, Gujarat, India
+              Address: 123 Fashion Street, Mumbai, Maharashtra 400001, India
             </p>
           </section>
         </div>

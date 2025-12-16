@@ -6,9 +6,6 @@ const Footer = () => {
 
   const quickLinks = [
     { name: 'Home', path: '/' },
-    { name: 'All Products', path: '/products' },
-    { name: 'New Arrivals', path: '/new-arrivals' },
-    { name: 'Best Sellers', path: '/best-sellers' },
     { name: 'About Us', path: '/about' },
     { name: 'Contact', path: '/contact' },
   ];
@@ -22,14 +19,6 @@ const Footer = () => {
     { name: 'Accessories', path: '/category/accessories' },
   ];
 
-  const customerService = [
-    { name: 'Shipping Policy', path: '/shipping' },
-    { name: 'Returns & Exchange', path: '/returns' },
-    { name: 'Size Guide', path: '/size-guide' },
-    { name: 'Care Instructions', path: '/care-instructions' },
-    { name: 'FAQ', path: '/faq' },
-    { name: 'Warranty', path: '/warranty' },
-  ];
 
   const companyInfo = [
     { name: 'Our Story', path: '/about' },
@@ -72,74 +61,68 @@ const Footer = () => {
 
   return (
     <footer className="bg-gray-900 text-white w-full">
-      {/* Features Bar */}
-      <div className="border-b border-gray-800">
-        <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-4 2xl:px-6 py-8">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {features.map((feature, index) => (
-              <div key={index} className="flex items-center gap-4">
-                <div className="flex-shrink-0 w-12 h-12 bg-teal-600 rounded-lg flex items-center justify-center">
-                  {feature.icon}
-                </div>
-                <div>
-                  <h4 className="font-semibold text-white">{feature.title}</h4>
-                  <p className="text-sm text-gray-400">{feature.description}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
       {/* Main Footer Content */}
-      <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-4 2xl:px-6 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
+      <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-4 2xl:px-6 pt-6 pb-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-12">
           {/* Brand Column */}
-          <div className="lg:col-span-2">
-            <div className="mb-6">
-              <img 
-                src="https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765015560/13d1b209-cadd-4897-a880-6449d9ee256a.png"
-                alt="TickNTrack"
-                className="h-12 w-auto object-contain mb-4"
-              />
-              <p className="text-gray-400 leading-relaxed max-w-md">
+          <div className="lg:col-span-1">
+            <div className="mb-6 -mx-2 -mt-8">
+              <Link to="/" className="inline-block -mt-4">
+                <img 
+                  src="https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765853492/image-removebg-preview_ji9lfq.png"
+                  alt="TickNTrack"
+                  className="h-32 sm:h-40 w-auto object-contain filter brightness-0 invert hover:opacity-90 transition-opacity"
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.style.display = 'none';
+                    const parent = e.target.parentElement;
+                    if (parent && !parent.querySelector('.text-logo-fallback')) {
+                      const textLogo = document.createElement('div');
+                      textLogo.className = 'text-logo-fallback text-4xl font-bold text-white mb-4';
+                      textLogo.textContent = 'TickNTrack';
+                      parent.appendChild(textLogo);
+                    }
+                  }}
+                />
+              </Link>
+              <p className="text-gray-400 leading-relaxed max-w-md -mt-10 mb-6">
                 Your trusted destination for premium footwear and luxury timepieces. 
                 We bring you the finest collection of shoes and watches from top brands worldwide.
               </p>
-            </div>
 
-            {/* Contact Info */}
-            <div className="space-y-3">
-              <div className="flex items-center gap-3 text-gray-400">
-                <Phone className="w-5 h-5 text-teal-500" />
-                <span>+91 98765 43210</span>
+              {/* Contact Info */}
+              <div className="space-y-3 mb-6">
+                <div className="flex items-center gap-3 text-gray-400">
+                  <Phone className="w-5 h-5 text-teal-500" />
+                  <span>+91 98765 43210</span>
+                </div>
+                <div className="flex items-center gap-3 text-gray-400">
+                  <Mail className="w-5 h-5 text-teal-500" />
+                  <span>support@tickntrack.com</span>
+                </div>
+                <div className="flex items-center gap-3 text-gray-400">
+                  <MapPin className="w-5 h-5 text-teal-500" />
+                  <span>123 Fashion Street, Mumbai, India 400001</span>
+                </div>
               </div>
-              <div className="flex items-center gap-3 text-gray-400">
-                <Mail className="w-5 h-5 text-teal-500" />
-                <span>support@tickntrack.com</span>
-              </div>
-              <div className="flex items-center gap-3 text-gray-400">
-                <MapPin className="w-5 h-5 text-teal-500" />
-                <span>123 Fashion Street, Mumbai, India 400001</span>
-              </div>
-            </div>
 
-            {/* Social Links */}
-            <div className="mt-6">
-              <h5 className="font-semibold text-white mb-4">Follow Us</h5>
-              <div className="flex gap-3">
-                {socialLinks.map((social, index) => (
-                  <a
-                    key={index}
-                    href={social.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center text-gray-400 hover:bg-teal-600 hover:text-white transition-colors duration-300"
-                    aria-label={social.name}
-                  >
-                    {social.icon}
-                  </a>
-                ))}
+              {/* Social Links */}
+              <div>
+                <h5 className="font-semibold text-white mb-4">Follow Us</h5>
+                <div className="flex gap-3">
+                  {socialLinks.map((social, index) => (
+                    <a
+                      key={index}
+                      href={social.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center text-gray-400 hover:bg-teal-600 hover:text-white transition-colors duration-300"
+                      aria-label={social.name}
+                    >
+                      {social.icon}
+                    </a>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
@@ -179,47 +162,6 @@ const Footer = () => {
               ))}
             </ul>
           </div>
-
-          {/* Customer Service */}
-          <div>
-            <h5 className="font-semibold text-white mb-4">Customer Service</h5>
-            <ul className="space-y-3">
-              {customerService.map((service, index) => (
-                <li key={index}>
-                  <Link 
-                    to={service.path}
-                    className="text-gray-400 hover:text-teal-400 transition-colors duration-300 flex items-center gap-2"
-                  >
-                    <ChevronRight className="w-4 h-4" />
-                    {service.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-
-        {/* Newsletter Section */}
-        <div className="border-t border-gray-800 mt-12 pt-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-            <div>
-              <h5 className="font-semibold text-white mb-2">Subscribe to Our Newsletter</h5>
-              <p className="text-gray-400">
-                Get exclusive offers, new product updates, and style tips delivered to your inbox
-              </p>
-            </div>
-            <div className="flex flex-col sm:flex-row gap-3">
-              <input
-                type="email"
-                placeholder="Enter your email address"
-                className="flex-1 px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
-              />
-              <button className="px-6 py-3 bg-teal-600 text-white font-semibold rounded-lg hover:bg-teal-700 transition-colors duration-300 flex items-center justify-center gap-2">
-                <Mail className="w-5 h-5" />
-                Subscribe
-              </button>
-            </div>
-          </div>
         </div>
       </div>
 
@@ -253,12 +195,102 @@ const Footer = () => {
           <div className="text-center">
             <p className="text-gray-400 text-sm mb-4">We Accept</p>
             <div className="flex justify-center items-center gap-4 flex-wrap">
-              <div className="w-12 h-8 bg-white rounded flex items-center justify-center text-xs font-bold text-gray-800">VISA</div>
-              <div className="w-12 h-8 bg-white rounded flex items-center justify-center text-xs font-bold text-gray-800">MC</div>
-              <div className="w-12 h-8 bg-white rounded flex items-center justify-center text-xs font-bold text-gray-800">UPI</div>
-              <div className="w-12 h-8 bg-white rounded flex items-center justify-center text-xs font-bold text-gray-800">GPay</div>
-              <div className="w-12 h-8 bg-white rounded flex items-center justify-center text-xs font-bold text-gray-800">PayTM</div>
-              <div className="w-12 h-8 bg-white rounded flex items-center justify-center text-xs font-bold text-gray-800">COD</div>
+              {/* VISA */}
+              <div className="w-16 h-10 bg-white rounded flex items-center justify-center shadow-sm hover:shadow-md transition-shadow">
+                <img 
+                  src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Visa_Inc._logo.svg/2560px-Visa_Inc._logo.svg.png" 
+                  alt="VISA" 
+                  className="h-6 w-auto object-contain"
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.parentElement.innerHTML = '<span class="text-xs font-bold text-gray-800">VISA</span>';
+                  }}
+                />
+              </div>
+              
+              {/* Mastercard */}
+              <div className="w-16 h-10 bg-white rounded flex items-center justify-center shadow-sm hover:shadow-md transition-shadow">
+                <img 
+                  src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Mastercard-logo.svg/2560px-Mastercard-logo.svg.png" 
+                  alt="Mastercard" 
+                  className="h-6 w-auto object-contain"
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.parentElement.innerHTML = '<span class="text-xs font-bold text-gray-800">MC</span>';
+                  }}
+                />
+              </div>
+              
+              {/* UPI */}
+              <div className="w-16 h-10 bg-white rounded flex items-center justify-center shadow-sm hover:shadow-md transition-shadow">
+                <img 
+                  src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/UPI-Logo-vector.svg/1200px-UPI-Logo-vector.svg.png" 
+                  alt="UPI" 
+                  className="h-8 w-auto object-contain"
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.parentElement.innerHTML = '<span class="text-xs font-bold text-gray-800">UPI</span>';
+                  }}
+                />
+              </div>
+              
+              {/* Google Pay */}
+              <div className="w-16 h-10 bg-white rounded flex items-center justify-center shadow-sm hover:shadow-md transition-shadow p-1.5">
+                <img 
+                  src="https://www.google.com/pay/static/images/gpay.svg" 
+                  alt="Google Pay" 
+                  className="h-full w-auto object-contain"
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.style.display = 'none';
+                    const parent = e.target.parentElement;
+                    if (parent && !parent.querySelector('.gpay-fallback')) {
+                      const fallback = document.createElement('div');
+                      fallback.className = 'gpay-fallback flex items-center gap-1';
+                      fallback.innerHTML = `
+                        <div class="flex gap-0.5">
+                          <div class="w-2 h-2 rounded-full bg-blue-500"></div>
+                          <div class="w-2 h-2 rounded-full bg-red-500"></div>
+                          <div class="w-2 h-2 rounded-full bg-yellow-500"></div>
+                          <div class="w-2 h-2 rounded-full bg-green-500"></div>
+                        </div>
+                        <span class="text-gray-800 text-[10px] font-bold">Pay</span>
+                      `;
+                      parent.appendChild(fallback);
+                    }
+                  }}
+                />
+              </div>
+              
+              {/* PayTM */}
+              <div className="w-16 h-10 bg-white rounded flex items-center justify-center shadow-sm hover:shadow-md transition-shadow p-1">
+                <img 
+                  src="https://static.paytm.in/merchants/paytm_logo.png" 
+                  alt="PayTM" 
+                  className="h-full w-auto object-contain"
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.style.display = 'none';
+                    const parent = e.target.parentElement;
+                    if (parent && !parent.querySelector('.paytm-fallback')) {
+                      const fallback = document.createElement('div');
+                      fallback.className = 'paytm-fallback flex flex-col items-center';
+                      fallback.innerHTML = `
+                        <div class="w-10 h-5 bg-gradient-to-r from-blue-500 to-cyan-500 rounded flex items-center justify-center mb-0.5">
+                          <span class="text-white text-[9px] font-bold">Pay</span>
+                        </div>
+                        <span class="text-gray-800 text-[8px] font-bold">TM</span>
+                      `;
+                      parent.appendChild(fallback);
+                    }
+                  }}
+                />
+              </div>
+              
+              {/* COD */}
+              <div className="w-16 h-10 bg-gradient-to-r from-orange-500 to-red-500 rounded flex items-center justify-center shadow-sm hover:shadow-md transition-shadow">
+                <span className="text-xs font-bold text-white">COD</span>
+              </div>
             </div>
           </div>
         </div>
