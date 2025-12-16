@@ -81,6 +81,11 @@ const Router = () => {
                        location.pathname === '/products' || 
                        location.pathname.startsWith('/category/');
 
+  // Scroll to top on route change
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+  }, [location.pathname]);
+
   return (
     <CartProvider>
       <Routes>

@@ -66,6 +66,7 @@ export default function AddressForm() {
   const [showSuccess, setShowSuccess] = useState(false);
   const [showForm, setShowForm] = useState(true);
   const [paymentMethod, setPaymentMethod] = useState('razorpay'); // 'razorpay' or 'cod'
+  const [isProcessingCOD, setIsProcessingCOD] = useState(false);
   const { cart, cartTotal: total, loadCart } = useCart();
 
   // Calculate price details
@@ -99,17 +100,23 @@ export default function AddressForm() {
 
     // Handle COD orders
     if (paymentMethod === 'cod') {
+      setIsProcessingCOD(true);
       try {
         const result = await createCODOrder();
         if (result && result.success) {
           await loadCart();
           const orderId = result.order?._id || result.order?.id;
+          // Add 2-3 second delay before navigating to success page
+          await new Promise(resolve => setTimeout(resolve, 2500));
+          setIsProcessingCOD(false);
           navigate(`/order/success?orderId=${orderId}&paymentMethod=cod`);
         } else {
+          setIsProcessingCOD(false);
           alert('Failed to place COD order. Please try again.');
         }
       } catch (e) {
         console.error('COD order error:', e);
+        setIsProcessingCOD(false);
         alert('Failed to place COD order. Please try again.');
       }
       return;
@@ -755,16 +762,28 @@ export default function AddressForm() {
 
             <button 
               onClick={handlePayment}
-              disabled={!hasSavedAddress}
-              className={`w-full mt-4 py-4 px-4 rounded-xl transition-all font-bold cursor-pointer shadow-lg ${
-                hasSavedAddress 
-                  ? paymentMethod === 'cod'
-                    ? 'bg-gradient-to-r from-orange-600 to-red-600 text-white hover:from-orange-700 hover:to-red-700 hover:shadow-xl transform hover:scale-105 active:scale-95'
-                    : 'bg-gradient-to-r from-teal-600 to-cyan-600 text-white hover:from-teal-700 hover:to-cyan-700 hover:shadow-xl transform hover:scale-105 active:scale-95'
-                  : 'bg-gray-300 text-gray-600 cursor-not-allowed'
+              disabled={!hasSavedAddress || isProcessingCOD}
+              className={`w-full mt-4 py-4 px-4 rounded-xl transition-all font-bold cursor-pointer shadow-lg relative ${
+                isProcessingCOD
+                  ? 'bg-gray-400 text-white cursor-wait'
+                  : hasSavedAddress 
+                    ? paymentMethod === 'cod'
+                      ? 'bg-gradient-to-r from-orange-600 to-red-600 text-white hover:from-orange-700 hover:to-red-700 hover:shadow-xl transform hover:scale-105 active:scale-95'
+                      : 'bg-gradient-to-r from-teal-600 to-cyan-600 text-white hover:from-teal-700 hover:to-cyan-700 hover:shadow-xl transform hover:scale-105 active:scale-95'
+                    : 'bg-gray-300 text-gray-600 cursor-not-allowed'
               }`}
             >
-              {paymentMethod === 'cod' ? 'PLACE ORDER (COD)' : 'PROCEED TO PAYMENT'}
+              {isProcessingCOD ? (
+                <span className="flex items-center justify-center gap-2">
+                  <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Processing Order...
+                </span>
+              ) : (
+                paymentMethod === 'cod' ? 'PLACE ORDER (COD)' : 'PROCEED TO PAYMENT'
+              )}
             </button>
           </div>
         </div>
