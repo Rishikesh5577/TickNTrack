@@ -6,16 +6,20 @@ import TickNTrackSections from '../components/TickNTrackSections';
 
 const Home = () => {
   return (
-    <div className="min-h-screen pt-0 pb-16 md:pb-0 mt-0">
+    <div className="min-h-screen pt-0 pb-16 md:pb-0 mt-0 -mt-0">
       {/* Hero Slider */}
       <HeroSlider
         slides={[
           {
-            desktop: 'https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765019607/Desktop_-_1_8_rkwkq3.svg',
+            desktop: 'https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765793761/Black_Bold_Texts_Login_Page_Wireframe_Website_UI_Prototype_2048_x_594_px_1590_x_504_px_1_o6nx7i.svg',
             alt: 'TickNTrack - Premium Shoes & Watches Collection',
           },
           {
-            desktop: 'https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765023578/Desktop_-_1_9_gvj1rs.svg',
+            desktop: 'https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765795400/Black_Bold_Texts_Login_Page_Wireframe_Website_UI_Prototype_2048_x_594_px_1_morepy.svg',
+            alt: 'TickNTrack - Premium Collection',
+          },
+          {
+            desktop: 'https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765793938/Black_Bold_Texts_Login_Page_Wireframe_Website_UI_Prototype_2048_x_594_px_2_pl1jml.png',
             alt: 'Festive Offer - TickNTrack',
           },
         ]}

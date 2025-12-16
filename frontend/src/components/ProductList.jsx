@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { FaRupeeSign, FaSpinner, FaFilter, FaTimes, FaChevronDown, FaChevronUp } from 'react-icons/fa';
-import { fetchSarees } from '../services/api';
+import { FaRupeeSign, FaSpinner, FaFilter, FaTimes, FaChevronDown, FaChevronUp, FaHeart, FaRegHeart } from 'react-icons/fa';
+import { fetchSarees, addToWishlist, removeFromWishlist, getWishlist } from '../services/api';
 import { placeholders, getProductImage } from '../utils/imagePlaceholder';
 
 // Add CSS to hide scrollbar and loading animation
@@ -89,6 +89,9 @@ const ProductList = ({ defaultCategory } = {}) => {
   const [selectedWatchCaseMaterials, setSelectedWatchCaseMaterials] = useState([]);
   const [selectedWatchBandMaterials, setSelectedWatchBandMaterials] = useState([]);
   const [selectedWaterResistance, setSelectedWaterResistance] = useState([]);
+  
+  // Wishlist state
+  const [wishlistedProducts, setWishlistedProducts] = useState(new Set());
   
   // Accordion states for desktop filters
   const [openSections, setOpenSections] = useState({
@@ -391,6 +394,63 @@ const ProductList = ({ defaultCategory } = {}) => {
 
     load();
   }, [effectiveCategory, effectiveSubCategory]);
+  
+  // Load wishlist
+  useEffect(() => {
+    const loadWishlist = async () => {
+      try {
+        const wishlist = await getWishlist();
+        if (wishlist && wishlist.items) {
+          const wishlistIds = new Set(wishlist.items.map(item => item.product?._id || item.product));
+          setWishlistedProducts(wishlistIds);
+        }
+      } catch (err) {
+        // Silently fail if user is not logged in
+        console.log('Wishlist not available');
+      }
+    };
+    loadWishlist();
+    
+    // Listen for wishlist updates
+    const handleWishlistUpdate = () => {
+      loadWishlist();
+    };
+    window.addEventListener('wishlist:updated', handleWishlistUpdate);
+    return () => {
+      window.removeEventListener('wishlist:updated', handleWishlistUpdate);
+    };
+  }, []);
+  
+  // Handle wishlist toggle
+  const handleWishlistToggle = async (e, productId) => {
+    e.stopPropagation();
+    if (!productId) return;
+    
+    try {
+      const isWishlisted = wishlistedProducts.has(productId);
+      if (isWishlisted) {
+        await removeFromWishlist(productId);
+        setWishlistedProducts(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(productId);
+          return newSet;
+        });
+        try { window.dispatchEvent(new Event('wishlist:updated')); } catch {}
+      } else {
+        await addToWishlist(productId);
+        setWishlistedProducts(prev => new Set([...prev, productId]));
+        try { window.dispatchEvent(new Event('wishlist:updated')); } catch {}
+      }
+    } catch (err) {
+      console.error('Error toggling wishlist:', err);
+      if (err.message && err.message.includes('login')) {
+        alert('Please login to add items to wishlist');
+        navigate('/signin');
+      } else {
+        alert('Failed to update wishlist. Please try again.');
+      }
+    }
+  };
   
   // Apply filters
   useEffect(() => {
@@ -1078,7 +1138,6 @@ const ProductList = ({ defaultCategory } = {}) => {
                     ? effectiveCategory
                     : 'All Products')}
             </h1>
-            <div className="w-24 sm:w-32 h-1 sm:h-1.5 bg-gradient-to-r from-teal-600 via-cyan-600 to-teal-500 rounded-full shadow-sm"></div>
           </div>
         </div>
 
@@ -1305,19 +1364,36 @@ const ProductList = ({ defaultCategory } = {}) => {
                   {filteredProducts.slice(0, displayCount).map((p) => (
                   <div
                     key={p._id || p.title}
-                    className="group bg-white overflow-hidden rounded-lg shadow-sm sm:shadow-md hover:shadow-xl sm:hover:shadow-2xl transition-all duration-500 cursor-pointer border border-gray-100 hover:border-teal-300 sm:hover:border-[#7A2A2A]/20 transform hover:-translate-y-1 sm:hover:-translate-y-2"
+                    className="group bg-white overflow-hidden rounded-lg shadow-sm sm:shadow-md hover:shadow-xl sm:hover:shadow-2xl transition-all duration-500 cursor-pointer border border-gray-100 hover:border-teal-300 sm:hover:border-[#7A2A2A]/20"
                     onClick={() => handleCardClick(p)}
                   >
                     <div className="relative w-full aspect-[3/4] bg-gray-100 overflow-hidden">
                       <img
                         src={getProductImage(p, 'image1')}
                         alt={p.title}
-                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                        className="w-full h-full object-cover"
                         onError={(e) => {
                           e.target.onerror = null;
                           e.target.src = placeholders.productList;
                         }}
                       />
+                      {/* Wishlist Button */}
+                      <button
+                        type="button"
+                        onClick={(e) => handleWishlistToggle(e, p._id)}
+                        className={`absolute top-2 left-2 sm:top-4 sm:left-4 z-10 rounded-full p-2 shadow-md transition-all ${
+                          wishlistedProducts.has(p._id)
+                            ? 'bg-red-600 text-white hover:bg-red-700'
+                            : 'bg-white text-red-600 hover:bg-red-50'
+                        }`}
+                        aria-label={wishlistedProducts.has(p._id) ? 'Remove from wishlist' : 'Add to wishlist'}
+                      >
+                        {wishlistedProducts.has(p._id) ? (
+                          <FaHeart className="w-4 h-4 sm:w-5 sm:h-5 fill-current" />
+                        ) : (
+                          <FaRegHeart className="w-4 h-4 sm:w-5 sm:h-5" />
+                        )}
+                      </button>
                       {(p.discountPercent > 0 || p.discount) && (
                         <span className="absolute top-2 right-2 sm:top-4 sm:right-4 bg-teal-600 text-white text-xs font-bold px-2 py-1 sm:px-3 sm:py-1.5 rounded-md sm:rounded-lg shadow-md sm:shadow-lg uppercase">
                           {p.discountPercent || p.discount}% OFF

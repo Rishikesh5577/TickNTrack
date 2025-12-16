@@ -202,8 +202,8 @@ const ProductDetail = () => {
                   type="button"
                   aria-label="Add to wishlist"
                   className={(wishlisted
-                    ? 'bg-teal-600 text-white hover:bg-teal-700 border border-teal-600'
-                    : 'bg-white text-teal-700 hover:bg-teal-50 border border-teal-300') + ' rounded-full p-2 shadow-md cursor-pointer transition-all'}
+                    ? 'bg-red-600 text-white hover:bg-red-700 border border-red-600'
+                    : 'bg-white text-red-600 hover:bg-red-50 border border-red-300') + ' rounded-full p-2 shadow-md cursor-pointer transition-all'}
                   onClick={async (e) => {
                     e.stopPropagation();
                     if (!saree) return;

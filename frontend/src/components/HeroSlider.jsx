@@ -35,7 +35,7 @@ const HeroSlider = ({ slides = [], mobileSrc }) => {
       {/* Desktop slider */}
       <div className="hidden md:block relative overflow-hidden">
         <div
-          className="flex transition-transform duration-500 ease-out"
+          className="flex transition-transform duration-500 ease-out items-start"
           style={{ transform: `translateX(-${index * 100}%)` }}
           onMouseEnter={stop}
           onMouseLeave={start}
@@ -45,7 +45,13 @@ const HeroSlider = ({ slides = [], mobileSrc }) => {
               key={i}
               src={s.desktop}
               alt={s.alt || `Banner ${i + 1}`}
-              className="w-full h-auto object-cover block shrink-0 grow-0 basis-full"
+              className={`w-full h-auto block shrink-0 grow-0 basis-full ${
+                i === slides.length - 1 ? 'object-contain' : 'object-cover'
+              }`}
+              style={{ 
+                objectPosition: 'top center',
+                alignSelf: 'flex-start'
+              }}
               loading="eager"
               onError={(e) => {
                 e.currentTarget.src = s.fallback || s.desktop;

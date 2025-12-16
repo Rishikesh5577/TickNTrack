@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { searchProducts } from '../services/api';
@@ -30,24 +31,16 @@ const Navbar = () => {
       const currentScrollY = window.scrollY;
       setIsScrolled(currentScrollY > 20);
       
-      // On mobile, always show secondary nav for easy category access
-      const isMobile = window.innerWidth < 768;
-      
-      if (isMobile) {
-        // Mobile: Always show secondary nav
+      // Both mobile and desktop: Show secondary nav at top, hide when scrolling down, show when scrolling up
+      if (currentScrollY < 50) {
+        // At top - always show
         setShowSecondaryNav(true);
-      } else {
-        // Desktop: Show secondary nav at top, hide when scrolling down, show when scrolling up
-        if (currentScrollY < 50) {
-          // At top - always show
-          setShowSecondaryNav(true);
-        } else if (currentScrollY > lastScrollY) {
-          // Scrolling down - hide
-          setShowSecondaryNav(false);
-        } else if (currentScrollY < lastScrollY) {
-          // Scrolling up - show
-          setShowSecondaryNav(true);
-        }
+      } else if (currentScrollY > lastScrollY) {
+        // Scrolling down - hide
+        setShowSecondaryNav(false);
+      } else if (currentScrollY < lastScrollY) {
+        // Scrolling up - show
+        setShowSecondaryNav(true);
       }
       
       setLastScrollY(currentScrollY);
@@ -274,43 +267,47 @@ const Navbar = () => {
         if (retryButton) {
           calculateDropdownPosition(categoryName);
         }
-      }, 10);
+      }, 50);
       return;
     }
 
-    // Use requestAnimationFrame to ensure DOM is ready
-    requestAnimationFrame(() => {
+    // Calculate position immediately
+    const calculate = () => {
       const rect = button.getBoundingClientRect();
-      const dropdownWidth = 256; // w-64 = 256px
-      const gap = 8; // Gap between button and dropdown
       
-      // For fixed positioning, use viewport coordinates directly
-      // Position dropdown directly below the category button, aligned to left edge of button
+      // Validate that we have valid button dimensions and position
+      if (!rect || rect.width === 0 || rect.height === 0) {
+        return false;
+      }
+      
+      const dropdownWidth = 256; // w-64 = 256px
+      const gap = 4; // Gap between button and dropdown
+      const padding = 16; // Padding from viewport edges
+      
+      // Position dropdown directly below the category button
       let top = rect.bottom + gap;
-      // Always align dropdown to the left edge of the button
+      
+      // Align dropdown to the left edge of the button
       let left = rect.left;
       
       // Ensure dropdown stays within viewport bounds
       const viewportWidth = window.innerWidth;
       const viewportHeight = window.innerHeight;
-      const padding = 16; // Padding from viewport edges
       
-      // Check if dropdown would overflow on the right
-      const rightEdge = left + dropdownWidth;
-      if (rightEdge > viewportWidth - padding) {
-        // Shift left just enough to fit within viewport, but never go left of button
-        const maxLeft = viewportWidth - padding - dropdownWidth;
-        left = Math.max(rect.left, maxLeft);
+      // If dropdown would overflow on the right, shift it left
+      if (left + dropdownWidth > viewportWidth - padding) {
+        left = viewportWidth - dropdownWidth - padding;
+        // But never go to the left of the button's left edge
+        if (left < rect.left) {
+          left = rect.left;
+        }
       }
       
-      // Never allow dropdown to go to the left of the button's left edge
-      if (left < rect.left) {
+      // Ensure dropdown doesn't go off the left edge, but prefer button alignment
+      if (left < padding && rect.left > padding) {
         left = rect.left;
-      }
-      
-      // Only adjust if dropdown would go off-screen on the left (shouldn't happen now)
-      if (left < padding) {
-        left = Math.max(rect.left, padding);
+      } else if (left < padding) {
+        left = padding;
       }
       
       // Check if dropdown would overflow at bottom
@@ -324,16 +321,34 @@ const Navbar = () => {
         }
       }
       
-      // Ensure valid position values - always use button's left edge as base
+      // Ensure valid position values - must be positive and reasonable
       const finalTop = Math.max(padding, top);
-      const finalLeft = left; // Use calculated left directly
+      const finalLeft = Math.max(padding, Math.min(left, viewportWidth - dropdownWidth - padding));
       
-      setDropdownPosition({
-        top: finalTop,
-        left: finalLeft,
-        width: rect.width
+      // Set position if values are valid
+      if (finalTop >= padding && finalLeft >= padding && finalLeft < viewportWidth) {
+        setDropdownPosition({
+          top: finalTop,
+          left: finalLeft,
+          width: rect.width
+        });
+        return true;
+      }
+      return false;
+    };
+
+    // Try to calculate immediately
+    if (!calculate()) {
+      // If it fails, retry with requestAnimationFrame
+      requestAnimationFrame(() => {
+        if (!calculate()) {
+          // If still fails, retry after a short delay
+          setTimeout(() => {
+            calculate();
+          }, 50);
+        }
       });
-    });
+    }
   };
 
   // Handle category click - toggle dropdown
@@ -348,15 +363,30 @@ const Navbar = () => {
     if (activeCategory === categoryName) {
       // Close if clicking the same category
       setActiveCategory(null);
+      setDropdownPosition({ top: 0, left: 0, width: 0 });
       isClickingCategoryRef.current = false;
     } else {
-      // Open new category - calculate position immediately (for desktop)
+      // Set active category first
+      setActiveCategory(categoryName);
+      
+      // Calculate position immediately for desktop
       const isMobile = window.innerWidth < 768;
       if (!isMobile) {
+        // Calculate position immediately and retry multiple times
         calculateDropdownPosition(categoryName);
+        requestAnimationFrame(() => {
+          calculateDropdownPosition(categoryName);
+        });
+        setTimeout(() => {
+          calculateDropdownPosition(categoryName);
+        }, 10);
+        setTimeout(() => {
+          calculateDropdownPosition(categoryName);
+        }, 50);
+        setTimeout(() => {
+          calculateDropdownPosition(categoryName);
+        }, 100);
       }
-      // Set active category
-      setActiveCategory(categoryName);
       
       // Reset flag after a delay to allow scroll handler to see it
       setTimeout(() => {
@@ -373,20 +403,31 @@ const Navbar = () => {
 
   // Update dropdown position on scroll and resize to keep it aligned with category button
   useEffect(() => {
-    if (!activeCategory) return;
+    if (!activeCategory) {
+      setDropdownPosition({ top: 0, left: 0, width: 0 });
+      return;
+    }
 
     const updatePosition = () => {
       calculateDropdownPosition(activeCategory);
     };
 
-    // Initial position
+    // Initial position - calculate immediately and retry to ensure it works
     updatePosition();
+    const timeoutId1 = setTimeout(() => {
+      updatePosition();
+    }, 50);
+    const timeoutId2 = setTimeout(() => {
+      updatePosition();
+    }, 150);
 
     // Update position on scroll and resize to keep dropdown aligned with button
     window.addEventListener('scroll', updatePosition, { passive: true });
     window.addEventListener('resize', updatePosition);
 
     return () => {
+      clearTimeout(timeoutId1);
+      clearTimeout(timeoutId2);
       window.removeEventListener('scroll', updatePosition);
       window.removeEventListener('resize', updatePosition);
     };
@@ -436,10 +477,10 @@ const Navbar = () => {
     <nav className="relative z-[9999] bg-gradient-to-br from-gray-50 via-teal-50/30 to-cyan-50/30 w-full">
       {/* Top Bar - Dark Grey with Social Icons and Account Links */}
       <div className="bg-gray-800 text-white py-1 w-full">
-        <div className="w-full px-3 sm:px-4 md:px-6 lg:px-8 xl:px-4 2xl:px-6">
-          <div className="flex items-center justify-between">
+        <div className="w-full px-2 sm:px-4 md:px-6 lg:px-8 xl:px-4 2xl:px-6">
+          <div className="flex items-center justify-between flex-wrap gap-1 sm:gap-0">
             {/* Social Media Icons - Left */}
-            <div className="flex items-center space-x-1 sm:space-x-1.5 md:space-x-2">
+            <div className="flex items-center space-x-0.5 sm:space-x-1.5 md:space-x-2">
               <a 
                 href="https://facebook.com" 
                 target="_blank" 
@@ -496,14 +537,16 @@ const Navbar = () => {
             </div>
 
             {/* Account Links - Right */}
-            <div className="flex items-center space-x-2 sm:space-x-3 md:space-x-4 text-xs sm:text-sm">
+            <div className="flex items-center space-x-1 sm:space-x-2 md:space-x-3 lg:space-x-4 text-[10px] xs:text-xs sm:text-sm">
               {isAuthenticated ? (
-                <Link to="/profile" className="text-white hover:text-gray-300 transition-colors whitespace-nowrap">
-                  My Account
+                <Link to="/profile" className="text-white hover:text-gray-300 transition-colors whitespace-nowrap px-1 sm:px-0">
+                  <span className="hidden xs:inline">My Account</span>
+                  <span className="xs:hidden">Account</span>
                 </Link>
               ) : (
-                <button onClick={handleLogin} className="text-white hover:text-gray-300 transition-colors whitespace-nowrap">
-                  My Account
+                <button onClick={handleLogin} className="text-white hover:text-gray-300 transition-colors whitespace-nowrap px-1 sm:px-0">
+                  <span className="hidden xs:inline">My Account</span>
+                  <span className="xs:hidden">Account</span>
                 </button>
               )}
             </div>
@@ -513,20 +556,28 @@ const Navbar = () => {
 
       {/* Bottom Bar - White with Logo, Navigation, and Icons */}
       <div className="bg-gradient-to-br from-gray-50 via-teal-50/30 to-cyan-50/30 border-b border-gray-200 w-full">
-        <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-4 2xl:px-6">
-          <div className="flex items-center justify-between h-14 md:h-16">
+        <div className="w-full px-2 sm:px-4 md:px-6 lg:px-8 xl:px-4 2xl:px-6">
+          <div className="flex items-center justify-between h-12 sm:h-14 md:h-16 gap-2">
             {/* Logo/Brand - Left */}
-            <Link to="/" className="flex-shrink-0">
+            <Link 
+              to="/" 
+              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+              className="flex-shrink-0 -ml-2 sm:-ml-4 md:-ml-6 lg:-ml-12"
+            >
               <img 
-                src="https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765022427/TickNtrack_logo_borcim.png"
+                src="https://res.cloudinary.com/dvkxgrcbv/image/upload/v1765853492/image-removebg-preview_ji9lfq.png"
                 alt="TickNTrack"
-                className="h-10 md:h-12 w-auto object-contain"
+                className="h-20 sm:h-24 md:h-28 lg:h-32 xl:h-36 w-auto object-contain"
               />
             </Link>
 
             {/* Navigation Menu - Center (Desktop) - Removed Categories */}
             <div className="hidden md:flex items-center justify-center flex-1 space-x-3 lg:space-x-5">
-              <Link to="/" className="text-gray-700 hover:text-gray-900 font-medium text-sm uppercase transition-colors px-2 py-1">
+              <Link 
+                to="/" 
+                onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                className="text-gray-700 hover:text-gray-900 font-medium text-sm uppercase transition-colors px-2 py-1"
+              >
                 HOME
               </Link>
               <Link to="/collections" className="text-gray-700 hover:text-gray-900 font-medium text-sm uppercase transition-colors px-2 py-1">
@@ -540,34 +591,22 @@ const Navbar = () => {
               </Link>
             </div>
 
-            {/* Login Button - Right (Desktop) */}
-            <div className="hidden md:flex items-center ml-4">
-              {!isAuthenticated && (
-                <button
-                  onClick={handleLogin}
-                  className="px-4 py-2 bg-gray-800 text-white rounded-lg font-medium hover:bg-gray-700 transition-colors duration-200 text-sm"
-                >
-                  Login
-                </button>
-              )}
-            </div>
-
             {/* Icons - Right (Search, Wishlist, Cart) */}
-            <div className="flex items-center space-x-4 ml-auto md:ml-0">
+            <div className="flex items-center space-x-1 sm:space-x-2 md:space-x-3 lg:space-x-4 ml-auto md:ml-0">
               {/* Search Icon */}
               <div className="relative" ref={searchWrapRefDesktop}>
                 <button
                   onClick={() => setSearchOpen(!searchOpen)}
-                  className="p-2 text-gray-700 hover:text-gray-900 transition-all duration-200 hover:scale-110"
+                  className="p-1.5 sm:p-2 text-gray-700 hover:text-gray-900 transition-all duration-200 hover:scale-110"
                   aria-label="Search"
                 >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                  <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
                   </svg>
                 </button>
                 {/* Search Dropdown */}
                 {searchOpen && (
-                  <div className="fixed md:absolute right-4 md:right-0 left-4 md:left-auto top-[calc(var(--app-header-height,60px)+0.5rem)] md:top-full mt-0 md:mt-2 w-[calc(100vw-2rem)] md:w-80 bg-white border border-gray-200 rounded-lg shadow-xl z-[80]">
+                  <div className="fixed md:absolute right-4 md:right-0 left-4 md:left-auto top-[calc(var(--app-header-height,60px)+0.5rem)] md:top-full mt-0 md:mt-2 w-[calc(100vw-2rem)] md:w-80 bg-white border border-gray-200 rounded-lg shadow-xl z-[99999]">
                     <div className="p-3">
                       <input
                         type="text"
@@ -619,8 +658,8 @@ const Navbar = () => {
               </div>
 
               {/* Wishlist Icon */}
-              <Link to="/wishlist" className="p-2 text-gray-700 hover:text-red-500 relative transition-all duration-200 hover:scale-110 group">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+              <Link to="/wishlist" className="p-1.5 sm:p-2 text-gray-700 hover:text-red-500 relative transition-all duration-200 hover:scale-110 group">
+                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.312-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
                 </svg>
                 {wishlistCount > 0 && (
@@ -631,8 +670,8 @@ const Navbar = () => {
               </Link>
 
               {/* Cart Icon */}
-              <Link to="/cart" className="p-2 text-gray-700 hover:text-gray-900 relative transition-all duration-200 hover:scale-110">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+              <Link to="/cart" className="p-1.5 sm:p-2 text-gray-700 hover:text-gray-900 relative transition-all duration-200 hover:scale-110">
+                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.25 10.5a.75.75 0 01-.75.75H5.25a.75.75 0 010-1.5h2.25a.75.75 0 01.75.75zm6.75 0a.75.75 0 01-.75.75h-2.25a.75.75 0 010-1.5h2.25a.75.75 0 01.75.75z" />
                 </svg>
                 {cartCount > 0 && (
@@ -641,6 +680,16 @@ const Navbar = () => {
                   </span>
                 )}
               </Link>
+
+              {/* Login Button - Right (Desktop) */}
+              {!isAuthenticated && (
+                <button
+                  onClick={handleLogin}
+                  className="hidden md:block px-4 py-2 bg-gray-800 text-white rounded-lg font-medium hover:bg-gray-700 transition-colors duration-200 text-sm"
+                >
+                  Login
+                </button>
+              )}
             </div>
 
             {/* Mobile menu button */}
@@ -674,7 +723,10 @@ const Navbar = () => {
                 <Link
                   to="/"
                   className="w-full text-left text-gray-700 hover:text-gray-900 hover:bg-gray-50 font-medium py-3 px-4 rounded-lg transition-all duration-200 text-sm uppercase"
-                  onClick={() => setIsMobileMenuOpen(false)}
+                  onClick={() => {
+                    setIsMobileMenuOpen(false);
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }}
                 >
                   HOME
                 </Link>
@@ -796,7 +848,7 @@ const Navbar = () => {
         className={`bg-gradient-to-br from-gray-50 via-teal-50/30 to-cyan-50/30 border-b border-gray-200 w-full relative transition-all duration-300 ease-in-out ${
           showSecondaryNav ? 'max-h-[70px] opacity-100 visible' : 'max-h-0 opacity-0 invisible'
         }`}
-        style={{ zIndex: 9998 }}
+        style={{ zIndex: 9998, overflow: 'visible' }}
       >
         <div className="w-full">
           {/* Desktop: Centered horizontal layout */}
@@ -809,9 +861,9 @@ const Navbar = () => {
                       categoryButtonRefs.current[category.name] = el;
                     }
                   }}
-                    className={`flex items-center text-gray-700 hover:text-gray-900 font-medium text-xs uppercase transition-all duration-200 cursor-pointer whitespace-nowrap px-2 lg:px-2.5 py-0.5 rounded-md hover:bg-gray-50 ${
-                      activeCategory === category.name ? 'text-gray-900 bg-gray-50' : ''
-                    }`}
+                  className={`flex items-center text-gray-700 hover:text-gray-900 font-medium text-xs uppercase transition-all duration-200 cursor-pointer whitespace-nowrap px-2 lg:px-2.5 py-0.5 rounded-md hover:bg-gray-50 ${
+                    activeCategory === category.name ? 'text-gray-900 bg-gray-50' : ''
+                  }`}
                   onClick={(e) => handleCategoryClick(category.name, e)}
                 >
                   <span className="whitespace-nowrap">{category.name}</span>
@@ -918,14 +970,15 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* Dropdown Portal - Rendered outside normal flow (Desktop only) */}
-      {activeCategory && categories.find(cat => cat.name === activeCategory)?.subcategories && dropdownPosition.left > 0 && dropdownPosition.top > 0 && (
+      {/* Dropdown - Rendered with Portal (Desktop only) */}
+      {activeCategory && categories.find(cat => cat.name === activeCategory)?.subcategories && typeof document !== 'undefined' && createPortal(
         <div
           ref={dropdownRef}
-          className="hidden md:block fixed z-[9999] animate-in fade-in slide-in-from-top-2 duration-200"
+          className="hidden md:block fixed z-[99999] animate-in fade-in slide-in-from-top-2 duration-200"
           style={{
-            top: `${dropdownPosition.top}px`,
-            left: `${dropdownPosition.left}px`,
+            top: dropdownPosition.top > 0 ? `${dropdownPosition.top}px` : '150px',
+            left: dropdownPosition.left > 0 ? `${dropdownPosition.left}px` : '50%',
+            transform: dropdownPosition.left > 0 ? 'none' : 'translateX(-50%)',
             pointerEvents: 'auto'
           }}
         >
@@ -971,7 +1024,8 @@ const Navbar = () => {
               ))}
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Custom Styles for Dropdown */}

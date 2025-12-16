@@ -211,7 +211,7 @@ const TickNTrackSections = () => {
           </div>
 
           {/* Banner Image with Text Overlay */}
-          <div className="w-full mt-4 md:mt-6 mb-0 relative">
+          <div className="w-full mt-4 md:mt-6 mb-0 relative rounded-xl md:rounded-2xl overflow-hidden">
             <picture>
               <source 
                 media="(max-width: 1023px)" 
@@ -288,11 +288,11 @@ const TickNTrackSections = () => {
           {/* Stats Bar */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-20">
             {stats.map((stat, idx) => (
-              <div key={idx} className="text-center p-6 bg-gradient-to-br from-gray-50 to-white rounded-2xl border border-gray-100">
+              <div key={idx} className="text-center p-6 bg-white rounded-2xl border-2 border-gray-200 shadow-lg hover:shadow-xl transition-shadow duration-300">
                 <div className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-teal-600 to-cyan-600 text-transparent bg-clip-text mb-2">
                   {stat.number}
                 </div>
-                <div className="text-sm font-medium text-gray-600">
+                <div className="text-sm font-medium text-gray-700">
                   {stat.label}
                 </div>
               </div>
