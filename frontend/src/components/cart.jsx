@@ -60,12 +60,12 @@ function Cart() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-4">
             {cart.map((item) => (
-              <div key={item.id} className="bg-white rounded-xl shadow-md p-4 sm:p-5 flex flex-col sm:flex-row items-start border-2 border-l-0 border-teal-100 hover:border-teal-300 transition-all hover:shadow-lg">
-                <div className="w-28 h-28 sm:w-28 sm:h-28 flex items-center justify-center overflow-hidden rounded-lg cursor-pointer border-2 border-teal-100 hover:border-teal-400 transition-all mb-4 sm:mb-0 flex-shrink-0">
+              <div key={item.id} className="bg-white rounded-xl shadow-md p-5 flex items-start border-2 border-teal-100 hover:border-teal-300 transition-all hover:shadow-lg">
+                <div className="w-28 h-28 flex items-center justify-center overflow-hidden rounded-lg cursor-pointer border-2 border-teal-100 hover:border-teal-400 transition-all">
                   <img
                     src={getProductImage({ images: { image1: item.image } }, 'image1') || placeholders.product}
                     alt={item.name}
-                    className="w-full h-full object-contain"
+                    className="min-w-full min-h-full object-contain"
                     onClick={() => navigate(`/product/${item.id}`)}
                     onError={(e) => {
                       e.currentTarget.onerror = null;
@@ -73,9 +73,9 @@ function Cart() {
                     }}
                   />
                 </div>
-                <div className="ml-0 sm:ml-5 flex-1 w-full sm:w-auto min-w-0">
+                <div className="ml-5 flex-1">
                   <h3 
-                    className="text-lg sm:text-xl font-semibold text-gray-900 cursor-pointer hover:text-teal-600 transition-colors mb-2 break-words"
+                    className="text-xl font-semibold text-gray-900 cursor-pointer hover:text-teal-600 transition-colors mb-2"
                     onClick={() => navigate(`/product/${item.id}`)}
                   >
                     {item.name}
@@ -84,12 +84,12 @@ function Cart() {
                     <p className="text-teal-700 font-semibold text-sm mb-2">Size: {item.size}</p>
                   )}
                   {(item.material || item.work) && (
-                    <p className="text-gray-600 text-sm mb-3 break-words">
+                    <p className="text-gray-600 text-sm mb-3">
                       {item.material && item.work ? `${item.material} with ${item.work}` : item.material || item.work}
                     </p>
                   )}
                   
-                  <div className="flex flex-col sm:flex-row items-start sm:items-center mt-3 gap-3 sm:gap-0">
+                  <div className="flex items-center mt-3">
                     <div className="flex items-center border-2 border-teal-300 rounded-lg overflow-hidden shadow-sm">
                       <button 
                         onClick={() => handleQuantityChange(item.id, (item.quantity || 1) - 1, item.size)}
@@ -108,14 +108,14 @@ function Cart() {
                     
                     <button
                       onClick={() => removeFromCart(item.id, item.size || null)}
-                      className="sm:ml-4 text-red-500 hover:text-red-700 flex items-center cursor-pointer font-medium transition-colors hover:bg-red-50 px-3 py-2 rounded-lg whitespace-nowrap"
+                      className="ml-4 text-red-500 hover:text-red-700 flex items-center cursor-pointer font-medium transition-colors hover:bg-red-50 px-3 py-2 rounded-lg"
                     >
                       <FaTrash className="mr-2" /> Remove
                     </button>
                   </div>
                 </div>
                 
-                <div className="text-left sm:text-right w-full sm:w-auto mt-4 sm:mt-0 sm:ml-4">
+                <div className="text-right">
                   <p className="text-2xl font-bold text-teal-700">₹{(item.price * (item.quantity || 1)).toLocaleString()}</p>
                   {item.originalPrice > item.price && (
                     <p className="text-sm text-gray-500 line-through mt-1">₹{item.originalPrice.toLocaleString()}</p>
