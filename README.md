@@ -2,13 +2,7 @@
 
 A modern, full-stack e-commerce platform for premium shoes and watches. Built with React and Node.js, featuring a responsive design, secure authentication, and seamless shopping experience.
 
-🌐 **Live Demo:** [https://tickntrack-1.onrender.com/](https://tickntrack-1.onrender.com/)  
-📦 **Repository:** [https://github.com/Rishikesh5577/TickNTrack.git](https://github.com/Rishikesh5577/TickNTrack.git)
-
-![TickNTrack](https://img.shields.io/badge/TickNTrack-E-Commerce-blue)
-![React](https://img.shields.io/badge/React-19.1.1-61DAFB?logo=react)
-![Node.js](https://img.shields.io/badge/Node.js-18+-339933?logo=node.js)
-![MongoDB](https://img.shields.io/badge/MongoDB-8.19.2-47A248?logo=mongodb)
+🌐 **Live Demo:** https://www.tickntrack.in/
 
 ## 📋 Table of Contents
 
@@ -346,11 +340,6 @@ This project is licensed under the ISC License.
 - [Tailwind CSS](https://tailwindcss.com/) - Styling framework
 - [Vite](https://vitejs.dev/) - Build tool
 
-## 📞 Support
-
-For support, open an issue in the repository.
-
----
 
 **Made with ❤️ for premium shopping experience**
 
